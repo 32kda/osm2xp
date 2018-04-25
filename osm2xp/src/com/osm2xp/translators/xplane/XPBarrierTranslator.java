@@ -44,7 +44,7 @@ public class XPBarrierTranslator extends XPWritingTranslator {
 //				osmPolygon.getPolygon().removePoint(
 //						osmPolygon.getPolygon().getLastPoint());
 				for (Point2D loc : osmPolygon.getPolygon().getVertices()) {
-					sb.append("POLYGON_POINT " + loc.y + " " + loc.x);
+					sb.append("POLYGON_POINT " + loc.x + " " + loc.y);
 					sb.append(LINE_SEP);
 				}
 				sb.append("END_WINDING");

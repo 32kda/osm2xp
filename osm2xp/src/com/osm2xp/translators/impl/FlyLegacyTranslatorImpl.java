@@ -63,7 +63,7 @@ public class FlyLegacyTranslatorImpl implements ITranslator {
 		String fileName = file.getName().substring(0,
 				file.getName().indexOf("."));
 		this.ofeFile = new File(this.folderPath + File.separator + fileName
-				+ "_" + currentTile.x + "_" + currentTile.y + ".ofe");
+				+ "_" + currentTile.y + "_" + currentTile.x + ".ofe");
 		writeAreaHeader(currentTile);
 
 	}
@@ -75,8 +75,8 @@ public class FlyLegacyTranslatorImpl implements ITranslator {
 	 *            Point2D lat/long.
 	 */
 	private void writeAreaHeader(Point2D coordinates) {
-		int latitude = (int) coordinates.x;
-		int longitude = (int) coordinates.y;
+		int latitude = (int) coordinates.y;
+		int longitude = (int) coordinates.x;
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("Area SW[" + latitude + "," + longitude + "]");
 		stringBuilder.append(" NE[" + (latitude + 1) + "," + (longitude + 1)
@@ -146,7 +146,7 @@ public class FlyLegacyTranslatorImpl implements ITranslator {
 			}
 			for (Point2D point2d : polygon.getVertices()) {
 				stringBuilder
-						.append("V(" + point2d.x + "," + point2d.y + ")\n");
+						.append("V(" + point2d.y + "," + point2d.x + ")\n");
 			}
 			FilesUtils.writeTextToFile(this.ofeFile, stringBuilder.toString(),
 					true);
@@ -168,7 +168,7 @@ public class FlyLegacyTranslatorImpl implements ITranslator {
 	@Override
 	public void init() {
 		Osm2xpLogger.info("Starting Fly! Legacy file for tile "
-				+ this.currentTile.x + "/" + this.currentTile.y + ".");
+				+ this.currentTile.y + "/" + this.currentTile.x + ".");
 	}
 
 	@Override

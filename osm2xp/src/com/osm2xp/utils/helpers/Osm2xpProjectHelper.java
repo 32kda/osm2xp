@@ -75,8 +75,8 @@ public class Osm2xpProjectHelper {
 		osm2XpProject.setCoordinatesList(new CoordinatesList());
 		for (Point2D coords : tilesList) {
 			Coordinates coordinates = new Coordinates();
-			coordinates.setLatitude((int) coords.x);
-			coordinates.setLongitude((int) coords.y);
+			coordinates.setLatitude((int) coords.y);
+			coordinates.setLongitude((int) coords.x);
 			osm2XpProject.getCoordinatesList().getCoordinates()
 					.add(coordinates);
 		}
@@ -95,8 +95,8 @@ public class Osm2xpProjectHelper {
 		if (osm2XpProject != null) {
 			for (Coordinates coords : osm2XpProject.getCoordinatesList()
 					.getCoordinates()) {
-				Point2D point2d = new Point2D(coords.getLatitude(),
-						coords.getLongitude());
+				Point2D point2d = new Point2D(coords.getLongitude(),
+						coords.getLatitude());
 				if ((point2d.x == coordinates.x)
 						&& (point2d.y == coordinates.y)) {
 					osm2XpProject.getCoordinatesList().getCoordinates()

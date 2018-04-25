@@ -46,8 +46,8 @@ public class DsfUtils {
 		for (Point2D point : dsfObject.getOsmPolygon().getPolygon()
 				.getVertices()) {
 
-			writer.write("<node id=\"" + cpt++ + "\" lat=\"" + point.x
-					+ "\" lon=\"" + point.y + "\" version=\"1\" />\n");
+			writer.write("<node id=\"" + cpt++ + "\" lat=\"" + point.y
+					+ "\" lon=\"" + point.x + "\" version=\"1\" />\n");
 		}
 
 		writer.write("<way id=\"" + cpt++
@@ -65,8 +65,8 @@ public class DsfUtils {
 		// write origin
 		Point2D origin = null;// GeomUtils.getRotationPoint(dsfObject.getOsmPolygon().getPolygon(),50,0);
 
-		writer.write("<node id=\"" + cpt++ + "\" lat=\"" + origin.x
-				+ "\" lon=\"" + origin.y + "\" version=\"1\" >\n");
+		writer.write("<node id=\"" + cpt++ + "\" lat=\"" + origin.y
+				+ "\" lon=\"" + origin.x + "\" version=\"1\" >\n");
 		writer.write("<tag k=\"man_made\" v=\"water_tower\"/>\n");
 		writer.write("</node>\n");
 
@@ -260,8 +260,8 @@ public class DsfUtils {
 	 * @return String array, 0 = folder name, 1 = file name
 	 */
 	public static String[] getFolderAndFileNames(Point2D coordinates) {
-		int latitude = (int) coordinates.x;
-		int longitude = (int) coordinates.y;
+		int latitude = (int) coordinates.y;
+		int longitude = (int) coordinates.x;
 
 		Double dossierFirst = new Double(latitude);
 		Double dossierEnd = new Double(longitude);
@@ -357,11 +357,11 @@ public class DsfUtils {
 			DsfObjectsProvider dsfObjectsProvider) {
 
 		StringBuilder sb = new StringBuilder();
-		int latitude = (int) coordinates.x;
-		int longitude = (int) coordinates.y;
+		int latitude = (int) coordinates.y;
+		int longitude = (int) coordinates.x;
 		Box2D exclusionBox = dsfObjectsProvider.getExclusionBox();
-		String exclusionCoordinate = exclusionBox != null ? formatDsfCoord(exclusionBox.getMinY()) + "/" + formatDsfCoord(exclusionBox.getMinX()) + "/" + 
-				formatDsfCoord(exclusionBox.getMaxY()) + "/" + formatDsfCoord(exclusionBox.getMaxX()) + "\n"				
+		String exclusionCoordinate = exclusionBox != null ? formatDsfCoord(exclusionBox.getMinX()) + "/" + formatDsfCoord(exclusionBox.getMinY()) + "/" + 
+				formatDsfCoord(exclusionBox.getMaxX()) + "/" + formatDsfCoord(exclusionBox.getMaxY()) + "\n"				
 				: longitude + ".000000/" + latitude + ".000000/"
 				+ (longitude + 1) + ".000000/" + (latitude + 1) + ".000000\n";
 

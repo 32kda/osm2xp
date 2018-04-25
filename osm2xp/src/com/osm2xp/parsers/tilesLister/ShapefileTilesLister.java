@@ -47,10 +47,10 @@ public class ShapefileTilesLister implements TilesLister {
 					} else if (node.getLat() != 0 && node.getLon() == 0) {
 						node.setLon(Math.toDegrees(point));
 
-						Point2D loc = new Point2D(node.getLat(), node.getLon());
-						int lat = (int) Math.floor(loc.x);
-						int lon = (int) Math.floor(loc.y);
-						Point2D cleanedLoc = new Point2D(lat, lon);
+						Point2D loc = new Point2D(node.getLon(), node.getLat());
+						int lat = (int) Math.floor(loc.y);
+						int lon = (int) Math.floor(loc.x);
+						Point2D cleanedLoc = new Point2D(lon, lat);
 						tilesList.add(cleanedLoc);
 
 						node = new Node();

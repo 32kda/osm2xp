@@ -104,8 +104,8 @@ public class BuildController {
 
 		for (Coordinates coordinates : Osm2xpProjectHelper.getOsm2XpProject()
 				.getCoordinatesList().getCoordinates()) {
-			Point2D tuile = new Point2D(coordinates.getLatitude(),
-					coordinates.getLongitude());
+			Point2D tuile = new Point2D(coordinates.getLongitude(),
+					coordinates.getLatitude());
 			try {
 				generateSingleTile(currentFile, tuile, folderPath, null);
 			} catch (Osm2xpBusinessException e) {
@@ -216,8 +216,8 @@ public class BuildController {
 	private void generateSingleTile(File currentFile, Point2D coordinates,
 			final String folderPath, List<Relation> relationsList)
 			throws Osm2xpBusinessException {
-		String jobTitle = "Generate tile " + +(int) coordinates.x + " / "
-				+ (int) coordinates.y + " of file " + currentFile.getName();
+		String jobTitle = "Generate tile " + +(int) coordinates.y + " / "
+				+ (int) coordinates.x + " of file " + currentFile.getName();
 		final GenerateTileJob job = new GenerateTileJob(jobTitle, currentFile,
 				coordinates, folderPath, relationsList, "todoJob");
 		job.setRule(new MutexRule());

@@ -94,7 +94,7 @@ public class ConsoleTranslatorImpl implements ITranslator {
 	@Override
 	public void init() {
 		Osm2xpLogger.info("Starting console debug output for tile lat "
-				+ currentTile.x + " long " + currentTile.y);
+				+ currentTile.y + " long " + currentTile.x);
 	}
 
 	private boolean processBuilding(OsmPolygon polygon, LinearRing2D poly) {

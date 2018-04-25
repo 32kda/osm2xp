@@ -72,7 +72,7 @@ public class FsxBgTranslatorImpl implements ITranslator {
 			String guid = BglUtils
 					.getRandomBglGuid(node.getTag(), node.getId());
 			if (guid != null) {
-				write3dObjectToBgl(new Point2D(node.getLat(), node.getLon()),
+				write3dObjectToBgl(new Point2D(node.getLon(), node.getLat()),
 						guid);
 			}
 		}

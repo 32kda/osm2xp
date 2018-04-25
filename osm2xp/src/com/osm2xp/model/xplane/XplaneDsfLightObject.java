@@ -32,7 +32,7 @@ public class XplaneDsfLightObject extends XplaneDsfObject {
 			center = getOsmPolygon().getCenter();
 		}
 		sb.append("OBJECT " + this.dsfIndex + " "
-				+ this.osmPolygon.getCenter().y + " " + center.x + " 0 "
+				+ this.osmPolygon.getCenter().x + " " + center.y + " 0 "
 				+ this.rule.getHeight());
 		sb.append(System.getProperty("line.separator"));
 		return sb.toString();

@@ -166,8 +166,8 @@ public class SceneryFilePanel extends Osm2xpPanel {
 			public void widgetSelected(SelectionEvent e) {
 				Point2D result = null;
 				if (!btnGenerateAllTiles.getSelection()) {
-					result = new Point2D(spinnerLatitude.getSelection(),
-							spinnerLongitude.getSelection());
+					result = new Point2D(spinnerLongitude.getSelection(),
+							spinnerLatitude.getSelection());
 				}
 				GuiOptionsHelper.setSelectedCoordinates(result);
 			}

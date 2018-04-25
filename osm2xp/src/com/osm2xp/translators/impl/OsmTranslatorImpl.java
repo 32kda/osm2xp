@@ -86,7 +86,7 @@ public class OsmTranslatorImpl implements ITranslator {
 	@Override
 	public void init() {
 		Osm2xpLogger.info("Starting OpenStreetMap xml generation of tile "
-				+ (int) currentTile.x + "/" + (int) currentTile.y);
+				+ (int) currentTile.y + "/" + (int) currentTile.x);
 		writer.init(currentTile);
 	}
 
@@ -108,7 +108,7 @@ public class OsmTranslatorImpl implements ITranslator {
 		}
 		List<Node> nodeList = new ArrayList<Node>();
 		for (Point2D point : poly.getVertices()) {
-			Node node = new Node(null, point.x, point.y, nodeIndex);
+			Node node = new Node(null, point.y, point.x, nodeIndex);
 			writeNode(node);
 			nodeList.add(node);
 			nodeIndex++;

@@ -160,12 +160,12 @@ public class GeomUtils {
 			int yMaxLength, int xMinLength, int yMinLength, LinearRing2D poly) {
 		Boolean result = false;
 		if (poly.getVertices().size() == 5) {
-			double segment1 = latLongDistance(poly.getVertex(0).x,
-					poly.getVertex(0).y, poly.getVertex(1).x,
-					poly.getVertex(1).y);
-			double segment2 = latLongDistance(poly.getVertex(1).x,
-					poly.getVertex(1).y, poly.getVertex(2).x,
-					poly.getVertex(2).y);
+			double segment1 = latLongDistance(poly.getVertex(0).y,
+					poly.getVertex(0).x, poly.getVertex(1).y,
+					poly.getVertex(1).x);
+			double segment2 = latLongDistance(poly.getVertex(1).y,
+					poly.getVertex(1).x, poly.getVertex(2).y,
+					poly.getVertex(2).x);
 			result = segment1 < xMaxLength && segment1 > xMinLength
 					&& segment2 < yMaxLength && segment2 > yMinLength
 					|| segment1 < yMaxLength && segment1 > yMinLength
@@ -227,9 +227,9 @@ public class GeomUtils {
 		Double maxVector = null;
 
 		for (LineSegment2D segment : polygon.getEdges()) {
-			Double distance = latLongDistance(segment.getFirstPoint().x,
-					segment.getFirstPoint().y, segment.getLastPoint().x,
-					segment.getLastPoint().y);
+			Double distance = latLongDistance(segment.getFirstPoint().y,
+					segment.getFirstPoint().x, segment.getLastPoint().y,
+					segment.getLastPoint().x);
 			if (minVector == null || minVector > distance)
 				minVector = new Double(distance);
 			if (maxVector == null || maxVector < distance)
@@ -338,9 +338,9 @@ public class GeomUtils {
 	}
 
 	public static Point2D cleanCoordinatePoint(Point2D basePoint) {
-		int lati = (int) Math.floor(basePoint.x);
-		int longi = (int) Math.floor(basePoint.y);
-		Point2D cleanedLoc = new Point2D(lati, longi);
+		int longi = (int) Math.floor(basePoint.x);
+		int lati = (int) Math.floor(basePoint.y);
+		Point2D cleanedLoc = new Point2D(longi, lati);
 		return cleanedLoc;
 	}
 
@@ -565,7 +565,7 @@ public class GeomUtils {
 	public static LinearRing2D getPolygonFromOsmNodes(List<Node> nodes) {
 		LinearRing2D result = new LinearRing2D();
 		for (Node node : nodes) {
-			result.addPoint(new Point2D(node.getLat(), node.getLon()));
+			result.addPoint(new Point2D(node.getLon(), node.getLat()));
 		}
 		return result;
 	}
@@ -573,7 +573,7 @@ public class GeomUtils {
 	public static Point2D[] getPointsFromOsmNodes(List<Node> nodes) {
 		Point2D[] result = new Point2D[nodes.size()];
 		for (int i = 0; i < result.length; i++) {
-			result[i] = new Point2D(nodes.get(i).getLat(), nodes.get(i).getLon());
+			result[i] = new Point2D(nodes.get(i).getLon(), nodes.get(i).getLat());
 		}
 		return result;
 	}
@@ -588,11 +588,11 @@ public class GeomUtils {
 			LinearRing2D polygon = new LinearRing2D();
 
 			for (Node node : nodes) {
-				polygon.addPoint(new Point2D(node.getLat(), node.getLon()));
+				polygon.addPoint(new Point2D(node.getLon(), node.getLat()));
 			}
 			center = getPolygonCenter(polygon);
 		} else {
-			center = new Point2D(nodes.get(0).getLat(), nodes.get(0).getLon());
+			center = new Point2D(nodes.get(0).getLon(), nodes.get(0).getLat());
 		}
 		return center;
 
@@ -605,8 +605,8 @@ public class GeomUtils {
 	 */
 	public static boolean compareCoordinates(Point2D tile, Node node) {
 
-		return ((int) Math.floor(tile.x) == (int) Math.floor(node.getLat()) && (int) Math
-				.floor(tile.y) == (int) Math.floor(node.getLon()));
+		return ((int) Math.floor(tile.x) == (int) Math.floor(node.getLon()) && (int) Math
+				.floor(tile.y) == (int) Math.floor(node.getLat()));
 
 	}
 
@@ -737,10 +737,10 @@ public class GeomUtils {
 
 		double deltaLong = long2 - long1;
 
-		double y = Math.sin(deltaLong) * Math.cos(lat2);
-		double x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1)
+		double x = Math.sin(deltaLong) * Math.cos(lat2);
+		double y = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1)
 				* Math.cos(lat2) * Math.cos(deltaLong);
-		double bearing = Math.atan2(y, x);
+		double bearing = Math.atan2(x, y);
 		return ConvertToBearing(RadToDeg(bearing));
 	}
 

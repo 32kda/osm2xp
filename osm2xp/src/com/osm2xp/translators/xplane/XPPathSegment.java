@@ -30,13 +30,13 @@ public class XPPathSegment {
 			builder.append(getComment());
 			builder.append(LINE_SEP);
 		}
-		builder.append(String.format("BEGIN_SEGMENT 0 %d %d %3.9f %4.9f 0.000000000", type, startId, points[0].y, points[0].x));
+		builder.append(String.format("BEGIN_SEGMENT 0 %d %d %3.9f %4.9f 0.000000000", type, startId, points[0].x, points[0].y));
 		builder.append(LINE_SEP);
 		for (int i = 1; i < points.length - 1; i++) {
-			builder.append(String.format("SHAPE_POINT %1.9f %2.9f 0.000000000",points[i].y, points[i].x));
+			builder.append(String.format("SHAPE_POINT %1.9f %2.9f 0.000000000",points[i].x, points[i].y));
 			builder.append(LINE_SEP);
 		}
-		builder.append(String.format("END_SEGMENT %d %2.9f %3.9f 0.000000000", endId, points[points.length - 1].y, points[points.length - 1].x));
+		builder.append(String.format("END_SEGMENT %d %2.9f %3.9f 0.000000000", endId, points[points.length - 1].x, points[points.length - 1].y));
 		builder.append(LINE_SEP);
 		return builder.toString();
 	}

@@ -145,7 +145,7 @@ public class FsxTranslatorImpl implements ITranslator {
 	@Override
 	public void init() {
 		Osm2xpLogger.info("Starting FSX generation of tile "
-				+ (int) currentTile.x + "/" + (int) currentTile.y);
+				+ (int) currentTile.y + "/" + (int) currentTile.x);
 		writer.init(null);
 
 	}

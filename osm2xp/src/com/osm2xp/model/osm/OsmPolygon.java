@@ -71,7 +71,7 @@ public class OsmPolygon {
 		// first check on how many tiles is this polygon
 		Set<Point2D> tiles = new HashSet<Point2D>();
 		for (Node node : nodes) {
-			Point2D point2d = new Point2D(node.lat, node.lon);
+			Point2D point2d = new Point2D(node.lon, node.lat);
 			point2d = GeomUtils.cleanCoordinatePoint(point2d);
 			tiles.add(point2d);
 		}
@@ -92,7 +92,7 @@ public class OsmPolygon {
 							new ArrayList<Node>(), false));
 				}
 				polygons.get(tilePoint).getNodes()
-						.add(new Node(null, point.x, point.y, 1));
+						.add(new Node(null, point.y, point.x, 1));
 
 			}
 
@@ -190,7 +190,7 @@ public class OsmPolygon {
 		if (this.nodes.size() > 1) {
 			this.center = GeomUtils.getPolygonCenter(polygon);
 		} else {
-			this.center = new Point2D(nodes.get(0).lat, nodes.get(0).lon);
+			this.center = new Point2D(nodes.get(0).lon, nodes.get(0).lat);
 		}
 		return center;
 	}

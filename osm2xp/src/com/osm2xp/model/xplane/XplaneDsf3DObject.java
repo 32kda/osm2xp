@@ -50,10 +50,10 @@ public class XplaneDsf3DObject extends XplaneDsfObject {
 					ptLast = polygon.getVertex(i + 3);
 				}
 
-				double segmentX = GeomUtils.latLongDistance(ptX.x, ptX.y,
-						ptOrigin.x, ptOrigin.y);
-				double segmentY = GeomUtils.latLongDistance(ptOrigin.x,
-						ptOrigin.y, ptY.x, ptY.y);
+				double segmentX = GeomUtils.latLongDistance(ptX.y, ptX.x,
+						ptOrigin.y, ptOrigin.x);
+				double segmentY = GeomUtils.latLongDistance(ptOrigin.y,
+						ptOrigin.x, ptY.y, ptY.x);
 				// check if the rule x/y segments "fits" the current osm
 				// polygon
 				Boolean xVectorCheck = segmentX > rule.getxVectorMinLength()
@@ -68,7 +68,7 @@ public class XplaneDsf3DObject extends XplaneDsfObject {
 				if (dimensionsCheck) {
 					result = new XplaneObjGeoRef();
 					result.origin = ptOrigin;
-					result.angle = GeomUtils.getBearing(ptOrigin.x, ptOrigin.y, ptY.x, ptY.y);
+					result.angle = GeomUtils.getBearing(ptOrigin.y, ptOrigin.x, ptY.y, ptY.x);
 				}
 
 				if (result != null)
@@ -135,8 +135,8 @@ public class XplaneDsf3DObject extends XplaneDsfObject {
 		if (obj == null || obj.angle == null | obj.origin == null) {
 			throw new Osm2xpBusinessException("Error computing 3D object");
 		}
-		sb.append("OBJECT " + this.dsfIndex + " " + obj.origin.y + " "
-				+ obj.origin.x + " " + obj.angle);
+		sb.append("OBJECT " + this.dsfIndex + " " + obj.origin.x + " "
+				+ obj.origin.y + " " + obj.angle);
 		sb.append(System.getProperty("line.separator"));
 		return sb.toString();
 	}

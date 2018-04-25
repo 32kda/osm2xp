@@ -66,14 +66,14 @@ public class ImageDebugTranslationListener implements ITranslationListener {
 	protected Polygon calculateDrawPoly(OsmPolygon polygon) {
 		Polygon drawPoly = null;
 		Point2D center = polygon.getCenter();
-		int drawCenterX = (int)(longScale * (center.y - baseX));
-		int drawCenterY = (int)(latScale * (center.x - baseY));
+		int drawCenterX = (int)(longScale * (center.x - baseX));
+		int drawCenterY = (int)(latScale * (center.y - baseY));
 		if (drawCenterX >= 0 && drawCenterX < IMGSIZE_X && drawCenterY >= 0 && drawCenterY < IMGSIZE_Y) {
 			Shape awtShape = polygon.getPolygon().getAsAWTShape();
 			Point2D[] pointArray = polygon.getPolygon().getPointArray();
 			drawPoly = new Polygon();
 			for (int i = 0; i < pointArray.length; i++) {
-				drawPoly.addPoint( (int)(longScale * (pointArray[i].y - baseX)), IMGSIZE_Y - (int) (latScale * (pointArray[i].x - baseY)));
+				drawPoly.addPoint( (int)(longScale * (pointArray[i].x - baseX)), IMGSIZE_Y - (int) (latScale * (pointArray[i].y - baseY)));
 			}
 		}
 		return drawPoly;
@@ -83,9 +83,9 @@ public class ImageDebugTranslationListener implements ITranslationListener {
 		Point2D[] pointArray = polygon.getPolygon().getPointArray();
 		Path2D.Double drawPath = new Path2D.Double();
 		if (pointArray.length > 0) {
-			drawPath.moveTo((int)(longScale * (pointArray[0].y - baseX)), IMGSIZE_Y - (int) (latScale * (pointArray[0].x - baseY)));
+			drawPath.moveTo((int)(longScale * (pointArray[0].x - baseX)), IMGSIZE_Y - (int) (latScale * (pointArray[0].y - baseY)));
 			for (int i = 1; i < pointArray.length; i++) {
-				drawPath.lineTo( (int)(longScale * (pointArray[i].y - baseX)), IMGSIZE_Y - (int) (latScale * (pointArray[i].x - baseY)));
+				drawPath.lineTo( (int)(longScale * (pointArray[i].x - baseX)), IMGSIZE_Y - (int) (latScale * (pointArray[i].y - baseY)));
 			}
 		}
 		if (drawPath.intersects(0,0,IMGSIZE_X,IMGSIZE_Y)) {
@@ -97,8 +97,8 @@ public class ImageDebugTranslationListener implements ITranslationListener {
 	protected void checkSetBase(OsmPolygon polygon) {
 		if (baseX == Double.MIN_VALUE) {
 			Box2D boundingBox = polygon.getPolygon().getBoundingBox();
-			baseX =  boundingBox.getMinY();
-			baseY =  boundingBox.getMinX();
+			baseX =  boundingBox.getMinX();
+			baseY =  boundingBox.getMinY();
 			longScale = latScale * Math.cos(Math.toRadians(baseY));
 		}
 	}

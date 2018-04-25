@@ -58,7 +58,7 @@
 	<classpathentry kind="lib" path="lib/SGImplify.jar"/>
 	<classpathentry kind="lib" path="lib/Tuple.jar"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="lib" path="lib/osmosis-osm-binary-0.46.jar" sourcepath="C:/Users/Sviridov/AppData/Local/Temp/.org.sf.feeling.decompiler1524565554968/source/osmosis-osm-binary-0.46-sources-1524572554760.jar"/>
+	<classpathentry kind="lib" path="lib/osmosis-osm-binary-0.46.jar" sourcepath="C:/Users/Sviridov/AppData/Local/Temp/.org.sf.feeling.decompiler1524651337313/source/osmosis-osm-binary-0.46-sources-1524654107888.jar"/>
 	<classpathentry kind="lib" path="lib/protobuf-java-3.4.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

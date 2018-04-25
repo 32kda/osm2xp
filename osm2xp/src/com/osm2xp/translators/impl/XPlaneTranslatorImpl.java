@@ -147,8 +147,8 @@ public class XPlaneTranslatorImpl implements ITranslator{
 						+ currentTile, e);
 			}
 		} else if (!GuiOptionsHelper.getOptions().isSinglePass()) {
-			Osm2xpLogger.info("Tile " + (int) currentTile.x + "/"
-					+ (int) currentTile.y + " is empty, no dsf generated");
+			Osm2xpLogger.info("Tile " + (int) currentTile.y + "/"
+					+ (int) currentTile.x + " is empty, no dsf generated");
 		}
 	}
 
@@ -179,7 +179,7 @@ public class XPlaneTranslatorImpl implements ITranslator{
 				osmPolygon.getPolygon().removePoint(
 						osmPolygon.getPolygon().getLastPoint());
 				for (Point2D loc : osmPolygon.getPolygon().getVertices()) {
-					sb.append("POLYGON_POINT " + loc.y + " " + loc.x);
+					sb.append("POLYGON_POINT " + loc.x + " " + loc.y);
 					sb.append(LINE_SEP);
 				}
 				sb.append("END_WINDING");
@@ -372,9 +372,13 @@ public class XPlaneTranslatorImpl implements ITranslator{
 	@Override
 	public void processBoundingBox(HeaderBBox bbox) {
 		if (bbox != null && GuiOptionsHelper.isUseExclusionsFromPBF()) {
-			Box2D tileRect = new Box2D(currentTile, 1,1);
-			Box2D bboxRect = new Box2D(bbox.getBottom() / COORD_DIV_FACTOR,bbox.getTop() / COORD_DIV_FACTOR, bbox.getLeft() / COORD_DIV_FACTOR, bbox.getRight() / COORD_DIV_FACTOR);
-			dsfObjectsProvider.setExclusionBox(tileRect.intersection(bboxRect));
+			Box2D bboxRect = new Box2D(bbox.getLeft() / COORD_DIV_FACTOR,bbox.getRight() / COORD_DIV_FACTOR, bbox.getBottom() / COORD_DIV_FACTOR, bbox.getTop() / COORD_DIV_FACTOR);
+			if (currentTile != null) {
+				Box2D tileRect = new Box2D(currentTile, 1,1);
+				dsfObjectsProvider.setExclusionBox(tileRect.intersection(bboxRect));
+			} else {
+				dsfObjectsProvider.setExclusionBox(bboxRect);
+			}
 		}
 	}
 
@@ -597,7 +601,7 @@ public class XPlaneTranslatorImpl implements ITranslator{
 		sb.append("BEGIN_WINDING");
 		sb.append(LINE_SEP);
 		for (Point2D loc : osmPolygon.getPolygon().getVertices()) {
-			sb.append("POLYGON_POINT " + loc.y + " " + loc.x);
+			sb.append("POLYGON_POINT " + loc.x + " " + loc.y);
 			sb.append(LINE_SEP);
 		}
 		sb.append("END_WINDING");

@@ -58,7 +58,7 @@ public class G2xplTranslatorImpl implements ITranslator {
 		this.currentTile = currentTile;
 		this.folderPath = folderPath;
 		this.txtFile = new File(this.folderPath + File.separator + "g2xpl_"
-				+ currentTile.x + "_" + currentTile.y + ".txt");
+				+ currentTile.y + "_" + currentTile.x + ".txt");
 	}
 
 	@Override
@@ -75,7 +75,7 @@ public class G2xplTranslatorImpl implements ITranslator {
 			StringBuilder wayText = new StringBuilder();
 			wayText.append(osmPolygon.getId() + ":");
 			for (Point2D point : polygon.getVertices()) {
-				wayText.append(point.x + "," + point.y + ",");
+				wayText.append(point.y + "," + point.x + ",");
 			}
 			wayText.replace(wayText.lastIndexOf(","), wayText.length(), "");
 			wayText.append("\n");
@@ -97,7 +97,7 @@ public class G2xplTranslatorImpl implements ITranslator {
 	@Override
 	public void init() {
 		Osm2xpLogger.info("Starting G2xpl binding file for tile "
-				+ this.currentTile.x + "/" + this.currentTile.y + ".");
+				+ this.currentTile.y + "/" + this.currentTile.x + ".");
 	}
 
 	@Override

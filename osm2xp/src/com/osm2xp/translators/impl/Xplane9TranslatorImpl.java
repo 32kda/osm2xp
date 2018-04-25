@@ -96,7 +96,7 @@ public class Xplane9TranslatorImpl extends XPlaneTranslatorImpl {
 					int orientation = randomGenerator.nextInt(360);
 					sb.append("OBJECT "
 							+ dsfObjectsProvider.getRandomStreetLightObject()
-							+ " " + (lightLoc.y) + " " + (lightLoc.x) + " "
+							+ " " + (lightLoc.x) + " " + (lightLoc.y) + " "
 							+ orientation);
 					sb.append(System.getProperty("line.separator"));
 					// stats

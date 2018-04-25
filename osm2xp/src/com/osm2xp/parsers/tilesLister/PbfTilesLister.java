@@ -82,10 +82,10 @@ public class PbfTilesLister extends BinaryParser implements TilesLister {
 			}
 			// Handle dense info.
 //			if (di != null) {
-				Point2D loc = new Point2D(latf, lonf);
-				int lati = (int) Math.floor(loc.x);
-				int longi = (int) Math.floor(loc.y);
-				Point2D cleanedLoc = new Point2D(lati, longi);
+				Point2D loc = new Point2D(lonf, latf);
+				int longi = (int) Math.floor(loc.x);
+				int lati = (int) Math.floor(loc.y);
+				Point2D cleanedLoc = new Point2D(longi, lati);
 				tilesList.add(cleanedLoc);
 
 //			}

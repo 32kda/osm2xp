@@ -48,7 +48,7 @@ public class BglWriterImpl implements IWriter {
 	@Override
 	public void init(Point2D coordinates) {
 		this.currentBglFile = new File(sceneFolder + File.separator + "osm2xp_"
-				+ coordinates.x + "_" + coordinates.y + ".xml");
+				+ coordinates.y + "_" + coordinates.x + ".xml");
 		writeBglHeader();
 
 	}

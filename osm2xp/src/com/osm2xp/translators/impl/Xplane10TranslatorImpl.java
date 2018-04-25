@@ -73,8 +73,8 @@ public class Xplane10TranslatorImpl extends XPlaneTranslatorImpl implements ITra
 		}
 
 		if (currentTile != null && !StatsHelper.isTileEmpty(stats)) {
-			Osm2xpLogger.info("Tile " + (int) currentTile.x + "/"
-					+ (int) currentTile.y + " stats : "
+			Osm2xpLogger.info("Tile " + (int) currentTile.y + "/"
+					+ (int) currentTile.x + " stats : "
 					+ stats.getBuildingsNumber() + " buildings, "
 					+ stats.getForestsNumber() + " forests, "
 					+ stats.getStreetlightsNumber() + " street lights, "
@@ -100,8 +100,8 @@ public class Xplane10TranslatorImpl extends XPlaneTranslatorImpl implements ITra
 						+ currentTile, e);
 			}
 		} else if (!GuiOptionsHelper.getOptions().isSinglePass()) {
-			Osm2xpLogger.info("Tile " + (int) currentTile.x + "/"
-					+ (int) currentTile.y + " is empty, no dsf generated");
+			Osm2xpLogger.info("Tile " + (int) currentTile.y + "/"
+					+ (int) currentTile.x + " is empty, no dsf generated");
 		}
 		if (translationListener != null) {
 			translationListener.complete();

@@ -64,7 +64,7 @@ public class FlightGearTranslatorImpl implements ITranslator {
 		String fileName = file.getName().substring(0,
 				file.getName().indexOf("."));
 		this.xmlFile = new File(this.folderPath + File.separator + fileName
-				+ "_" + currentTile.x + "_" + currentTile.y + ".stg");
+				+ "_" + currentTile.y + "_" + currentTile.x + ".stg");
 
 	}
 
@@ -117,8 +117,8 @@ public class FlightGearTranslatorImpl implements ITranslator {
 			// <elevation-offset-m> <heading-deg> <pitch-deg> <roll-deg>
 			String objectDeclaration = MessageFormat.format(
 					FLIGHT_GEAR_OBJECT_DECLARATION,
-					new Object[] { object.getPath(), centerPoint.x,
-							centerPoint.y, 0, 1, 0, 0 });
+					new Object[] { object.getPath(), centerPoint.y,
+							centerPoint.x, 0, 1, 0, 0 });
 			objectDeclaration = objectDeclaration.replaceAll(",", ".");
 			FilesUtils.writeTextToFile(this.xmlFile, objectDeclaration, true);
 
@@ -138,7 +138,7 @@ public class FlightGearTranslatorImpl implements ITranslator {
 	@Override
 	public void init() {
 		Osm2xpLogger.info("Starting FlightGear file for tile "
-				+ this.currentTile.x + "/" + this.currentTile.y + ".");
+				+ this.currentTile.y + "/" + this.currentTile.x + ".");
 	}
 
 	@Override

@@ -67,11 +67,11 @@ public class XmlTilesLister implements ContentHandler, TilesLister {
 				&& attributs.getValue("lat") != null
 				&& attributs.getValue("lon") != null) {
 			Point2D loc = new Point2D(Double.parseDouble(attributs
-					.getValue("lat")), Double.parseDouble(attributs
-					.getValue("lon")));
-			int lat = (int) Math.floor(loc.x);
-			int lon = (int) Math.floor(loc.y);
-			Point2D cleanedLoc = new Point2D(lat, lon);
+					.getValue("lon")), Double.parseDouble(attributs
+					.getValue("lat")));
+			int lat = (int) Math.floor(loc.y);
+			int lon = (int) Math.floor(loc.x);
+			Point2D cleanedLoc = new Point2D(lon, lat);
 			tilesList.add(cleanedLoc);
 		}
 	}
