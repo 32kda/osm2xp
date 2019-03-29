@@ -1,24 +1,25 @@
-package com.osm2xp.parsers.tilesLister;
+package com.osm2xp.generation.parsers.listers;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.openstreetmap.osmosis.osmbinary.BinaryParser;
-import org.openstreetmap.osmosis.osmbinary.Osmformat.*;
+import org.openstreetmap.osmosis.osmbinary.Osmformat.DenseNodes;
+import org.openstreetmap.osmosis.osmbinary.Osmformat.HeaderBlock;
+import org.openstreetmap.osmosis.osmbinary.Osmformat.Node;
+import org.openstreetmap.osmosis.osmbinary.Osmformat.Relation;
+import org.openstreetmap.osmosis.osmbinary.Osmformat.Way;
 import org.openstreetmap.osmosis.osmbinary.file.BlockInputStream;
 
-import math.geom2d.Point2D;
-
 import com.osm2xp.core.exceptions.Osm2xpBusinessException;
-import com.osm2xp.core.model.osm.Tag;
 import com.osm2xp.generation.collections.PointSet;
+
+import math.geom2d.Point2D;
 
 
 /**

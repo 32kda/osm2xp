@@ -1,4 +1,4 @@
-package com.osm2xp.parsers.tilesLister;
+package com.osm2xp.generation.parsers.listers;
 
 import java.io.File;
 import java.io.IOException;

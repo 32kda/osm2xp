@@ -5,9 +5,14 @@
 	<artifactId>com.osm2xp.core</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<!-- <packaging>jar</packaging> -->
-	<packaging>eclipse-plugin</packaging>
+	<packaging>bundle</packaging>
+	
+	<properties>
+	   <bundle.symbolicName>com.osm2xp.core</bundle.symbolicName>
+	   <bundle.namespace>com.osm2xp</bundle.namespace>
+	</properties>
 
-	<name>core</name>
+	<name>${bundle.symbolicName}</name>
 	<url>http://maven.apache.org</url>
 
 	<parent>
@@ -17,180 +22,125 @@
 		<relativePath>../releng-core</relativePath>
 	</parent>
 
-<!-- 	<dependencies> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.openstreetmap.osmosis</groupId> -->
-<!-- 			<artifactId>osmosis-pbf</artifactId> -->
-<!-- 			<version>0.46</version> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>math.geom2d</groupId> -->
-<!-- 			<artifactId>javaGeom</artifactId> -->
-<!-- 			<version>0.11.1</version> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.openstreetmap.osmosis</groupId> -->
-<!-- 			<artifactId>osmosis-osm-binary</artifactId> -->
-<!-- 			<version>0.43.1</version> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.openstreetmap.osmosis</groupId> -->
-<!-- 			<artifactId>osmosis-core</artifactId> -->
-<!-- 			<version>0.47</version> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.openstreetmap.osmosis</groupId> -->
-<!-- 			<artifactId>osmosis-xml</artifactId> -->
-<!-- 			<version>0.47</version> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.google.protobuf</groupId> -->
-<!-- 			<artifactId>protobuf-java</artifactId> -->
-<!-- 			<version>2.4.1</version> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 		    <groupId>net.sf.trove4j</groupId> -->
-<!-- 		    <artifactId>trove4j</artifactId> -->
-<!-- 		    <version>3.0.3</version> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>commons-lang</groupId> -->
-<!-- 			<artifactId>commons-lang</artifactId> -->
-<!-- 			<version>2.6</version> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.bbn.openmap</groupId> -->
-<!-- 			<artifactId>openmap</artifactId> -->
-<!-- 			<version>5.0.3</version> -->
-<!-- 		</dependency> -->
- 		<!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api --> 
-<!-- 		<dependency> -->
-<!-- 			<groupId>javax.xml.bind</groupId> -->
-<!-- 			<artifactId>jaxb-api</artifactId> -->
-<!-- 			<version>2.3.1</version> -->
-<!-- 		</dependency> -->
-<!-- 		 https://mvnrepository.com/artifact/javax.activation/activation  -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>javax.activation</groupId> -->
-<!-- 			<artifactId>activation</artifactId> -->
-<!-- 			<version>1.1</version> -->
-<!-- 		</dependency> -->
+	<dependencies>
+		<dependency>
+			<groupId>org.openstreetmap.osmosis</groupId>
+			<artifactId>osmosis-pbf</artifactId>
+			<version>0.46</version>
+		</dependency>
+		<dependency>
+			<groupId>math.geom2d</groupId>
+			<artifactId>javaGeom</artifactId>
+			<version>0.11.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openstreetmap.osmosis</groupId>
+			<artifactId>osmosis-osm-binary</artifactId>
+			<version>0.43.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openstreetmap.osmosis</groupId>
+			<artifactId>osmosis-core</artifactId>
+			<version>0.47</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openstreetmap.osmosis</groupId>
+			<artifactId>osmosis-xml</artifactId>
+			<version>0.47</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java</artifactId>
+			<version>2.4.1</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.6</version>
+		</dependency>
+		<dependency>
+			<groupId>com.bbn.openmap</groupId>
+			<artifactId>openmap</artifactId>
+			<version>5.0.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-impl</artifactId>
+			<version>2.2.11</version>
+		</dependency>
 
-<!-- 		 https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime  -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.glassfish.jaxb</groupId> -->
-<!-- 			<artifactId>jaxb-runtime</artifactId> -->
-<!-- 			<version>2.3.0-b170127.1453</version> -->
-<!-- 		</dependency> -->
-<!-- 	</dependencies> -->
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-core</artifactId>
+			<version>2.2.11</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/javax.activation/activation -->
+		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>activation</artifactId>
+			<version>1.1</version>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>3.5.0</version>
+				<extensions>true</extensions>
+				<!-- the following instructions build a simple set of public/private 
+					classes into an OSGi bundle -->
+				<configuration>
+					<manifestLocation>META-INF</manifestLocation>
+					<unpackBundle>true</unpackBundle>
+					<instructions>
+						<Manifest-Version>1.0</Manifest-Version>
+						<Bundle-ManifestVersion>2</Bundle-ManifestVersion> 
+						<Bundle-Name>Core</Bundle-Name>
+						<Bundle-SymbolicName>com.osm2xp.core</Bundle-SymbolicName> 
+<!-- 						<Bundle-Version>1.0.0.qualifier</Bundle-Version> -->
+						<Bundle-Version>${pom.version}</Bundle-Version>
+						<Export-Package>com.osm2xp.core.*,
+										 com.bbn.openmap.layer.vpf,
+										 com.sun.xml.bind,
+										 com.sun.xml.bind.annotation,
+										 javax.xml.bind,
+										 javax.xml.bind.annotation,
+										 math.geom2d,
+										 math.geom2d.curve,
+										 math.geom2d.line,
+										 math.geom2d.point,
+										 math.geom2d.polygon,
+										 math.geom3d,
+										 org.apache.commons.lang
+						</Export-Package>
+						<Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
+						<Embed-Dependency>*;scope=compile|runtime;inline=false</Embed-Dependency>
+			            <Embed-Directory>target/dependency</Embed-Directory>
+			            <Embed-StripGroup>true</Embed-StripGroup>
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>2.10</version>
 				<executions>
 					<execution>
-						<id>copy-libraries</id>
-						<phase>validate</phase>
+						<id>copy-dependencies</id>
+						<phase>package</phase>
 						<goals>
-							<goal>copy</goal>
+							<goal>copy-dependencies</goal>
 						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>org.openstreetmap.osmosis</groupId>
-									<artifactId>osmosis-pbf</artifactId>
-									<version>0.46</version>
-								</artifactItem>
-								<dependency>
-									<groupId>math.geom2d</groupId>
-									<artifactId>javaGeom</artifactId>
-									<version>0.11.1</version>
-								</dependency>
-								<dependency>
-									<groupId>org.openstreetmap.osmosis</groupId>
-									<artifactId>osmosis-osm-binary</artifactId>
-									<version>0.43.1</version>
-								</dependency>
-								<dependency>
-									<groupId>org.openstreetmap.osmosis</groupId>
-									<artifactId>osmosis-core</artifactId>
-									<version>0.47</version>
-								</dependency>
-								<dependency>
-									<groupId>org.openstreetmap.osmosis</groupId>
-									<artifactId>osmosis-xml</artifactId>
-									<version>0.47</version>
-								</dependency>
-								<dependency>
-									<groupId>com.google.protobuf</groupId>
-									<artifactId>protobuf-java</artifactId>
-									<version>2.4.1</version>
-								</dependency>								
-								<dependency>
-									<groupId>commons-lang</groupId>
-									<artifactId>commons-lang</artifactId>
-									<version>2.6</version>
-								</dependency>
-								<dependency>
-									<groupId>com.bbn.openmap</groupId>
-									<artifactId>openmap</artifactId>
-									<version>5.0.3</version>
-								</dependency>
-								<dependency>
-								    <groupId>com.sun.xml.bind</groupId>
-								    <artifactId>jaxb-impl</artifactId>
-								    <version>2.2.11</version>
-								</dependency>
-								
-								<dependency>
-								    <groupId>com.sun.xml.bind</groupId>
-								    <artifactId>jaxb-core</artifactId>
-								    <version>2.2.11</version>
-								</dependency>
-								<!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
-								<dependency>
-									<groupId>javax.xml.bind</groupId>
-									<artifactId>jaxb-api</artifactId>
-									<version>2.3.1</version>
-								</dependency>
-								<!-- https://mvnrepository.com/artifact/javax.activation/activation -->
-								<dependency>
-									<groupId>javax.activation</groupId>
-									<artifactId>activation</artifactId>
-									<version>1.1</version>
-								</dependency>
-
-								<!-- https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime -->
-<!-- 								<dependency> -->
-<!-- 									<groupId>org.glassfish.jaxb</groupId> -->
-<!-- 									<artifactId>jaxb-runtime</artifactId> -->
-<!-- 									<version>2.3.0-b170127.1453</version> -->
-<!-- 								</dependency> -->
-							</artifactItems>
-							<outputDirectory>lib</outputDirectory>
-							<stripVersion>true</stripVersion>
-							<overWriteReleases>true</overWriteReleases>
-							<overWriteSnapshots>true</overWriteSnapshots>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifest>
-							<addClasspath>true</addClasspath>
-							<classpathPrefix>lib/</classpathPrefix>
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin>						
 		</plugins>
 	</build>
-	
+
 </project>

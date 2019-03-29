@@ -1,11 +1,8 @@
-package com.osm2xp.parsers.tilesLister;
+package com.osm2xp.generation.parsers.listers;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Set;
-
-import math.geom2d.Point2D;
 
 import com.bbn.openmap.layer.shape.ESRIPoly.ESRIFloatPoly;
 import com.bbn.openmap.layer.shape.ESRIPolygonRecord;
@@ -14,6 +11,8 @@ import com.osm2xp.core.exceptions.Osm2xpBusinessException;
 import com.osm2xp.core.logging.Osm2xpLogger;
 import com.osm2xp.core.model.osm.Node;
 import com.osm2xp.generation.collections.PointSet;
+
+import math.geom2d.Point2D;
 
 /**
  * ShapefileTilesLister.
