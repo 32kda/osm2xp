@@ -231,8 +231,11 @@ public class XPlaneTranslatorImpl implements ITranslator{
 			if (perimeter <= 30) {
 				return (int) Math.round(levelHeight);
 			}
-			if (perimeter <= 50) {
+			if (perimeter <= 80) {
 				return (int) Math.round(levelHeight * 2);
+			}
+			if (perimeter <= 120) {
+				return (int) Math.round(levelHeight * 3);
 			}
 			
 			if (polygon.getArea() * 10000000 < 0.2) {
