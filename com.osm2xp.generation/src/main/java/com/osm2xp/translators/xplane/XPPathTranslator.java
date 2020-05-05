@@ -94,12 +94,12 @@ public abstract class XPPathTranslator extends XPWritingTranslator {
 			   ((needStartEntrance != needEndEntrance) && length > minLength)) {
 				XPPathSegment startSegment = null, endSegment = null;
 				if (needStartEntrance) {
-					double distance = 0;
+					double sumLen = 0;
 					for (int i = 1; i < points.length; i++) {
 						Double curLen = GeomUtils.latLonDistance(points[i-1].y(),
 								points[i-1].x(), points[i].y(),points[i].x());
-						if (distance + curLen > minLength) {
-							double newSegLen = minLength - distance;
+						if (sumLen + curLen > minLength) {
+							double newSegLen = minLength - sumLen;
 							double k = newSegLen / curLen;
 							double newX = points[i-1].x() + (points[i].x()-points[i-1].x())*k;
 							double newY = points[i-1].y() + (points[i].y()-points[i-1].y())*k;
@@ -107,38 +107,39 @@ public abstract class XPPathTranslator extends XPWritingTranslator {
 							newSegPts[i] = new Point2D(newX, newY);
 							int newPointId = idProvider.getIncrementId();
 							startSegment = new XPPathSegment(pathSegment.getType(), pathSegment.getStartId(), newPointId, newSegPts);
-							startSegment.setStartHeight(1);
+							startSegment.setStartHeight(getLayer((int) pathSegment.getStartId()));
 							Point2D[] tailPts = Arrays.copyOfRange(points, i, points.length);
 							tailPts = (Point2D[]) ArrayUtils.add(tailPts, 0, new Point2D(newX, newY));
 							pathSegment = new XPPathSegment(pathSegment.getType(), newPointId, pathSegment.getEndId(), tailPts); //Leave a tail of original segment
 							break;
 						}
-						distance += curLen;
+						sumLen += curLen;
 					}
 				}
 				if (needEndEntrance) {
 					points = pathSegment.getPoints();
-					double distance = 0;
+					double sumLen = 0;
 					for (int i = points.length - 2; i >= 0; i--) {
 						Double curLen = GeomUtils.latLonDistance(points[i+1].y(),
 								points[i+1].x(), points[i].y(),points[i].x());
-						if (distance + curLen > minLength) {
-							double newSegLen = minLength - distance;
+						if (sumLen + curLen > minLength) {
+							double newSegLen = minLength - sumLen;
 							double k = newSegLen / curLen;
 							double newX = points[i+1].x() + (points[i].x()-points[i+1].x())*k;
 							double newY = points[i+1].y() + (points[i].y()-points[i+1].y())*k;
 							Point2D[] newSegPts = Arrays.copyOf(points, i + 2);
-							newSegPts[i+1] = new Point2D(newX, newY);
+							Point2D newPoint = new Point2D(newX, newY);
+							newSegPts[i+1] = newPoint;
 							long originalEndId = pathSegment.getEndId();
 							int newPointId = idProvider.getIncrementId();
 							pathSegment = new XPPathSegment(pathSegment.getType(), pathSegment.getStartId(), newPointId, newSegPts);
 							Point2D[] tailPts = Arrays.copyOfRange(points, i+1, points.length); //was i 
-							tailPts = (Point2D[]) ArrayUtils.add(tailPts, 0, new Point2D(newX, newY));
+							tailPts = (Point2D[]) ArrayUtils.add(tailPts, 0, newPoint);
 							endSegment = new XPPathSegment(pathSegment.getType(), newPointId, originalEndId, tailPts); //Leave a tail of original segment
-							endSegment.setEndHeight(1);
+							endSegment.setEndHeight(getLayer((int) originalEndId));
 							break;
 						}
-						distance += curLen;
+						sumLen += curLen;
 					}
 				}
 				List<XPPathSegment> resList = new ArrayList<XPPathSegment>();
@@ -178,7 +179,7 @@ public abstract class XPPathTranslator extends XPWritingTranslator {
 				int newStartId = idProvider.getNewId(currentSegment.get(0).getId());
 				int newEndId = idProvider.getNewId(node.getId());
 				if (bridge) {
-					int layer = Math.max(1, getLayerFromTags(poly)); //We suport bridge layers starting from 1
+					int layer = Math.max(1, getLayerFromTags(poly)); //We support bridge layers starting from 1
 					bridgeNodeLayers.put(newStartId, layer);
 					bridgeNodeLayers.put(newEndId, layer);
 				}

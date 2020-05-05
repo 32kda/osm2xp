@@ -47,7 +47,7 @@ public class LanduseAreasAnalyzer extends AbstractOSMDataConverter {
 					List<Geometry> fixed = fix(Collections.singletonList(poly));
 					for (Geometry geometry : fixed) {
 						if (geometry instanceof Polygon) {
-							MapArea area = new MapArea(tagName, value, (Polygon) geometry);
+							MapArea area = new MapArea(tags, (Polygon) geometry);
 							AreaProvider.getInstance().addArea(area);
 						}
 					}
@@ -66,7 +66,7 @@ public class LanduseAreasAnalyzer extends AbstractOSMDataConverter {
 				List<Geometry> fixed = fix(Collections.singletonList(polygon));
 				for (Geometry geometry : fixed) {
 					if (geometry instanceof Polygon) {
-						MapArea area = new MapArea(tagName, value, (Polygon) geometry);
+						MapArea area = new MapArea(tagsModel, (Polygon) geometry);
 						AreaProvider.getInstance().addArea(area);
 					}
 				}

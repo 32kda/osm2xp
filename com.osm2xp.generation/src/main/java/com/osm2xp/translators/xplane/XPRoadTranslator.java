@@ -124,7 +124,7 @@ public class XPRoadTranslator extends XPPathTranslator {
 	
 	protected boolean isInCity(IHasTags poly) {
 		String landuse = poly.getTagValue(OsmConstants.LANDUSE_TAG);
-		return "industrial".equalsIgnoreCase(landuse) || "residental".equalsIgnoreCase(landuse) || "commercial".equalsIgnoreCase(landuse);
+		return "industrial".equalsIgnoreCase(landuse) || "residential".equalsIgnoreCase(landuse) || "commercial".equalsIgnoreCase(landuse);
 	}
 
 	@Override

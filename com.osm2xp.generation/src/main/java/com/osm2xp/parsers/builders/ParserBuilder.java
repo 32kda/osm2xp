@@ -3,9 +3,11 @@ package com.osm2xp.parsers.builders;
 import java.io.File;
 import java.util.Collection;
 
+import com.osm2xp.converters.impl.AbstractTileDataConverter;
 import com.osm2xp.converters.impl.AbstractTranslatingConverter;
 import com.osm2xp.converters.impl.GeneralTranslatingConverter;
 import com.osm2xp.converters.impl.MultiTileDataConverter;
+import com.osm2xp.converters.impl.SingleTileDataConverter;
 import com.osm2xp.converters.impl.SpecificTranslatingConverter;
 import com.osm2xp.core.exceptions.DataSinkException;
 import com.osm2xp.core.exceptions.Osm2xpBusinessException;
@@ -24,6 +26,8 @@ import com.osm2xp.translators.IPreprocessorProvider;
 import com.osm2xp.translators.ITranslator;
 import com.osm2xp.translators.ITranslatorProvider;
 import com.osm2xp.translators.airfield.XPAirfieldTranslationAdapter;
+
+import math.geom2d.Point2D;
 
 /**
  * ParserBuilder.
@@ -96,22 +100,28 @@ public class ParserBuilder {
 	
 	
 	/**
-	 * Build the parser implementation for the type of file
-	 * @param dataSink 
+	 * Build the parser implementation 
 	 * 
-	 * @param folderPath
-	 * @param relationsList
-	 * 
-	 * @param tiles Tiles list
-	 * @return
+	 * @return {@link IVisitingParser} instance
 	 * @throws Osm2xpBusinessException
 	 * @throws DataSinkException
-	 * @throws NumberFormatException
-	 * @throws Exception
 	 */
 	public static IVisitingParser getMultiTileParser(File currentFile,ITranslatorProvider translatorProvider, IDataSink dataSink)
 		throws DataSinkException {
-		MultiTileDataConverter converter = new MultiTileDataConverter(dataSink, translatorProvider);		
+		AbstractTileDataConverter converter = new MultiTileDataConverter(dataSink, translatorProvider);		
+		return (IVisitingParser) getParser(currentFile, converter);
+	}
+	
+	/**
+	 * Build the parser implementation for the single tile
+	 * 
+	 * @return {@link IVisitingParser} instance
+	 * @throws Osm2xpBusinessException
+	 * @throws DataSinkException
+	 */
+	public static IVisitingParser getSingleTileParser(File currentFile, ITranslatorProvider translatorProvider, IDataSink dataSink, Point2D tile)
+			throws DataSinkException {
+		AbstractTileDataConverter converter = new SingleTileDataConverter(dataSink, translatorProvider, tile);		
 		return (IVisitingParser) getParser(currentFile, converter);
 	}
 

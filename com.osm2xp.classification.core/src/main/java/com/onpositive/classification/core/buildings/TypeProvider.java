@@ -13,11 +13,17 @@ public class TypeProvider {
 		if ("department_store".equals(shop) || "mall".equals(shop)) {
 			return OSMBuildingType.MALL;
 		}
+		if (!StringUtils.isEmpty(shop)) {
+			return OSMBuildingType.SHOP;
+		}		
 		String building = TagUtil.getValue("building", tags);
 		OSMBuildingType type = getFromBuildingTag(tags, building);
 		if (type == null) {
 			String buildingUse = TagUtil.getValue("building:use", tags);
 			type = getFromBuildingTag(tags, buildingUse);
+		}
+		if (type != null) {
+			return type;
 		}
 		String amenity = TagUtil.getValue("amenity", tags);
 		if (amenity != null && amenity.endsWith("school") || "college".equals(amenity)) {
@@ -30,9 +36,27 @@ public class TypeProvider {
 			"dentist".equals(amenity) || "doctors".equals(amenity)) {
 			return OSMBuildingType.SOCIAL;
 		}
-		if (!StringUtils.isEmpty(shop)) {
-			return OSMBuildingType.SHOP;
-		}		
+		if (building != null) {
+			String residential = TagUtil.getValue("residential", tags);
+			if ("rural".equals(residential)) {
+				return OSMBuildingType.HOUSE;
+			} else if (residential != null) {
+				return OSMBuildingType.BLOCK;
+			}
+			String landuse = TagUtil.getValue("landuse", tags); 
+			if ("allotments".equals(landuse)) {
+				return OSMBuildingType.HOUSE;
+			}
+			if ("industrial".equals(landuse)) {
+				return OSMBuildingType.INDUSTRIAL;
+			}
+			if ("residential".equals(landuse) || "apartments".equals(landuse)) {
+				return OSMBuildingType.BLOCK;
+			}
+			if ("commercial".equals(landuse)) {
+				return OSMBuildingType.SHOP;
+			}
+		}
 		return type;
 	}
 
@@ -55,7 +79,7 @@ public class TypeProvider {
 		if ("industrial".equals(building)) {
 			return OSMBuildingType.INDUSTRIAL;
 		}
-		if ("residental".equals(building) || "apartments".equals(building)) {
+		if ("residential".equals(building) || "apartments".equals(building)) {
 			return OSMBuildingType.BLOCK;
 		}
 		if ("house".equals(building) || "detached".equals(building)) {

@@ -432,7 +432,7 @@ public class XPlaneTranslatorImpl implements ITranslator{
 		if (XPlaneOptionsProvider.getOptions().isGenerateObj() && GeomUtils.compareCoordinates(currentTile, node) && !node.getTags().isEmpty()) { //We don't analyze nodes, which doesn't have any tags - to avoid spending too much time doing useless work
 			MapArea area = getContainingArea(node.getLon(), node.getLat());
 			if (area != null) {
-				node.getTags().add(new Tag(area.tag, area.value));
+				node.getTags().addAll(area.tags);
 			}
 			
 			// write a 3D object in the dsf file if this node is in an
@@ -520,7 +520,7 @@ public class XPlaneTranslatorImpl implements ITranslator{
 		if (osmPolyline.getTags().size() > 0 && !isArea) { //We define containing area only for objects having some other tags 
 			MapArea area = getContainingArea(osmPolyline.getCenter().x(), osmPolyline.getCenter().y());
 			if (area != null) {
-				osmPolyline.getTags().add(new Tag(area.tag, area.value));
+				osmPolyline.getTags().addAll(area.tags);
 			}
 		}
 		return Collections.singletonList(osmPolyline);

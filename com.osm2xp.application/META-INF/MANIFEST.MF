@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Osm2xp
 Bundle-SymbolicName: com.osm2xp.application;singleton:=true
-Bundle-Version: 4.6.0.qualifier
+Bundle-Version: 4.6.2.qualifier
 Bundle-ClassPath: .,
  staticlib/commons-collections-3.2.1.jar,
  staticlib/commons-compress-1.0.jar,

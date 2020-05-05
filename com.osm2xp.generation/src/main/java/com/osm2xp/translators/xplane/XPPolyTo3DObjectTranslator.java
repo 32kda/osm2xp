@@ -101,14 +101,12 @@ public class XPPolyTo3DObjectTranslator extends XPWritingTranslator {
 		}
 		double tolerance = xpOptions.getObjSizeTolerance();
 		OSMBuildingType buildingType = TypeProvider.getBuildingType(osmPolyline.getTags());
-		if (buildingType == null && GlobalOptionsProvider.getOptions().isAnalyzeAreas()) {
-			buildingType = getTypeFromLanduse(osmPolyline);
-		}
-		LineSegment2D edge0 = osmPolyline.getPolyline().edge(0);
-		LineSegment2D edge1 = osmPolyline.getPolyline().edge(1);
-		LineSegment2D edge2 = osmPolyline.getPolyline().edge(2);
-		LineSegment2D edge3 = osmPolyline.getPolyline().edge(3);
+
 		if (buildingType != null) {
+			LineSegment2D edge0 = osmPolyline.getPolyline().edge(0);
+			LineSegment2D edge1 = osmPolyline.getPolyline().edge(1);
+			LineSegment2D edge2 = osmPolyline.getPolyline().edge(2);
+			LineSegment2D edge3 = osmPolyline.getPolyline().edge(3);
 			Collection<ModelWithSize> models = modelsByType.get(buildingType);
 			if (models.isEmpty()) {
 				return false;
@@ -183,7 +181,7 @@ public class XPPolyTo3DObjectTranslator extends XPWritingTranslator {
 		if ("industrial".equals(landuse)) {
 			return OSMBuildingType.INDUSTRIAL;
 		}
-		if ("residental".equals(landuse) || "apartments".equals(landuse)) {
+		if ("residential".equals(landuse) || "apartments".equals(landuse)) {
 			return OSMBuildingType.BLOCK;
 		}
 		if ("commercial".equals(landuse)) {

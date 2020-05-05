@@ -1,23 +1,25 @@
 package com.osm2xp.generation.areas;
 
+import java.util.List;
+
 import org.locationtech.jts.geom.Polygon;
+
+import com.osm2xp.core.model.osm.Tag;
 
 public class MapArea {
 	
-	public final String tag;
-	public final String value;
+	public final List<Tag> tags;
 	public final Polygon polygon;
 	
-	public MapArea(String tag, String value, Polygon polygon) {
+	public MapArea(List<Tag> tags, Polygon polygon) {
 		super();
-		this.tag = tag;
-		this.value = value;
+		this.tags = tags;
 		this.polygon = polygon;
 	}
 
 	@Override
 	public String toString() {
-		return "Area:" + tag + " = " + value + ", bounds " + polygon.getEnvelopeInternal();
+		return "Area:" + tags + ", bounds " + polygon.getEnvelopeInternal();
 	}
 	
 }

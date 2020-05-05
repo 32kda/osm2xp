@@ -124,7 +124,7 @@ public class XplaneOptions {
 	protected XplaneAirfieldOptions airfieldOptions;
 	
 	protected int city3LaneHighwayRoadType = 14;
-	protected int country3LaneHighwayRoadType = 10;
+	protected int country3LaneHighwayRoadType = 14;
 	protected int city2LaneHighwayRoadType=40;
 	protected int country2LaneHighwayRoadType=40;
 	protected int cityRoadType=40;
@@ -141,7 +141,7 @@ public class XplaneOptions {
 	}
 
 	/**
-	 * Fully-initialising value constructor
+	 * Fully-initializing value constructor
 	 * 
 	 */
 	public XplaneOptions(final boolean excludeObj, final boolean excludeFac,

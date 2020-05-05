@@ -22,7 +22,7 @@ import com.osm2xp.gui.Activator;
 import com.osm2xp.gui.handlers.modes.CommandXplane10Mode;
 import com.osm2xp.gui.views.MainSceneryFileView;
 import com.osm2xp.jobs.GenerateJob;
-import com.osm2xp.jobs.GenerateMultiTilesJob;
+import com.osm2xp.jobs.GenerateTilesJob;
 import com.osm2xp.jobs.GenerateWholeFileJob;
 import com.osm2xp.jobs.MutexRule;
 import com.osm2xp.model.facades.FacadeSetManager;
@@ -195,7 +195,7 @@ public class BuildController {
 			final String folderPath) {
 		ITranslatorProvider translatorProvider = TranslatorBuilder.getTranslatorProvider(currentFile, folderPath, mode);
 		if (translatorProvider != null) {
-			return new GenerateMultiTilesJob(currentFile, folderPath, translatorProvider);
+			return new GenerateTilesJob(currentFile, folderPath, translatorProvider);
 		} 
 		ITranslator translator= TranslatorBuilder.getTranslator(currentFile, null, folderPath, mode);
 		if (translator != null) {

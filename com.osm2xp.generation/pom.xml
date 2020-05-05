@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>com.osm2xp</groupId>
 		<artifactId>com.osm2xp.core.parent</artifactId>
-		<version>4.6.0-SNAPSHOT</version>
+		<version>4.6.2-SNAPSHOT</version>
 		<relativePath>../releng-core</relativePath>
 	</parent>
 
