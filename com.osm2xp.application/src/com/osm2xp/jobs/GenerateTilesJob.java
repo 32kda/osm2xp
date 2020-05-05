@@ -42,7 +42,7 @@ public class GenerateTilesJob extends GenerateJob {
 		try {
 			Point2D selectedCoordinates = GuiOptionsHelper.getSelectedCoordinates();
 			String msg = selectedCoordinates != null ?
-						 String.format(Locale.ROOT, "tile lat: %d lon: %d", (int) selectedCoordinates.x(), (int) selectedCoordinates.y())
+						 String.format(Locale.ROOT, "tile lat: %d lon: %d", (int) selectedCoordinates.y(), (int) selectedCoordinates.x())
 						 :
 						 "several tiles";
 			Osm2xpLogger.info("Starting  generation of " + msg + ", target folder " + folderPath);
