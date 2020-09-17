@@ -1,5 +1,9 @@
 package com.osm2xp.translators.xplane;
 
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.stream.Collectors;
+
 import math.geom2d.Point2D;
 
 public class XPPathSegment {
@@ -27,6 +31,15 @@ public class XPPathSegment {
 	@Override
 	public String toString() {
 		return "Path segment, type " + type + " start " + startId + " end " + endId + ", " + points.length + " points";
+	}
+	
+	/**
+	 * Debug method
+	 * @return JTS LINESTRING for this  Path Segment
+	 */ 
+	public String getJTSString() {
+		String coordsStr = Arrays.stream(points).map(point -> String.format(Locale.ROOT, "%.9f %.9f", point.x(), point.y())).collect(Collectors.joining(", "));		
+		return "LINESTRING (" + coordsStr + ")";
 	}
 
 	public Point2D getPoint(int i) {

@@ -15,6 +15,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
+import com.osm2xp.converters.impl.AbstractTileDataConverter;
 import com.osm2xp.converters.impl.MultiTileDataConverter;
 import com.osm2xp.core.exceptions.DataSinkException;
 import com.osm2xp.core.parsers.IOSMDataVisitor;
@@ -148,7 +149,7 @@ public class App
     			
     			parser.process();
     			if (parser instanceof IVisitingParser && ((IVisitingParser) parser).getVisitor() instanceof MultiTileDataConverter) {
-    				System.out.println("Finished generation of " +  ((MultiTileDataConverter) ((IVisitingParser) parser).getVisitor()).getTilesCount() + " tiles, target folder " + sceneryName);
+    				System.out.println("Finished generation of " +  ((AbstractTileDataConverter) ((IVisitingParser) parser).getVisitor()).getTilesCount() + " tiles, target folder " + sceneryName);
     			} else {
     				System.out.println("Generation finished, target folder " + sceneryName);
     			}

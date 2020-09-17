@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>com.osm2xp.console</artifactId>
-	<version>4.6.0</version>
+	<version>4.6.2</version>
 	<packaging>jar</packaging>
 	<name>console</name>
 	<url>https://sourceforge.net/projects/osm2xp</url>
@@ -11,7 +11,7 @@
 	<parent>
 		<groupId>com.osm2xp</groupId>
 		<artifactId>com.osm2xp.console.parent</artifactId>
-		<version>4.6.0-SNAPSHOT</version>
+		<version>4.6.2-SNAPSHOT</version>
 		<relativePath>../releng-console</relativePath>
 	</parent>
 
@@ -275,7 +275,7 @@
 		<dependency>
 			<groupId>com.osm2xp</groupId>
 			<artifactId>com.osm2xp.classification.core</artifactId>
-			<version>4.6.0-SNAPSHOT</version>
+			<version>4.6.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 		    <groupId>com.ibm.icu</groupId>

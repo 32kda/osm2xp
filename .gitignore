@@ -20,3 +20,4 @@ testscenery/
 
 #Prepared learning datasets
 *.arff
+.idea/

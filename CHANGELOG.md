@@ -6,13 +6,27 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [4.6.2]
+
+### Fixed
+- Ability to generate a single tile only
+- Airfields were generated even when Airfields generation was switched off
+- Light strings now have slightly cut ends to avoid lammposts on roads near the road crossings
+- Default road type for wide roads changed to 14 to avoid trees nearthe road
+- Building type computation improved - fixed a typo for `residential` buildings and areas, other small fixes
+
+## [4.6.1]
+
+### Fixed
+- Small fix for Lights UI and defaults
+
 ## [4.6.0]
 
 ### Added
 - Street lights generation for some roads using Object Strings feature
 
 ### Fixed
-- Serious brekdown which led to the multipolygon mlfunction
+- Serious brekdown which led to the multipolygon malfunction
 - UI fixes
 
 ## [4.5.0]
