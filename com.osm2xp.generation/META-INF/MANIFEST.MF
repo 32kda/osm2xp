@@ -39,7 +39,21 @@ Export-Package: com.google.common.collect,
  com.osm2xp.writers.impl,
  org.apache.commons.io
 Require-Bundle: com.osm2xp.core,
- com.osm2xp.classification.core
+ com.osm2xp.classification.core,
+ org.junit,
+ org.junit.jupiter.api,
+ org.junit.jupiter.engine,
+ org.junit.jupiter.migrationsupport,
+ org.junit.jupiter.params,
+ org.junit.platform.commons,
+ org.junit.platform.engine,
+ org.junit.platform.launcher,
+ org.junit.platform.runner,
+ org.junit.platform.suite.api,
+ org.junit.vintage.engine,
+ org.hamcrest.core,
+ org.opentest4j,
+ org.apiguardian
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
  lib/commons-io.jar,

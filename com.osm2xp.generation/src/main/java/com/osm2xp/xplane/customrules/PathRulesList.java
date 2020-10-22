@@ -10,10 +10,9 @@ import javax.xml.bind.annotation.XmlType;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "PathRulesList", propOrder = { "rules" })
-
+@XmlType(propOrder = { "rules" })
 public class PathRulesList {
-	@XmlElement(required = true)
+	@XmlElement(name="rule", required = true)
 	protected List<PathRule> rules;
 	
 	public List<PathRule> getRules() {
@@ -21,6 +20,16 @@ public class PathRulesList {
 			rules = new ArrayList<PathRule>();
 		}
 		return this.rules;
+	}
+	
+	public void addRule(PathRule pathRule) {
+		List<PathRule> rulesList = getRules();
+		rulesList.add(pathRule);
+	}
+	
+	public boolean removeRule(PathRule pathRule) {
+		List<PathRule> rulesList = getRules();
+		return rulesList.remove(pathRule);
 	}
 
 }

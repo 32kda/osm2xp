@@ -4,9 +4,9 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.osm2xp.core.exceptions.Osm2xpBusinessException;
 import com.osm2xp.core.logging.Osm2xpLogger;
 import com.osm2xp.generation.options.XmlHelper;
-import com.osm2xp.generation.options.XplaneOptions;
 import com.osm2xp.generation.paths.PathsService;
 
 public class PathRulesProvider {
@@ -30,11 +30,20 @@ public class PathRulesProvider {
 	private static PathRulesList loadOptions(PathOptionsType type) {
 		File pathRulesFile = getPathRulesFile(type);
 		try {
-			return (PathRulesList) XmlHelper.loadFileFromXml(pathRulesFile, XplaneOptions.class);
+			return (PathRulesList) XmlHelper.loadFileFromXml(pathRulesFile, PathRulesList.class);
 		} catch (com.osm2xp.core.exceptions.Osm2xpBusinessException e) {
 			Osm2xpLogger.warning("Unable to load X-Plane options file at " + pathRulesFile.getAbsolutePath()); 
 		}
 		return new PathRulesList();
+	}
+	
+	public static void saveOptions(PathOptionsType optionsType, PathRulesList pathRulesList) {
+		File pathRulesFile = getPathRulesFile(optionsType);
+		try {
+			XmlHelper.saveToXml(pathRulesList, pathRulesFile);
+		} catch (Osm2xpBusinessException e) {
+			Osm2xpLogger.error("Unable to save X-Plane options file at " + pathRulesFile.getAbsolutePath(),e); 
+		}
 	}
 	
 	public static File getPathRulesFile(PathOptionsType optionsType) {

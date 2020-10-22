@@ -12,13 +12,17 @@ import javax.xml.bind.annotation.XmlType;
 public class PathRule {
 	
 	@XmlAttribute
-	public final String name;
+	protected String name;
 	@XmlAttribute
-	public final String condition;
+	protected String condition;
 	@XmlAttribute
-	public final String resultValue;
+	protected int resultValue;
 	
-	public PathRule(String name, String condition, String resultValue) {
+	public PathRule() {
+		
+	}		
+	
+	public PathRule(String name, String condition, int resultValue) {
 		super();
 		this.name = name;
 		this.condition = condition;
@@ -28,6 +32,30 @@ public class PathRule {
 	@Override
 	public String toString() {
 		return "PathRule [name=" + name + ", condition=" + condition + ", resultValue=" + resultValue + "]";
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getCondition() {
+		return condition;
+	}
+
+	public void setCondition(String condition) {
+		this.condition = condition;
+	}
+
+	public int getResultValue() {
+		return resultValue;
+	}
+
+	public void setResultValue(int resultValue) {
+		this.resultValue = resultValue;
 	}	
 	
 	
