@@ -87,7 +87,12 @@
 								    <groupId>com.ibm.icu</groupId>
 								    <artifactId>icu4j</artifactId>
 								    <version>65.1</version>
-								</dependency>																														
+								</dependency>	
+								<dependency>
+								    <groupId>net.sf.opencsv</groupId>
+								    <artifactId>opencsv</artifactId>
+								    <version>2.3</version>
+								</dependency>																													
 							</artifactItems>
 							<outputDirectory>lib</outputDirectory>
 							<stripVersion>true</stripVersion>

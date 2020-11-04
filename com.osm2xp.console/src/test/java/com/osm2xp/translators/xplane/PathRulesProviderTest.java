@@ -1,6 +1,6 @@
 package com.osm2xp.translators.xplane;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 

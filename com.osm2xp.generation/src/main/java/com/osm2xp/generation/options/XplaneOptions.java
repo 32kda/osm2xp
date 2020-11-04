@@ -25,7 +25,7 @@ import com.osm2xp.generation.options.rules.XplaneObjectsRulesList;
 		"maxHouseSegment", "minHouseArea", "objectRenderLevel", "facadeRenderLevel", "buildLibrary", "generateObj",
 		"generateObjBuildings", "generateFor", "generateBuildings", "generatePowerlines", "generateRailways",
 		"generateRoads", "generateFence", "generateTanks", "generateChimneys", "generateCoolingTowers",
-		"generateBridges", "generateSlopedRoofs", "generatePolys", "generateStreetLights", "lightsDensity",
+		"generateBridges", "generateSlopedRoofs", "generatePolys", "generateStreetLights", "lightsDensity", "useEUNetwork",
 		"city3LaneHighwayRoadType", "country3LaneHighwayRoadType","city2LaneHighwayRoadType","country2LaneHighwayRoadType","cityRoadType",    
 		"countryRoadType", "oneLaneRoadType","railwayType", "powerlineType", "packageFacades", "hardBuildings", "lightObject", "lightObjectString", "facadeSets", 
 		"restrictFacadeLod", "facadeLod", "generateXmlStats", "generatePdfStats", "generateDebugImg", "generateComments", "generateHighwayLights", 
@@ -81,6 +81,7 @@ public class XplaneOptions {
 	protected boolean generateBridges = true;
 	protected boolean generatePolys = true;
 	protected boolean generateStreetLights = true;
+	protected boolean useEUNetwork = false;
 	protected boolean generateSlopedRoofs;
 	protected boolean deleteSrc = true;
 	protected int lightsDensity;
@@ -1137,5 +1138,15 @@ public class XplaneOptions {
 	public void setStreetLightsInterval(int streetLightsInterval) {
 		this.streetLightsInterval = streetLightsInterval;
 	}
+
+	public boolean isUseEUNetwork() {
+		return useEUNetwork;
+	}
+
+	public void setUseEUNetwork(boolean useEUNetwork) {
+		this.useEUNetwork = useEUNetwork;
+	}
+	
+	
 
 }

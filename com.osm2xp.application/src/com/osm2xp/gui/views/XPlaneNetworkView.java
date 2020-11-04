@@ -4,8 +4,11 @@ import org.eclipse.core.databinding.beans.PojoProperties;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.Section;
 
@@ -30,6 +33,33 @@ public class XPlaneNetworkView extends AbstractOptionsView {
 			@Override
 			protected void initComponents() {
 				
+				Group group = new Group(this, SWT.NONE);
+				group.setText("Type of road network");
+				group.setText("Use regular or EU road network definitions?");
+				GridDataFactory.fillDefaults().applyTo(group);
+				group.setLayout(new GridLayout(2, false));
+				
+				Button btnRegular = new Button(group, SWT.RADIO);
+				btnRegular.setText("Worldwide(roards.net)");
+				btnRegular.setSelection(!XPlaneOptionsProvider.getOptions().isUseEUNetwork());
+				GridDataFactory.fillDefaults().applyTo(btnRegular);
+				Button btnEU = new Button(group, SWT.RADIO);
+				btnEU.setText("European (roads_eu.net; X-Plane 11 only!)");
+				btnEU.setSelection(XPlaneOptionsProvider.getOptions().isUseEUNetwork());
+				GridDataFactory.fillDefaults().applyTo(btnEU);
+				
+				SelectionAdapter netTypeListener = new SelectionAdapter() {
+					
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						XPlaneOptionsProvider.getOptions().setUseEUNetwork(btnEU.getSelection());
+					}
+					
+				};
+				btnRegular.addSelectionListener(netTypeListener);
+				btnEU.addSelectionListener(netTypeListener);
+				
+				GridDataFactory.fillDefaults().grab(true, true).span(2,1).applyTo(group);
 				
 				Button btnGenerateRoads = new Button(this, SWT.CHECK);
 				btnGenerateRoads.setText("Generate Roads");
