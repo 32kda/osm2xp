@@ -91,7 +91,11 @@ public class XPOutputFormat {
 				sb.append("OBJECT_DEF " + objectPath + "\n");
 			}
 
-		sb.append("NETWORK_DEF lib/g10/roads.net\n");
+			if (XPlaneOptionsProvider.getOptions().isUseEUNetwork()) {				
+				sb.append("NETWORK_DEF lib/g10/roads_EU.net\n");
+			} else {
+				sb.append("NETWORK_DEF lib/g10/roads.net\n");
+			}
 
 		return sb.toString();
 	}

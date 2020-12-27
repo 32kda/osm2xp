@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,20 +22,20 @@ public class PathRulesProvider {
 
 	}
 
-	private static Map<PathOptionsType, PathRulesList> pathRules = new HashMap<>();
+	private static Map<PathOptionsType, List<PathRule>> pathRules = new HashMap<>();
 
-	public static PathRulesList getRulesList(PathOptionsType optionsType) {
+	public static List<PathRule> getRulesList(PathOptionsType optionsType) {
 		return pathRules.computeIfAbsent(optionsType, type -> loadOptions(type));
 	}
 
-	private static PathRulesList loadOptions(PathOptionsType type) {
+	private static List<PathRule> loadOptions(PathOptionsType type) {
 		File pathRulesFile = getPathRulesFile(type);
-		PathRulesList pathRulesList = new PathRulesList();
+		List<PathRule> pathRulesList = new ArrayList<>();
 		try (CSVReader reader = new CSVReader(new FileReader(pathRulesFile), ',', '"', 1)) {
 			List<String[]> allRows = reader.readAll();
 			for (String[] row : allRows) {				
 				PathRule pathRule = new PathRule(row[0], row[1], Integer.parseInt(row[2]));
-				pathRulesList.addRule(pathRule);
+				pathRulesList.add(pathRule);
 			}				
 		} catch (Exception e) {
 			Osm2xpLogger.warning("Unable to load X-Plane path rules file at " + pathRulesFile.getAbsolutePath());
@@ -42,14 +43,13 @@ public class PathRulesProvider {
 		return pathRulesList;
 	}
 
-	public static void saveOptions(PathOptionsType optionsType, PathRulesList pathRulesList) {
+	public static void saveOptions(PathOptionsType optionsType, List<PathRule> pathRules) {
 		File pathRulesFile = getPathRulesFile(optionsType);
 		pathRulesFile.getParentFile().mkdirs();
 
 		try (CSVWriter writer = new CSVWriter(new FileWriter(pathRulesFile))) {
 			writer.writeNext(new String[] {"Name","Rule", "PathType"});
-			List<PathRule> rules = pathRulesList.getRules();
-			for (PathRule pathRule : rules) {
+			for (PathRule pathRule : pathRules) {
 				writer.writeNext(
 						new String[] { pathRule.getName(), pathRule.getCondition(), pathRule.getResultValue() + "" });
 
