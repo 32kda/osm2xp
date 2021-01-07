@@ -1,0 +1,17 @@
+"Name","Rule","PathType"
+"Motorway(3+ lanes)","item.highway=='motorway' && item.lanes>=3","100"
+"Motorway(<=2 lanes)","item.highway=='motorway'","110"
+"Motorway(link)","item.highway=='motorway_link'","120"
+"Trunk road(3+ lanes)","item.highway=='trunk' && item.lanes>=3","100"
+"Trunk road(<=2 lanes)","item.highway=='trunk'","110"
+"Trunk road(link)","item.highway=='trunk_link'","120"
+
+"Oneway road(2+ lanes)","(item.highway=='primary' || item.highway=='secondary' || item.highway=='tertiary') && item.oneway == 'yes' && item.lanes >= 2","24"
+"Oneway road","['primary','primary_link','secondary','secondary_link','tertiary','tertiary_link'].indexOf(item.highway) > -1 && item.oneway == 'yes'","64"
+"Primary road(2+ lanes)","item.highway=='primary' && item.lanes >= 2","14"
+"Primary road","item.highway=='primary' || item.highway=='primary_link'","34"
+"Secondary road(2+ lanes)","item.highway=='secondary' && item.lanes >= 2","14"
+"Secondary road","item.highway=='secondary' || item.highway=='secondary_link'","34"
+"Tertiary road(2+ lanes)","item.highway=='tertiary' && item.lanes >= 2","14"
+"Tertiary road","item.highway=='tertiary' || item.highway=='tertiary_link'","34"
+
