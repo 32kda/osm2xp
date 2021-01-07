@@ -34,8 +34,10 @@ public class PathRulesProvider {
 		try (CSVReader reader = new CSVReader(new FileReader(pathRulesFile), ',', '"', 1)) {
 			List<String[]> allRows = reader.readAll();
 			for (String[] row : allRows) {				
-				PathRule pathRule = new PathRule(row[0], row[1], Integer.parseInt(row[2]));
-				pathRulesList.add(pathRule);
+				if (row.length >= 3) {
+					PathRule pathRule = new PathRule(row[0], row[1], Integer.parseInt(row[2]));
+					pathRulesList.add(pathRule);
+				}
 			}				
 		} catch (Exception e) {
 			Osm2xpLogger.warning("Unable to load X-Plane path rules file at " + pathRulesFile.getAbsolutePath());

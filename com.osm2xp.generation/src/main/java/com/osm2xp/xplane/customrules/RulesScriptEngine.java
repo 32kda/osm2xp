@@ -3,7 +3,6 @@ package com.osm2xp.xplane.customrules;
 import java.util.List;
 
 import javax.script.Bindings;
-import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -11,42 +10,71 @@ import javax.script.ScriptException;
 import com.osm2xp.core.logging.Osm2xpLogger;
 import com.osm2xp.core.model.osm.IHasTags;
 import com.osm2xp.core.model.osm.Tag;
+import com.osm2xp.utils.NameUtils;
 
 public class RulesScriptEngine {
 	
-	protected ScriptEngineManager manager = new ScriptEngineManager();
-    protected ScriptEngine engine = manager.getEngineByName("nashorn");
+	protected static ScriptEngineManager manager = new ScriptEngineManager();
+    protected static ScriptEngine engine = manager.getEngineByName("nashorn");
+	protected String mainScript;
 	
-	
-	public int evaluateResult(IHasTags target, List<PathRule> pathRules) {
-			
-			Bindings bindings = createBindings(target);
+	public RulesScriptEngine(List<PathRule> pathRules) {
+		StringBuilder builder = new StringBuilder("var result = -1;\n");
 		for (PathRule pathRule : pathRules) {
-			String script = "var result=" + pathRule.getCondition() + ";" +
-		"result";
-			try {
-				engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
-				Object bindingsResult = engine.eval(script);
-				if (Boolean.TRUE.toString().equalsIgnoreCase(bindingsResult.toString())) {
-					return pathRule.getResultValue();
-				}
-			} catch (ScriptException e) {
-				Osm2xpLogger.error("Error clculating path condition " + script, e);
+			builder.append("if(");
+			builder.append(pathRule.condition);
+			builder.append(")result=");
+			builder.append(pathRule.resultValue);
+			builder.append(";\n");
+		}
+		builder.append("result");
+		mainScript = builder.toString();
+	}
+
+	public int evaluateResult(IHasTags target) {
+		String toEval = createObject(target) + "\n" + mainScript;
+		try {
+			Object result = engine.eval(toEval);
+			if (result instanceof Integer) {
+				return (int) result;
 			}
-			
+		} catch (ScriptException e) {
+			Osm2xpLogger.error("Error calculating path condition " + toEval, e);
 		}
 		return 0;
 	}
-
-	private Bindings createBindings(IHasTags polygon) {
-		Bindings bindings = engine.createBindings();
-		List<Tag> tags = polygon.getTags();
-		for (Tag tag : tags) {
-			bindings.put(tag.getKey(), tryParse(tag.getValue()));
-		}
-		return bindings;
-	}
 	
+	private String createObject(IHasTags entity) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("var item = new Object();");
+		builder.append("\n");
+		List<Tag> tags = entity.getTags();
+		for (Tag tag : tags) {
+			Object value = tryParse(tag.getValue());
+			if (value instanceof Double) {
+				Double dbl = (Double) value;				
+				builder.append("item.");
+				builder.append(NameUtils.toIdentifier(tag.getKey()));
+				builder.append(" = ");
+				builder.append(dbl);
+				builder.append(";\n");
+			} else {
+				builder.append("item.");
+				builder.append(NameUtils.toIdentifier(tag.getKey()));
+				builder.append(" = \"");
+				builder.append(normalizeStr(value.toString()));
+				builder.append("\";\n");
+				
+			}
+			
+		}
+		return builder.toString();		
+	}
+
+	private String normalizeStr(String value) {
+		return value.replace('"','\'');
+	}
+
 	private Object tryParse(String value) {
 		try {
 			return Double.parseDouble(value);

@@ -33,11 +33,13 @@ import com.osm2xp.translators.BuildingType;
 import com.osm2xp.translators.IPolyHandler;
 import com.osm2xp.translators.ITranslationListener;
 import com.osm2xp.translators.ITranslator;
+import com.osm2xp.translators.xplane.path.XPRulesRoadsTranslator;
 import com.osm2xp.utils.FilesUtils;
 import com.osm2xp.utils.MiscUtils;
 import com.osm2xp.utils.geometry.GeomUtils;
 import com.osm2xp.utils.osm.OsmUtils;
 import com.osm2xp.writers.IHeaderedWriter;
+import com.osm2xp.xplane.customrules.PathRulesProvider.PathOptionsType;
 
 import math.geom2d.Box2D;
 import math.geom2d.Point2D;
@@ -114,7 +116,9 @@ public class XPlaneTranslatorImpl implements ITranslator{
 		IDRenumbererService idProvider = new IDRenumbererService();
 		
 		polyHandlers.add(new XPBarrierTranslator(writer, dsfObjectsProvider, outputFormat));
-		polyHandlers.add(new XPRoadTranslator(writer, dsfObjectsProvider, idProvider, outputFormat));
+//		polyHandlers.add(new XPRoadTranslator(writer, dsfObjectsProvider, idProvider, outputFormat));
+		polyHandlers.add(new XPRulesRoadsTranslator(writer, dsfObjectsProvider, outputFormat, idProvider, PathOptionsType.ROADS_CITY));
+//		polyHandlers.add(new XPRulesRoadsTranslator(writer, dsfObjectsProvider, outputFormat, idProvider, PathOptionsType.ROADS_COUNTRY)); TODO
 		polyHandlers.add(new XPRailTranslator(writer, idProvider, outputFormat));
 		polyHandlers.add(new XPPowerlineTranslator(writer, idProvider, outputFormat));
 		polyHandlers.add(new XPCoolingTowerTranslator(writer, dsfObjectsProvider));

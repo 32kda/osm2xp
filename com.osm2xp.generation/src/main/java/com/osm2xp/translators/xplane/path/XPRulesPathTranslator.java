@@ -12,12 +12,11 @@ import com.osm2xp.xplane.customrules.RulesScriptEngine;
 
 public abstract class XPRulesPathTranslator extends XPPathTranslator {
 	
-	private RulesScriptEngine scriptEngine = new RulesScriptEngine();
-	private List<PathRule> pathRules;
+	private RulesScriptEngine scriptEngine;
 
 	public XPRulesPathTranslator(IWriter writer, XPOutputFormat outputFormat, IDRenumbererService idProvider, List<PathRule> pathRules) {
 		super(writer, outputFormat, idProvider);
-		this.pathRules = pathRules;
+		this.scriptEngine = new RulesScriptEngine(pathRules);
 	}
 
 
@@ -28,7 +27,7 @@ public abstract class XPRulesPathTranslator extends XPPathTranslator {
 
 	@Override
 	protected int getPathType(IHasTags polygon) {
-		return scriptEngine.evaluateResult(polygon, pathRules);
+		return scriptEngine.evaluateResult(polygon);
 	}
 	
 
