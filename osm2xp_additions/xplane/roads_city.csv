@@ -14,4 +14,15 @@
 "Secondary road","item.highway=='secondary' || item.highway=='secondary_link'","34"
 "Tertiary road(2+ lanes)","item.highway=='tertiary' && item.lanes >= 2","14"
 "Tertiary road","item.highway=='tertiary' || item.highway=='tertiary_link'","34"
+"Residential road(oneway)","item.highway=='residential' && item.oneway == 'yes'","68"
+"Residential road","item.highway=='residential'","54"
+"Living street(oneway)","item.highway=='living_street' && item.oneway == 'yes'","68"
+"Living street","item.highway=='residential'","58"
+"Pedestrian","item.highway=='pedestrian'","70"
+"Pedestrian","item.highway=='construction'","54"
+"Unclassified/service road(oneway)","item.oneway == 'yes' && (item.highway=='unclassified' || item.highway == 'service')","60"
+"Unclassified road","item.highway=='unclassified'","54"
+"Service road","item.highway=='service' && item.access != 'no' && item.access != 'private'","58"
+
+
 
