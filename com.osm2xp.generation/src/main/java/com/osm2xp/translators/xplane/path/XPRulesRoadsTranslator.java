@@ -7,6 +7,7 @@ import com.osm2xp.core.model.osm.IHasTags;
 import com.osm2xp.generation.options.GlobalOptionsProvider;
 import com.osm2xp.generation.options.XPlaneOptionsProvider;
 import com.osm2xp.generation.options.XplaneOptions;
+import com.osm2xp.generation.osm.OsmConstants;
 import com.osm2xp.generation.xplane.resources.DsfObjectsProvider;
 import com.osm2xp.generation.xplane.resources.XPOutputFormat;
 import com.osm2xp.model.osm.polygon.OsmPolyline;
@@ -24,11 +25,13 @@ public class XPRulesRoadsTranslator extends XPRulesPathTranslator {
 
 	private PathOptionsType roadsType;
 	private IXPLightTranslator lightTranslator;
+	private boolean city;
 
-	public XPRulesRoadsTranslator(IWriter writer, DsfObjectsProvider dsfObjectsProvider, XPOutputFormat outputFormat, IDRenumbererService idProvider, PathOptionsType roadsType) {
-		super(writer, outputFormat, idProvider, PathRulesProvider.getRulesList(roadsType));
+	public XPRulesRoadsTranslator(IWriter writer, DsfObjectsProvider dsfObjectsProvider, XPOutputFormat outputFormat, IDRenumbererService idProvider, boolean city) {
+		super(writer, outputFormat, idProvider, PathRulesProvider.getRulesList(city ? PathOptionsType.ROADS_CITY : PathOptionsType.ROADS_COUNTRY));
+		this.city = city;
 		lightTranslator = new XPStringLightTranslator(writer, dsfObjectsProvider, outputFormat);
-		this.roadsType = roadsType;
+		this.roadsType = city ? PathOptionsType.ROADS_CITY : PathOptionsType.ROADS_COUNTRY;
 	}
 	
 	@Override
@@ -36,11 +39,19 @@ public class XPRulesRoadsTranslator extends XPRulesPathTranslator {
 		if (!XPlaneOptionsProvider.getOptions().isGenerateRoads()) {
 			return false;
 		}
+		if (this.city != isInCity(osmPolyline)) {
+			return false;
+		}
 		int pathType = getPathType(osmPolyline);
 		if (pathType > 0) {
 			addSegmentsFrom(osmPolyline);
 		}
 		return false;
+	}
+	
+	protected boolean isInCity(IHasTags poly) {
+		String landuse = poly.getTagValue(OsmConstants.LANDUSE_TAG);
+		return "industrial".equalsIgnoreCase(landuse) || "residential".equalsIgnoreCase(landuse) || "commercial".equalsIgnoreCase(landuse);
 	}
 	
 	@Override
