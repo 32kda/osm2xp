@@ -45,6 +45,7 @@ public class XPRulesRoadsTranslator extends XPRulesPathTranslator {
 		int pathType = getPathType(osmPolyline);
 		if (pathType > 0) {
 			addSegmentsFrom(osmPolyline);
+			return true;
 		}
 		return false;
 	}

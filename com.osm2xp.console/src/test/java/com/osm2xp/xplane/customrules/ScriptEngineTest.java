@@ -15,15 +15,15 @@ class ScriptEngineTest {
 	@Test
 	void test() {
 		PathRulesList pathRulesList = new PathRulesList();
-		pathRulesList.addRule(new PathRule("sample", "highway == 'primary' && lit == 'yes'", 100));
-		pathRulesList.addRule(new PathRule("sample 1", "highway == 'secondary' && lit == 'yes'", 101));
+		pathRulesList.addRule(new PathRule("sample", "item.highway == 'primary' && item.lit == 'yes'", 100));
+		pathRulesList.addRule(new PathRule("sample 1", "item.highway == 'secondary' && item.lit == 'yes'", 101));
 		
-		RulesScriptEngine rulesScriptEngine = new RulesScriptEngine();
+		RulesScriptEngine rulesScriptEngine = new RulesScriptEngine(pathRulesList.getRules());
 		
 		List<Tag> tags = new ArrayList<Tag>();
 		tags.add(new Tag("highway", "primary"));
 		tags.add(new Tag("lit", "yes"));
-		int result = rulesScriptEngine.evaluateResult(new CompositeTagSet(tags), pathRulesList.getRules());
+		int result = rulesScriptEngine.evaluateResult(new CompositeTagSet(tags));
 		assertEquals(100, result);
 	}
 
