@@ -19,19 +19,21 @@ import com.osm2xp.generation.options.rules.XplaneObjectsRulesList;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = { "autoExclude", "excludeObj", "excludeFac", "excludeFor", "smartExclusions", "smartExclusionSize",
-		"smartExclusionDistance", "excludeBch", "excludeNet", "excludeLin", "excludePol", "excludeStr",
-		"exclusionsFromInput", "residentialMin", "residentialMax", "buildingMin", "buildingMax", "minHouseSegment",
-		"maxHouseSegment", "minHouseArea", "objectRenderLevel", "facadeRenderLevel", "buildLibrary", "generateObj",
-		"generateObjBuildings", "generateFor", "generateBuildings", "generatePowerlines", "generateRailways",
-		"generateRoads", "generateFence", "generateTanks", "generateChimneys", "generateCoolingTowers",
-		"generateBridges", "generateSlopedRoofs", "generatePolys", "generateStreetLights", "lightsDensity", "useEUNetwork",
-		"city3LaneHighwayRoadType", "country3LaneHighwayRoadType","city2LaneHighwayRoadType","country2LaneHighwayRoadType","cityRoadType",    
-		"countryRoadType", "oneLaneRoadType","railwayType", "powerlineType", "packageFacades", "hardBuildings", "lightObject", "lightObjectString", "facadeSets", 
-		"restrictFacadeLod", "facadeLod", "generateXmlStats", "generatePdfStats", "generateDebugImg", "generateComments", "generateHighwayLights", 
-		"roadBridgeRampLen","railBridgeRampLen", "streetLightsInterval", "maxPerimeterToSimplify", "objSizeTolerance", "objHeightTolerance", "objHeightAllowedDifference",
-		"buildingsExclusions", "forestsRules", "objectsRules", "lightsRules", "facadesRules", "polygonRules", "streetLightObjects", "airfieldOptions",
-		"deleteSrc" })
+@XmlType(name = "", propOrder = { "autoExclude", "excludeObj", "excludeFac", "excludeFor", "smartExclusions",
+		"smartExclusionSize", "smartExclusionDistance", "excludeBch", "excludeNet", "excludeLin", "excludePol",
+		"excludeStr", "exclusionsFromInput", "residentialMin", "residentialMax", "buildingMin", "buildingMax",
+		"minHouseSegment", "maxHouseSegment", "minHouseArea", "objectRenderLevel", "facadeRenderLevel", "buildLibrary",
+		"generateObj", "generateObjBuildings", "generateFor", "generateBuildings", "generatePowerlines",
+		"generateRailways", "generateRoads", "generateFence", "generateTanks", "generateChimneys",
+		"generateCoolingTowers", "generateBridges", "generateSlopedRoofs", "generatePolys", "generateStreetLights",
+		"lightsDensity", "useEUNetwork", "city3LaneHighwayRoadType", "country3LaneHighwayRoadType",
+		"city2LaneHighwayRoadType", "country2LaneHighwayRoadType", "cityRoadType", "countryRoadType", "oneLaneRoadType",
+		"railwayType", "powerlineType", "packageFacades", "hardBuildings", "lightObject", "lightObjectString",
+		"facadeSets", "restrictFacadeLod", "facadeLod", "generateXmlStats", "generatePdfStats", "generateDebugImg",
+		"generateComments", "generateHighwayLights", "roadBridgeRampLen", "railBridgeRampLen", "streetLightsInterval",
+		"maxPerimeterToSimplify", "objSizeTolerance", "objHeightTolerance", "objHeightAllowedDifference",
+		"buildingsExclusions", "forestsRules", "objectsRules", "lightsRules", "facadesRules", "polygonRules",
+		"streetLightObjects", "airfieldOptions", "deleteSrc" })
 @XmlRootElement(name = "XplaneOptions")
 public class XplaneOptions {
 
@@ -64,7 +66,8 @@ public class XplaneOptions {
 	 */
 	protected int facadeRenderLevel = 3;
 	/**
-	 * Build separate X-Plane library - <code>true</code> or bundle all the resources into generated scenary - <code>false</code>
+	 * Build separate X-Plane library - <code>true</code> or bundle all the
+	 * resources into generated scenery - <code>false</code>
 	 */
 	protected boolean buildLibrary = false;
 	protected boolean generateObj = true;
@@ -77,11 +80,23 @@ public class XplaneOptions {
 	protected boolean generateFence = true;
 	protected boolean generateTanks = true;
 	protected boolean generateChimneys = true;
-	protected boolean generateCoolingTowers= true;
+	protected boolean generateCoolingTowers = true;
 	protected boolean generateBridges = true;
 	protected boolean generatePolys = true;
 	protected boolean generateStreetLights = true;
 	protected boolean useEUNetwork = false;
+
+	protected boolean generateHighwayMotorway = true;
+	protected boolean generateHighwayTrunk = true;
+	protected boolean generateHighwayPrimary = true;
+	protected boolean generateHighwaySecondary = true;
+	protected boolean generateHighwayTertiary = true;
+	protected boolean generateHighwayLiving = false;
+	protected boolean generateHighwayResidential = false;
+	protected boolean generateHighwayPedestrian = false;
+	protected boolean generateHighwayUnclassified = false;
+	protected boolean generateHighwayConstruction = false;
+
 	protected boolean generateSlopedRoofs;
 	protected boolean deleteSrc = true;
 	protected int lightsDensity;
@@ -119,20 +134,21 @@ public class XplaneOptions {
 	protected FacadesRulesList facadesRules;
 	@XmlElement(name = "StreetLightObjects", required = true)
 	protected ObjectsList streetLightObjects;
-	@XmlElement(name="Polygons")
+	@XmlElement(name = "Polygons")
 	protected PolygonRulesList polygonRules;
-	@XmlElement(name="AirfieldOptions", required=true) 
+	@XmlElement(name = "AirfieldOptions", required = true)
 	protected XplaneAirfieldOptions airfieldOptions;
-	
+
 	protected int city3LaneHighwayRoadType = 14;
 	protected int country3LaneHighwayRoadType = 14;
-	protected int city2LaneHighwayRoadType=40;
-	protected int country2LaneHighwayRoadType=40;
-	protected int cityRoadType=40;
-	protected int countryRoadType=40;
-	protected int oneLaneRoadType=50;
-	protected int railwayType=151;
-	protected int powerlineType=220;
+	protected int city2LaneHighwayRoadType = 40;
+	protected int country2LaneHighwayRoadType = 40;
+	protected int cityRoadType = 40;
+	protected int countryRoadType = 40;
+	protected int oneLaneRoadType = 50;
+	protected int railwayType = 151;
+	protected int powerlineType = 220;
+
 	/**
 	 * Default no-arg constructor
 	 * 
@@ -145,26 +161,18 @@ public class XplaneOptions {
 	 * Fully-initializing value constructor
 	 * 
 	 */
-	public XplaneOptions(final boolean excludeObj, final boolean excludeFac,
-			final boolean excludeFor, final boolean excludeBch,
-			final boolean excludeNet, final boolean excludeLin,
-			final boolean excludePol, final boolean excludeStr,
-			final int residentialMin, final int residentialMax,
-			final int buildingMin, final int buildingMax,
-			final int minHouseSegment, final int maxHouseSegment,
-			final int minHouseArea, final boolean generateObj,
-			final boolean generateFor, final boolean generateStreetLights,
-			final boolean generateBuildings, final boolean generateSlopedRoofs,
-			final int lightsDensity, final boolean packageFacades,
-			final boolean hardBuildings, final String lightObject,
-			final int facadeLod, final boolean generateXmlStats, final boolean generatePdfStats,
-			final BuildingsExclusionsList buildingsExclusions,
-			final ForestsRulesList forestsRules,
-			final LightsRulesList lightsRules,
-			final XplaneObjectsRulesList objectsRules,
-			final FacadesRulesList facadesRules,
-			final ObjectsList streetLightObjects,
-			final int smartExclusionDistance, final int smartExclusionSize) {
+	public XplaneOptions(final boolean excludeObj, final boolean excludeFac, final boolean excludeFor,
+			final boolean excludeBch, final boolean excludeNet, final boolean excludeLin, final boolean excludePol,
+			final boolean excludeStr, final int residentialMin, final int residentialMax, final int buildingMin,
+			final int buildingMax, final int minHouseSegment, final int maxHouseSegment, final int minHouseArea,
+			final boolean generateObj, final boolean generateFor, final boolean generateStreetLights,
+			final boolean generateBuildings, final boolean generateSlopedRoofs, final int lightsDensity,
+			final boolean packageFacades, final boolean hardBuildings, final String lightObject, final int facadeLod,
+			final boolean generateXmlStats, final boolean generatePdfStats,
+			final BuildingsExclusionsList buildingsExclusions, final ForestsRulesList forestsRules,
+			final LightsRulesList lightsRules, final XplaneObjectsRulesList objectsRules,
+			final FacadesRulesList facadesRules, final ObjectsList streetLightObjects, final int smartExclusionDistance,
+			final int smartExclusionSize) {
 		this.excludeObj = excludeObj;
 		this.excludeFac = excludeFac;
 		this.excludeFor = excludeFor;
@@ -584,8 +592,7 @@ public class XplaneOptions {
 	/**
 	 * Sets the value of the lightObject property.
 	 * 
-	 * @param value
-	 *            allowed object is {@link String }
+	 * @param value allowed object is {@link String }
 	 * 
 	 */
 	public void setLightObject(String value) {
@@ -621,8 +628,7 @@ public class XplaneOptions {
 	/**
 	 * Sets the value of the facadeSet property.
 	 * 
-	 * @param value
-	 *            allowed object is {@link String }
+	 * @param value allowed object is {@link String }
 	 * 
 	 */
 //	public void setFacadeSet(String value) {
@@ -674,8 +680,7 @@ public class XplaneOptions {
 	/**
 	 * Sets the value of the buildingsExclusions property.
 	 * 
-	 * @param value
-	 *            allowed object is {@link BuildingsExclusionsList }
+	 * @param value allowed object is {@link BuildingsExclusionsList }
 	 * 
 	 */
 	public void setBuildingsExclusions(BuildingsExclusionsList value) {
@@ -695,8 +700,7 @@ public class XplaneOptions {
 	/**
 	 * Sets the value of the forestsRules property.
 	 * 
-	 * @param value
-	 *            allowed object is {@link ForestsRulesList }
+	 * @param value allowed object is {@link ForestsRulesList }
 	 * 
 	 */
 	public void setForestsRules(ForestsRulesList value) {
@@ -716,8 +720,7 @@ public class XplaneOptions {
 	/**
 	 * Sets the value of the objectsRules property.
 	 * 
-	 * @param value
-	 *            allowed object is {@link ObjectsRulesList }
+	 * @param value allowed object is {@link ObjectsRulesList }
 	 * 
 	 */
 	public void setObjectsRules(XplaneObjectsRulesList value) {
@@ -737,8 +740,7 @@ public class XplaneOptions {
 	/**
 	 * Sets the value of the facadesRules property.
 	 * 
-	 * @param value
-	 *            allowed object is {@link FacadesRulesList }
+	 * @param value allowed object is {@link FacadesRulesList }
 	 * 
 	 */
 	public void setFacadesRules(FacadesRulesList value) {
@@ -758,8 +760,7 @@ public class XplaneOptions {
 	/**
 	 * Sets the value of the streetLightObjects property.
 	 * 
-	 * @param value
-	 *            allowed object is {@link ObjectsList }
+	 * @param value allowed object is {@link ObjectsList }
 	 * 
 	 */
 	public void setStreetLightObjects(ObjectsList value) {
@@ -768,8 +769,7 @@ public class XplaneOptions {
 
 	@Deprecated
 	/**
-	 * @return
-	 * Should use exclusion zone from input file instead
+	 * @return Should use exclusion zone from input file instead
 	 */
 	public boolean isSmartExclusions() {
 		return smartExclusions;
@@ -859,13 +859,13 @@ public class XplaneOptions {
 	public void setGenerateChimneys(boolean generateChimneys) {
 		this.generateChimneys = generateChimneys;
 	}
-	
+
 	public boolean isGenerateBridges() {
 		return generateBridges;
 	}
-	
+
 	public void setGenerateBridges(boolean generateBridges) {
-		this.generateBridges= generateBridges;
+		this.generateBridges = generateBridges;
 	}
 
 	public boolean isGenerateComments() {
@@ -875,6 +875,7 @@ public class XplaneOptions {
 	public void setGenerateComments(boolean generateComments) {
 		this.generateComments = generateComments;
 	}
+
 	/**
 	 * @return Road bridge ramp max length, 100m by default
 	 */
@@ -930,6 +931,7 @@ public class XplaneOptions {
 
 	/**
 	 * Set facade set string
+	 * 
 	 * @param facadeSets Facade sets, separated with ';'
 	 */
 	public void setFacadeSets(String facadeSets) {
@@ -1145,6 +1147,86 @@ public class XplaneOptions {
 
 	public void setUseEUNetwork(boolean useEUNetwork) {
 		this.useEUNetwork = useEUNetwork;
+	}
+
+	public boolean isGenerateHighwayMotorway() {
+		return generateHighwayMotorway;
+	}
+
+	public void setGenerateHighwayMotorway(boolean generateHighwayMotorway) {
+		this.generateHighwayMotorway = generateHighwayMotorway;
+	}
+
+	public boolean isGenerateHighwayTrunk() {
+		return generateHighwayTrunk;
+	}
+
+	public void setGenerateHighwayTrunk(boolean generateHighwayTrunk) {
+		this.generateHighwayTrunk = generateHighwayTrunk;
+	}
+
+	public boolean isGenerateHighwayPrimary() {
+		return generateHighwayPrimary;
+	}
+
+	public void setGenerateHighwayPrimary(boolean generateHighwayPrimary) {
+		this.generateHighwayPrimary = generateHighwayPrimary;
+	}
+
+	public boolean isGenerateHighwaySecondary() {
+		return generateHighwaySecondary;
+	}
+
+	public void setGenerateHighwaySecondary(boolean generateHighwaySecondary) {
+		this.generateHighwaySecondary = generateHighwaySecondary;
+	}
+
+	public boolean isGenerateHighwayTertiary() {
+		return generateHighwayTertiary;
+	}
+
+	public void setGenerateHighwayTertiary(boolean generateHighwayTertiary) {
+		this.generateHighwayTertiary = generateHighwayTertiary;
+	}
+
+	public boolean isGenerateHighwayLiving() {
+		return generateHighwayLiving;
+	}
+
+	public void setGenerateHighwayLiving(boolean generateHighwayLiving) {
+		this.generateHighwayLiving = generateHighwayLiving;
+	}
+
+	public boolean isGenerateHighwayResidential() {
+		return generateHighwayResidential;
+	}
+
+	public void setGenerateHighwayResidential(boolean generateHighwayResidential) {
+		this.generateHighwayResidential = generateHighwayResidential;
+	}
+
+	public boolean isGenerateHighwayPedestrian() {
+		return generateHighwayPedestrian;
+	}
+
+	public void setGenerateHighwayPedestrian(boolean generateHighwayPedestrian) {
+		this.generateHighwayPedestrian = generateHighwayPedestrian;
+	}
+
+	public boolean isGenerateHighwayUnclassified() {
+		return generateHighwayUnclassified;
+	}
+
+	public void setGenerateHighwayUnclassified(boolean generateHighwayUnclassified) {
+		this.generateHighwayUnclassified = generateHighwayUnclassified;
+	}
+
+	public boolean isGenerateHighwayConstruction() {
+		return generateHighwayConstruction;
+	}
+
+	public void setGenerateHighwayConstruction(boolean generateHighwayConstruction) {
+		this.generateHighwayConstruction = generateHighwayConstruction;
 	}
 	
 	

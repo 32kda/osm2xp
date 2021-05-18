@@ -36,12 +36,13 @@ public class XPRulesRoadsTranslator extends XPRulesPathTranslator {
 	
 	@Override
 	public boolean handlePoly(OsmPolyline osmPolyline) {
-		if (!XPlaneOptionsProvider.getOptions().isGenerateRoads()) {
+		if (!XPlaneOptionsProvider.getOptions().isGenerateRoads() || !generateRoadType(osmPolyline)) {
 			return false;
 		}
 		if (this.city != isInCity(osmPolyline)) {
 			return false;
 		}
+		
 		int pathType = getPathType(osmPolyline);
 		if (pathType > 0) {
 			addSegmentsFrom(osmPolyline);
@@ -50,6 +51,36 @@ public class XPRulesRoadsTranslator extends XPRulesPathTranslator {
 		return false;
 	}
 	
+	protected boolean generateRoadType(OsmPolyline osmPolyline) {
+		String highway = osmPolyline.getTagValue("highway");
+		if (highway == null) {
+			return false;
+		}
+		XplaneOptions options = XPlaneOptionsProvider.getOptions();
+		if ("motorway".equals(highway) && !options.isGenerateHighwayMotorway()) {
+			return false;
+		} else if ("trunk".equals(highway) && !options.isGenerateHighwayTrunk()) {
+			return false;
+		} else if ("primary".equals(highway) && !options.isGenerateHighwayPrimary()) {
+			return false;
+		} else if ("secondary".equals(highway) && !options.isGenerateHighwaySecondary()) {
+			return false;
+		} else if ("tertiary".equals(highway) && !options.isGenerateHighwayTertiary()) {
+			return false;
+		} else if ("residential".equals(highway) && !options.isGenerateHighwayResidential()) {
+			return false;
+		} else if ("living".equals(highway) && !options.isGenerateHighwayLiving()) {
+			return false;
+		} else if ("unclassified".equals(highway) && !options.isGenerateHighwayUnclassified()) {
+			return false;
+		} else if ("pedestrian".equals(highway) && !options.isGenerateHighwayPedestrian()) {
+			return false;
+		} else if ("construction".equals(highway) && !options.isGenerateHighwayConstruction()) {
+			return false;
+		}
+		return true;
+	}
+
 	protected boolean isInCity(IHasTags poly) {
 		String landuse = poly.getTagValue(OsmConstants.LANDUSE_TAG);
 		return "industrial".equalsIgnoreCase(landuse) || "residential".equalsIgnoreCase(landuse) || "commercial".equalsIgnoreCase(landuse);

@@ -35,7 +35,7 @@ public class XPlaneNetworkView extends AbstractOptionsView {
 				
 				Group group = new Group(this, SWT.NONE);
 				group.setText("Type of road network");
-				group.setText("Use regular or EU road network definitions?");
+				group.setToolTipText("Use regular or EU road network definitions?");
 				GridDataFactory.fillDefaults().applyTo(group);
 				group.setLayout(new GridLayout(2, false));
 				
