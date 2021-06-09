@@ -33,6 +33,7 @@ import com.osm2xp.translators.BuildingType;
 import com.osm2xp.translators.IPolyHandler;
 import com.osm2xp.translators.ITranslationListener;
 import com.osm2xp.translators.ITranslator;
+import com.osm2xp.translators.xplane.path.XPRulesRailwayTranslator;
 import com.osm2xp.translators.xplane.path.XPRulesRoadsTranslator;
 import com.osm2xp.utils.FilesUtils;
 import com.osm2xp.utils.MiscUtils;
@@ -115,9 +116,10 @@ public class XPlaneTranslatorImpl implements ITranslator{
 		
 		polyHandlers.add(new XPBarrierTranslator(writer, dsfObjectsProvider, outputFormat));
 //		polyHandlers.add(new XPRoadTranslator(writer, dsfObjectsProvider, idProvider, outputFormat));
-		polyHandlers.add(new XPRulesRoadsTranslator(writer, dsfObjectsProvider, outputFormat, idProvider, true));
-		polyHandlers.add(new XPRulesRoadsTranslator(writer, dsfObjectsProvider, outputFormat, idProvider, false));
-		polyHandlers.add(new XPRailTranslator(writer, idProvider, outputFormat));
+		polyHandlers.add(new XPRulesRoadsTranslator(writer, dsfObjectsProvider, idProvider, outputFormat, true));
+		polyHandlers.add(new XPRulesRoadsTranslator(writer, dsfObjectsProvider, idProvider, outputFormat, false));
+//		polyHandlers.add(new XPRailTranslator(writer, idProvider, outputFormat));
+		polyHandlers.add(new XPRulesRailwayTranslator(writer, idProvider, outputFormat));
 		polyHandlers.add(new XPPowerlineTranslator(writer, idProvider, outputFormat));
 		polyHandlers.add(new XPCoolingTowerTranslator(writer, dsfObjectsProvider));
 		polyHandlers.add(new XPChimneyTranslator(writer, dsfObjectsProvider));

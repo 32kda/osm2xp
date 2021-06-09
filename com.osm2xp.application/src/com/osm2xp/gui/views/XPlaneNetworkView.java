@@ -15,6 +15,7 @@ import org.eclipse.ui.forms.widgets.Section;
 import com.osm2xp.generation.options.XPlaneOptionsProvider;
 import com.osm2xp.gui.views.panels.CheckBoxPanel;
 import com.osm2xp.gui.views.panels.Osm2xpPanel;
+import com.osm2xp.gui.views.panels.xplane.ExtendedPathsPanel;
 
 public class XPlaneNetworkView extends AbstractOptionsView {
 	
@@ -92,65 +93,9 @@ public class XPlaneNetworkView extends AbstractOptionsView {
 		sectionGeneratedItems.setClient(scGeneratedItemsPanel);
 		
 		Section sectionRoadProperties = createSection("Types for roads/railways/powerlines", true);
-		Osm2xpPanel scRoadsPanel = new Osm2xpPanel(sectionRoadProperties, SWT.BORDER) {
-			
-			@Override
-			protected void initComponents() {
-				GridLayout gridLayout = new GridLayout(4, false);
-				gridLayout.verticalSpacing = 15;
-				gridLayout.horizontalSpacing = 15;
-				gridLayout.marginHeight = 15;
-				setLayout(gridLayout);
-				
-				toolkit.createLabel(this,"City, 3+ lanes highway road type").setLayoutData(GridDataFactory.swtDefaults().create());
-				Text city3LaneHighwayRoadType = new Text(this, SWT.BORDER);
-				city3LaneHighwayRoadType.addVerifyListener(onlyDigitsVerifyListener);
-				bindTextToInt(city3LaneHighwayRoadType, XPlaneOptionsProvider.getOptions(), "city3LaneHighwayRoadType");
-				
-				toolkit.createLabel(this,"Country, 3+ lanes highway road type").setLayoutData(GridDataFactory.swtDefaults().create());
-				Text country3LaneHighwayRoadType = new Text(this, SWT.BORDER);
-				country3LaneHighwayRoadType.addVerifyListener(onlyDigitsVerifyListener);
-				bindTextToInt(country3LaneHighwayRoadType, XPlaneOptionsProvider.getOptions(), "country3LaneHighwayRoadType");
-				
-				toolkit.createLabel(this,"City, 2 lanes highway road type").setLayoutData(GridDataFactory.swtDefaults().create());
-				Text city2LaneHighwayRoadType = new Text(this, SWT.BORDER);
-				city2LaneHighwayRoadType.addVerifyListener(onlyDigitsVerifyListener);
-				bindTextToInt(city2LaneHighwayRoadType, XPlaneOptionsProvider.getOptions(), "city2LaneHighwayRoadType");
-				
-				toolkit.createLabel(this,"Country, 2 lanes highway road type").setLayoutData(GridDataFactory.swtDefaults().create());
-				Text country2LaneHighwayRoadType = new Text(this, SWT.BORDER);
-				country2LaneHighwayRoadType.addVerifyListener(onlyDigitsVerifyListener);
-				bindTextToInt(country2LaneHighwayRoadType, XPlaneOptionsProvider.getOptions(), "country2LaneHighwayRoadType");
-				
-				toolkit.createLabel(this,"City, 2 lanes, default road type").setLayoutData(GridDataFactory.swtDefaults().create());
-				Text cityRoadType = new Text(this, SWT.BORDER);
-				cityRoadType.addVerifyListener(onlyDigitsVerifyListener);
-				bindTextToInt(cityRoadType, XPlaneOptionsProvider.getOptions(), "cityRoadType");
-				
-				toolkit.createLabel(this,"Country, 2 lanes, default road type").setLayoutData(GridDataFactory.swtDefaults().create());
-				Text countryRoadType = new Text(this, SWT.BORDER);
-				countryRoadType.addVerifyListener(onlyDigitsVerifyListener);
-				bindTextToInt(countryRoadType, XPlaneOptionsProvider.getOptions(), "countryRoadType");
-				
-				toolkit.createLabel(this,"One lane road type").setLayoutData(GridDataFactory.swtDefaults().create());
-				Text oneLaneRoadType = new Text(this, SWT.BORDER);
-				oneLaneRoadType.addVerifyListener(onlyDigitsVerifyListener);
-				bindTextToInt(oneLaneRoadType, XPlaneOptionsProvider.getOptions(), "oneLaneRoadType");
-				
-				toolkit.createLabel(this,"Railway type").setLayoutData(GridDataFactory.swtDefaults().create());
-				Text railwayType = new Text(this, SWT.BORDER);
-				railwayType.addVerifyListener(onlyDigitsVerifyListener);
-				bindTextToInt(railwayType, XPlaneOptionsProvider.getOptions(), "railwayType");
-				
-				toolkit.createLabel(this,"Powerline type").setLayoutData(GridDataFactory.swtDefaults().create());
-				Text powerlineType = new Text(this, SWT.BORDER);
-				powerlineType.addVerifyListener(onlyDigitsVerifyListener);
-				bindTextToInt(powerlineType, XPlaneOptionsProvider.getOptions(), "powerlineType");
-			}
-			
-		};
+		ExtendedPathsPanel extendedPathsPanel = new ExtendedPathsPanel(sectionRoadProperties);		
 		
-		toolkit.adapt(scRoadsPanel, true, true);
-		sectionRoadProperties.setClient(scRoadsPanel);
+		toolkit.adapt(extendedPathsPanel, true, true);
+		sectionRoadProperties.setClient(extendedPathsPanel);
 	}
 }

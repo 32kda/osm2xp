@@ -151,10 +151,9 @@ public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 				+ " by Benjamin Blanchet and Dmitry Karpenko");
 		Osm2xpLogger.info("==================================================");
 	}
-
+	
 	@Override
-	public void dispose() {
-
+	public boolean preWindowShellClose() {
 		try {
 			GlobalOptionsProvider.saveOptions();
 			XPlaneOptionsProvider.saveOptions();
@@ -163,7 +162,8 @@ public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 //			FlightGearOptionsProvider.saveOptions();
 		} catch (Osm2xpBusinessException e) {
 			Osm2xpLogger.error(e.getMessage());
-		}
-		super.dispose();
+		}		
+		return super.preWindowShellClose();
 	}
+	
 }

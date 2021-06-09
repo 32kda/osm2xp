@@ -27,7 +27,7 @@ public class XPRulesRoadsTranslator extends XPRulesPathTranslator {
 	private IXPLightTranslator lightTranslator;
 	private boolean city;
 
-	public XPRulesRoadsTranslator(IWriter writer, DsfObjectsProvider dsfObjectsProvider, XPOutputFormat outputFormat, IDRenumbererService idProvider, boolean city) {
+	public XPRulesRoadsTranslator(IWriter writer, DsfObjectsProvider dsfObjectsProvider, IDRenumbererService idProvider, XPOutputFormat outputFormat, boolean city) {
 		super(writer, outputFormat, idProvider, PathRulesProvider.getRulesList(city ? PathOptionsType.ROADS_CITY : PathOptionsType.ROADS_COUNTRY));
 		this.city = city;
 		lightTranslator = new XPStringLightTranslator(writer, dsfObjectsProvider, outputFormat);

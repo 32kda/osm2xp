@@ -10,28 +10,26 @@ import com.osm2xp.xplane.customrules.PathRulesProvider.PathOptionsType;
 
 public class XPRulesRailwayTranslator extends XPRulesPathTranslator {
 
-	private PathOptionsType railwayType;
-
-	public XPRulesRailwayTranslator(IWriter writer, XPOutputFormat outputFormat, IDRenumbererService idProvider, PathOptionsType railwayType) {
-		super(writer, outputFormat, idProvider, PathRulesProvider.getRulesList(railwayType));
-		this.railwayType = railwayType;
+	public XPRulesRailwayTranslator(IWriter writer, IDRenumbererService idProvider, XPOutputFormat outputFormat) {
+		super(writer, outputFormat, idProvider, PathRulesProvider.getRulesList(PathOptionsType.RAILWAYS));
 	}
 	
 	@Override
 	public boolean handlePoly(OsmPolyline osmPolyline) {
-		if (!XPlaneOptionsProvider.getOptions().isGenerateRailways()) {
+		if (!XPlaneOptionsProvider.getOptions().isGenerateRailways() || osmPolyline.getTagValue("railway") == null) {
 			return false;
-		}
+		}		
 		int pathType = getPathType(osmPolyline);
 		if (pathType > 0) {
 			addSegmentsFrom(osmPolyline);
+			return true;
 		}
 		return false;
 	}
 	
 	@Override
 	public String getId() {
-		return "Railway, rules-based(" + railwayType + ")";
+		return "Railway, rules-based";
 	}
 	
 

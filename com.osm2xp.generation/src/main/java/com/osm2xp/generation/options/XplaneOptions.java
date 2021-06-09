@@ -30,7 +30,10 @@ import com.osm2xp.generation.options.rules.XplaneObjectsRulesList;
 		"city2LaneHighwayRoadType", "country2LaneHighwayRoadType", "cityRoadType", "countryRoadType", "oneLaneRoadType",
 		"railwayType", "powerlineType", "packageFacades", "hardBuildings", "lightObject", "lightObjectString",
 		"facadeSets", "restrictFacadeLod", "facadeLod", "generateXmlStats", "generatePdfStats", "generateDebugImg",
-		"generateComments", "generateHighwayLights", "roadBridgeRampLen", "railBridgeRampLen", "streetLightsInterval",
+		"generateComments", "generateHighwayLights", "generateHighwayMotorway", "generateHighwayTrunk",
+		"generateHighwayPrimary", "generateHighwaySecondary", "generateHighwayTertiary", "generateHighwayLiving",
+		"generateHighwayResidential", "generateHighwayPedestrian", "generateHighwayUnclassified",
+		"generateHighwayConstruction", "roadBridgeRampLen", "railBridgeRampLen", "streetLightsInterval",
 		"maxPerimeterToSimplify", "objSizeTolerance", "objHeightTolerance", "objHeightAllowedDifference",
 		"buildingsExclusions", "forestsRules", "objectsRules", "lightsRules", "facadesRules", "polygonRules",
 		"streetLightObjects", "airfieldOptions", "deleteSrc" })
@@ -1228,7 +1231,5 @@ public class XplaneOptions {
 	public void setGenerateHighwayConstruction(boolean generateHighwayConstruction) {
 		this.generateHighwayConstruction = generateHighwayConstruction;
 	}
-	
-	
 
 }
