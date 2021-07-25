@@ -1,0 +1,12 @@
+"Name","Rule","PathType"
+"Railway (main line)","item.railway=='rail' && item.usage=='main'","151"
+"Railway (branch line)","item.railway=='rail' && item.usage=='branch'","152"
+"Railway (industrial)","item.railway=='rail' && item.usage=='industrial'","154"
+"Railway (industrial 1)","item.railway=='rail' && 'service' in item","154"
+"Railway (disused)","item.railway=='disused'","153"
+"Railway (construction)","item.railway=='construction'","153"
+"Railway (other)", "item.railway=='rail'", "152"
+
+
+
+
