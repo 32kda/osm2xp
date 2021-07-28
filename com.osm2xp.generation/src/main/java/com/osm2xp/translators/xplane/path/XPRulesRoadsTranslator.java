@@ -25,13 +25,11 @@ public class XPRulesRoadsTranslator extends XPRulesPathTranslator {
 
 	private PathOptionsType roadsType;
 	private IXPLightTranslator lightTranslator;
-	private boolean city;
 
-	public XPRulesRoadsTranslator(IWriter writer, DsfObjectsProvider dsfObjectsProvider, IDRenumbererService idProvider, XPOutputFormat outputFormat, boolean city) {
-		super(writer, outputFormat, idProvider, PathRulesProvider.getRulesList(city ? PathOptionsType.ROADS_CITY : PathOptionsType.ROADS_COUNTRY));
-		this.city = city;
+	public XPRulesRoadsTranslator(IWriter writer, DsfObjectsProvider dsfObjectsProvider, IDRenumbererService idProvider, XPOutputFormat outputFormat, PathOptionsType pathOptionsType) {
+		super(writer, outputFormat, idProvider, PathRulesProvider.getRulesList(pathOptionsType));
 		lightTranslator = new XPStringLightTranslator(writer, dsfObjectsProvider, outputFormat);
-		this.roadsType = city ? PathOptionsType.ROADS_CITY : PathOptionsType.ROADS_COUNTRY;
+		this.roadsType = pathOptionsType;
 	}
 	
 	@Override
@@ -39,7 +37,7 @@ public class XPRulesRoadsTranslator extends XPRulesPathTranslator {
 		if (!XPlaneOptionsProvider.getOptions().isGenerateRoads() || !generateRoadType(osmPolyline)) {
 			return false;
 		}
-		if (this.city != isInCity(osmPolyline)) {
+		if (isCity() != isInCity(osmPolyline)) {
 			return false;
 		}
 		
@@ -51,6 +49,10 @@ public class XPRulesRoadsTranslator extends XPRulesPathTranslator {
 		return false;
 	}
 	
+	private boolean isCity() {
+		return roadsType == PathOptionsType.ROADS_CITY || roadsType == PathOptionsType.ROADS_CITY_EU;
+	}
+
 	protected boolean generateRoadType(OsmPolyline osmPolyline) {
 		String highway = osmPolyline.getTagValue("highway");
 		if (highway == null) {

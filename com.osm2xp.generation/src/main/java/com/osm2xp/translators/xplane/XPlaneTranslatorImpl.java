@@ -19,6 +19,7 @@ import com.osm2xp.generation.areas.AreaProvider;
 import com.osm2xp.generation.areas.MapArea;
 import com.osm2xp.generation.options.GlobalOptionsProvider;
 import com.osm2xp.generation.options.XPlaneOptionsProvider;
+import com.osm2xp.generation.options.XplaneOptions;
 import com.osm2xp.generation.osm.OsmConstants;
 import com.osm2xp.generation.paths.PathsService;
 import com.osm2xp.generation.xplane.resources.DsfObjectsProvider;
@@ -40,6 +41,8 @@ import com.osm2xp.utils.MiscUtils;
 import com.osm2xp.utils.geometry.GeomUtils;
 import com.osm2xp.utils.osm.OsmUtils;
 import com.osm2xp.writers.IHeaderedWriter;
+import com.osm2xp.xplane.customrules.PathRulesProvider.PathOptionsType;
+
 import math.geom2d.Box2D;
 import math.geom2d.Point2D;
 
@@ -112,14 +115,16 @@ public class XPlaneTranslatorImpl implements ITranslator{
 		
 		outputFormat = createOutputFormat();
 		
+		XplaneOptions options = XPlaneOptionsProvider.getOptions();
+		
 		IDRenumbererService idProvider = new IDRenumbererService();
 		
 		polyHandlers.add(new XPBarrierTranslator(writer, dsfObjectsProvider, outputFormat));
 //		polyHandlers.add(new XPRoadTranslator(writer, dsfObjectsProvider, idProvider, outputFormat));
-		polyHandlers.add(new XPRulesRoadsTranslator(writer, dsfObjectsProvider, idProvider, outputFormat, true));
-		polyHandlers.add(new XPRulesRoadsTranslator(writer, dsfObjectsProvider, idProvider, outputFormat, false));
+		polyHandlers.add(new XPRulesRoadsTranslator(writer, dsfObjectsProvider, idProvider, outputFormat, options.isUseEUNetwork() ? PathOptionsType.ROADS_CITY_EU : PathOptionsType.ROADS_CITY));
+		polyHandlers.add(new XPRulesRoadsTranslator(writer, dsfObjectsProvider, idProvider, outputFormat, options.isUseEUNetwork() ? PathOptionsType.ROADS_COUNTRY_EU : PathOptionsType.ROADS_COUNTRY));
 //		polyHandlers.add(new XPRailTranslator(writer, idProvider, outputFormat));
-		polyHandlers.add(new XPRulesRailwayTranslator(writer, idProvider, outputFormat));
+		polyHandlers.add(new XPRulesRailwayTranslator(writer, idProvider, outputFormat, options.isUseEUNetwork() ? PathOptionsType.RAILWAYS_EU : PathOptionsType.RAILWAYS));
 		polyHandlers.add(new XPPowerlineTranslator(writer, idProvider, outputFormat));
 		polyHandlers.add(new XPCoolingTowerTranslator(writer, dsfObjectsProvider));
 		polyHandlers.add(new XPChimneyTranslator(writer, dsfObjectsProvider));

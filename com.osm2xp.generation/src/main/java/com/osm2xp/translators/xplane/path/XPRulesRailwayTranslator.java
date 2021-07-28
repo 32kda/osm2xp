@@ -10,8 +10,8 @@ import com.osm2xp.xplane.customrules.PathRulesProvider.PathOptionsType;
 
 public class XPRulesRailwayTranslator extends XPRulesPathTranslator {
 
-	public XPRulesRailwayTranslator(IWriter writer, IDRenumbererService idProvider, XPOutputFormat outputFormat) {
-		super(writer, outputFormat, idProvider, PathRulesProvider.getRulesList(PathOptionsType.RAILWAYS));
+	public XPRulesRailwayTranslator(IWriter writer, IDRenumbererService idProvider, XPOutputFormat outputFormat, PathOptionsType railwayType) {
+		super(writer, outputFormat, idProvider, PathRulesProvider.getRulesList(railwayType));
 	}
 	
 	@Override
