@@ -15,7 +15,7 @@
   <repositories>
 		<repository>
 		   <id>nution</id>
-		   <url>https://maven.nuiton.org/release/</url>
+		   <url>https://nexus.nuiton.org/nexus/service/local/repositories/thirdparty/content/</url>
 		   <layout>default</layout>
          <snapshots>
 	        <enabled>false</enabled>
