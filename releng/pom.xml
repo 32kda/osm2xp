@@ -15,7 +15,7 @@
   <repositories>
 		<repository>
 		   <id>nution</id>
-		   <url>http://maven.nuiton.org/release/</url>
+		   <url>https://maven.nuiton.org/release/</url>
 		   <layout>default</layout>
          <snapshots>
 	        <enabled>false</enabled>
