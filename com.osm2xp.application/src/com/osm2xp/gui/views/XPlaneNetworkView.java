@@ -41,7 +41,7 @@ public class XPlaneNetworkView extends AbstractOptionsView {
 				group.setLayout(new GridLayout(2, false));
 				
 				Button btnRegular = new Button(group, SWT.RADIO);
-				btnRegular.setText("Worldwide(roards.net)");
+				btnRegular.setText("Worldwide(roads.net)");
 				btnRegular.setSelection(!XPlaneOptionsProvider.getOptions().isUseEUNetwork());
 				GridDataFactory.fillDefaults().applyTo(btnRegular);
 				Button btnEU = new Button(group, SWT.RADIO);

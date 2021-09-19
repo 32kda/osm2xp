@@ -39,8 +39,9 @@ Icons by Open Icon Library http://http://openiconlibrary.sourceforge.net/
 
    <launcherArgs>
       <vmArgs>-Dosgi.requiredJavaVersion=1.8
+-Dorg.osgi.framework.bundle.parent=ext
 -Xms40m 
--Xmx4096m
+-Xmx8192m
 --add-modules=ALL-SYSTEM
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts

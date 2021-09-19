@@ -9,8 +9,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>com.osm2xp.parent</artifactId>
-	<version>5.0.0</version>
+	<artifactId>com.osm2xp.parent</artifactId>	
 	<packaging>pom</packaging>
 	<name>OSM2XP</name>
 	<organization>
@@ -20,7 +19,7 @@
 	<parent>
 		<groupId>com.osm2xp</groupId>
   		<artifactId>com.osm2xp.build</artifactId>
-  		<version>5.0.0-SNAPSHOT</version>
+  		<version>5.0.1-SNAPSHOT</version>
 		<relativePath>../releng</relativePath>
 	</parent>
 

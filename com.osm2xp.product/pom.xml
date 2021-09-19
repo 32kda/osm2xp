@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>com.osm2xp</groupId>
 		<artifactId>com.osm2xp.parent</artifactId>
-		<version>5.0.0</version>
+		<version>5.0.1-SNAPSHOT</version>
 		<relativePath>../releng-app/pom.xml</relativePath>
 	</parent>
 
