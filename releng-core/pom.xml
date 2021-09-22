@@ -19,7 +19,7 @@
 	<parent>
 		<groupId>com.osm2xp</groupId>
   		<artifactId>com.osm2xp.build</artifactId>
-  		<version>5.0.1-SNAPSHOT</version>
+  		<version>5.0.2-SNAPSHOT</version>
 		<relativePath>../releng</relativePath>
 	</parent>
 	

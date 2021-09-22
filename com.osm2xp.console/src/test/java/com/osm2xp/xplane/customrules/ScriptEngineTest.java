@@ -26,5 +26,46 @@ class ScriptEngineTest {
 		int result = rulesScriptEngine.evaluateResult(new CompositeTagSet(tags));
 		assertEquals(100, result);
 	}
+	
+	@Test
+	void testOrder() {
+		PathRulesList pathRulesList = new PathRulesList();
+		pathRulesList.addRule(new PathRule("sample", "item.highway == 'motorway' && item.lanes >= 2", 110));
+		pathRulesList.addRule(new PathRule("sample 1", "item.highway == 'motorway'", 100));
+		
+		RulesScriptEngine rulesScriptEngine = new RulesScriptEngine(pathRulesList.getRules());
+		
+		List<Tag> tags = new ArrayList<Tag>();
+		tags.add(new Tag("highway", "motorway"));
+		tags.add(new Tag("lanes", "2"));
+		int result = rulesScriptEngine.evaluateResult(new CompositeTagSet(tags));
+		assertEquals(110, result);
+		
+		List<Tag> tags1 = new ArrayList<Tag>();
+		tags1.add(new Tag("highway", "primary"));
+		tags1.add(new Tag("lanes", "2"));
+		result = rulesScriptEngine.evaluateResult(new CompositeTagSet(tags1));
+		assertEquals(-1, result);
+	}
+	
+	@Test
+	void testInSet() {
+		PathRulesList pathRulesList = new PathRulesList();
+		pathRulesList.addRule(new PathRule("sample", "['primary','primary_link','secondary','secondary_link'].indexOf(item.highway) > -1 && item.oneway == 'yes'",64));
+		pathRulesList.addRule(new PathRule("sample 1", "item.highway == 'motorway'", 100));
+		
+		RulesScriptEngine rulesScriptEngine = new RulesScriptEngine(pathRulesList.getRules());
+		
+		List<Tag> tags = new ArrayList<Tag>();
+		tags.add(new Tag("highway", "primary"));
+		tags.add(new Tag("oneway", "yes"));
+		int result = rulesScriptEngine.evaluateResult(new CompositeTagSet(tags));
+		assertEquals(64, result);
+		
+		List<Tag> tags1 = new ArrayList<Tag>();
+		tags1.add(new Tag("highway", "pedestrian"));		
+		result = rulesScriptEngine.evaluateResult(new CompositeTagSet(tags1));
+		assertEquals(-1, result);
+	}
 
 }

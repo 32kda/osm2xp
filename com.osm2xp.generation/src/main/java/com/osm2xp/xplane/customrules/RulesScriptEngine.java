@@ -37,13 +37,17 @@ public class RulesScriptEngine {
 	
 	public RulesScriptEngine(List<PathRule> pathRules) {
 		StringBuilder builder = new StringBuilder("var result = -1;\n");
-		for (PathRule pathRule : pathRules) {
-			builder.append("if(");
-			builder.append(pathRule.condition);
-			builder.append(")result=");
-			builder.append(pathRule.resultValue);
+		for (int i = 0; i < pathRules.size(); i++) {
+			if (i == 0) {
+				builder.append("if(");	
+			} else {
+				builder.append("else if(");
+			}
+			builder.append(pathRules.get(i).condition);
+			builder.append(") result=");
+			builder.append(pathRules.get(i).resultValue);
 			builder.append(";\n");
-		}
+		}		
 		builder.append("result");
 		mainScript = builder.toString();
 	}
