@@ -17,7 +17,7 @@
 "Residential road(oneway)","item.highway=='residential' && item.oneway == 'yes'","70"
 "Residential road","item.highway=='residential'","39"
 "Living street(oneway)","item.highway=='living_street' && item.oneway == 'yes'","70"
-"Living street","item.highway=='residential'","39"
+"Living street","item.highway=='living_street'","39"
 "Pedestrian","item.highway=='pedestrian'","70"
 "Construction","item.highway=='construction'","70"
 "Unclassified/service road(oneway)","item.oneway == 'yes' && (item.highway=='unclassified' || item.highway == 'service')","71"
