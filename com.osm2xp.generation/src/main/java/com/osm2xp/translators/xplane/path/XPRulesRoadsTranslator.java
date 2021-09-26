@@ -34,7 +34,8 @@ public class XPRulesRoadsTranslator extends XPRulesPathTranslator {
 	
 	@Override
 	public boolean handlePoly(OsmPolyline osmPolyline) {
-		if (!XPlaneOptionsProvider.getOptions().isGenerateRoads() || !generateRoadType(osmPolyline)) {
+		XplaneOptions options = XPlaneOptionsProvider.getOptions();
+		if (!options.isGenerateRoads() || !generateRoadType(osmPolyline)) {
 			return false;
 		}
 		if (isCity() != isInCity(osmPolyline)) {
@@ -44,6 +45,9 @@ public class XPRulesRoadsTranslator extends XPRulesPathTranslator {
 		int pathType = getPathType(osmPolyline);
 		if (pathType > 0) {
 			addSegmentsFrom(osmPolyline);
+			if (options.isGenerateStreetLights()) {
+				processLights(osmPolyline);
+			}
 			return true;
 		}
 		return false;
