@@ -9,12 +9,12 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.Section;
 
 import com.osm2xp.generation.options.XPlaneOptionsProvider;
 import com.osm2xp.gui.views.panels.CheckBoxPanel;
 import com.osm2xp.gui.views.panels.Osm2xpPanel;
+import com.osm2xp.gui.views.panels.xplane.AdvancedNetworkPanel;
 import com.osm2xp.gui.views.panels.xplane.ExtendedPathsPanel;
 
 public class XPlaneNetworkView extends AbstractOptionsView {
@@ -97,5 +97,11 @@ public class XPlaneNetworkView extends AbstractOptionsView {
 		
 		toolkit.adapt(extendedPathsPanel, true, true);
 		sectionRoadProperties.setClient(extendedPathsPanel);
+		
+		Section sectionAdvanced = createSection("Advanced", true);
+		AdvancedNetworkPanel advancedNetworkPanel = new AdvancedNetworkPanel(sectionAdvanced);
+				
+		toolkit.adapt(advancedNetworkPanel, true, true);
+		sectionAdvanced.setClient(advancedNetworkPanel);
 	}
 }
