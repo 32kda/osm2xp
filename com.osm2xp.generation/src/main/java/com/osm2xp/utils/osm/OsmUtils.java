@@ -332,7 +332,7 @@ public class OsmUtils {
 	}
 	
 	public static boolean isRailway(List<Tag> tags) {
-		return isTagInTagsList("railway","rail", tags);
+		return OsmUtils.isStringInTags("railway", tags);
 	}
 	
 	public static boolean isRoad(List<Tag> tags) {
