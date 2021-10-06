@@ -40,8 +40,10 @@ public class Tag {
 	 * 
 	 */
 	public Tag(final String key, final String value) {
-		this.key = key.intern();
-		this.value = value.indexOf(' ') >= 0 ? value : value.intern();
+		this.key = key;
+		this.value = value;
+//		this.key = key.intern();
+//		this.value = value.indexOf(' ') >= 0 ? value : value.intern();
 	}
 
 	public String getValue() {

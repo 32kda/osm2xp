@@ -650,18 +650,15 @@ public class XPlaneTranslatorImpl implements ITranslator{
 
 	@Override
 	public boolean mustStoreNode(Node node) {
-		Boolean result = true;
-//		if (!GlobalOptionsProvider.getOptions().isSinglePass()) { //XXX debug
-//			result = GeomUtils.compareCoordinates(currentTile, node);
-//		}
-		return result;
+		return true;
 	}
 
 
 	@Override
 	public boolean mustProcessPolyline(List<Tag> tags) {
-		return (OsmUtils.isBuilding(tags) || OsmUtils.isManMade(tags) || OsmUtils.isForest(tags) || OsmUtils
-				.isObject(tags) || OsmUtils.isRailway(tags) || OsmUtils.isRoad(tags) || OsmUtils.isPowerline(tags) || OsmUtils.isFence(tags) || OsmUtils.isAeroway(tags));
+		return true;
+//		return (OsmUtils.isBuilding(tags) || OsmUtils.isManMade(tags) || OsmUtils.isForest(tags) || OsmUtils
+//				.isObject(tags) || OsmUtils.isRailway(tags) || OsmUtils.isRoad(tags) || OsmUtils.isPowerline(tags) || OsmUtils.isFence(tags) || OsmUtils.isAeroway(tags));
 	}
 
 	public void setTranslationListener(ITranslationListener translationListener) {
