@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import com.osm2xp.core.logging.Osm2xpLogger;
+
 /**
  * StreamGobbler.
  * 
@@ -28,7 +30,7 @@ public class StreamGobbler extends Thread {
 			while ((line = br.readLine()) != null)
 				System.out.println(type + ">" + line);
 		} catch (IOException ioe) {
-			ioe.printStackTrace();
+			Osm2xpLogger.log(ioe);
 		}
 	}
 }

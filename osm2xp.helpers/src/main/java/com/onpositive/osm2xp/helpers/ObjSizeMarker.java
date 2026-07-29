@@ -15,6 +15,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
+import com.osm2xp.core.logging.Osm2xpLogger;
 
 public class ObjSizeMarker {
 	
@@ -108,8 +109,7 @@ public class ObjSizeMarker {
 				}
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Osm2xpLogger.log(e);
 		}
 		
 	}

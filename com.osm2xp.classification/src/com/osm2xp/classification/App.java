@@ -20,6 +20,7 @@ import com.osm2xp.classification.output.ARFFWriter;
 import com.osm2xp.classification.output.CSVWithAdditionalsWriter;
 import com.osm2xp.classification.output.StringDelimitedWriter;
 import com.osm2xp.classification.parsing.LearningDataParser;
+import com.osm2xp.core.logging.Osm2xpLogger;
 import com.osm2xp.core.model.osm.Node;
 import com.osm2xp.core.model.osm.Tag;
 
@@ -63,8 +64,7 @@ public class App {
 				writer.write(createBuildingData(data, parser.getCollectedNodes()));
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Osm2xpLogger.error("Error building dataset", e);
 		}
 	}
 	
@@ -74,10 +74,8 @@ public class App {
 				processCurFile(writer, curFile, classifiedPredicate);
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Osm2xpLogger.error("Error building geoindex", e);
 		}
-//		System.out.println("App.buildGeoindex() "+ geospatialIndex.getNearestNeighbors(new SimpleGeospatialPoint(55.01, 82.55), 3));
 	}
 
 	protected static void processCurFile(CSVWithAdditionalsWriter<BuildingData> writer, File curFile, Predicate<? super PointData<WayEntity>> classifiedPredicate) {
@@ -164,8 +162,7 @@ public class App {
 	        logisticBase.setBatchSize("100");
 	        evaluate(traindataset, testdataset, logisticBase);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Osm2xpLogger.error("Error building classifier", e);
 		}
 	}
 	

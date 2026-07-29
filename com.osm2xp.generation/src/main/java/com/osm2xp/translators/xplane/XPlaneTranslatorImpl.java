@@ -19,6 +19,7 @@ import com.osm2xp.generation.areas.AreaProvider;
 import com.osm2xp.generation.areas.MapArea;
 import com.osm2xp.generation.options.GlobalOptionsProvider;
 import com.osm2xp.generation.options.XPlaneOptionsProvider;
+import com.osm2xp.generation.options.XplaneOptions;
 import com.osm2xp.generation.osm.OsmConstants;
 import com.osm2xp.generation.paths.PathsService;
 import com.osm2xp.generation.xplane.resources.DsfObjectsProvider;
@@ -28,7 +29,9 @@ import com.osm2xp.model.osm.polygon.OsmPolygon;
 import com.osm2xp.model.osm.polygon.OsmPolyline;
 import com.osm2xp.model.xplane.XplaneDsf3DObject;
 import com.osm2xp.stats.CountStats;
-import com.osm2xp.stats.StatsProvider;
+import com.osm2xp.stats.InstanceStatsCollector;
+import com.osm2xp.stats.StatisticsCollector;
+import com.osm2xp.translators.BuildingClassifier;
 import com.osm2xp.translators.BuildingType;
 import com.osm2xp.translators.IPolyHandler;
 import com.osm2xp.translators.ITranslationListener;
@@ -99,14 +102,32 @@ public class XPlaneTranslatorImpl implements ITranslator{
 	protected double levelHeight = GlobalOptionsProvider.getOptions().getLevelHeight();
 	protected List<IPolyHandler> polyHandlers = new ArrayList<IPolyHandler>();
 	private Map<Long, Color> roofsColorMap;
+	protected BuildingClassifier buildingClassifier = new BuildingClassifier();
+	protected XplaneOptions xplaneOptions;
+	protected StatisticsCollector statsCollector = new InstanceStatsCollector();
 
 	public XPlaneTranslatorImpl(IHeaderedWriter writer,
 			Point2D currentTile, String folderPath,
 			DsfObjectsProvider dsfObjectsProvider) {
+		this(writer, currentTile, folderPath, dsfObjectsProvider, null, null);
+	}
+
+	public XPlaneTranslatorImpl(IHeaderedWriter writer,
+			Point2D currentTile, String folderPath,
+			DsfObjectsProvider dsfObjectsProvider, XplaneOptions xplaneOptions) {
+		this(writer, currentTile, folderPath, dsfObjectsProvider, xplaneOptions, null);
+	}
+
+	public XPlaneTranslatorImpl(IHeaderedWriter writer,
+			Point2D currentTile, String folderPath,
+			DsfObjectsProvider dsfObjectsProvider, XplaneOptions xplaneOptions,
+			StatisticsCollector statsCollector) {
 		this.currentTile = currentTile;
 		this.writer = writer;
 		this.folderPath = folderPath;
 		this.dsfObjectsProvider = dsfObjectsProvider;
+		this.xplaneOptions = xplaneOptions != null ? xplaneOptions : XPlaneOptionsProvider.getOptions();
+		this.statsCollector = statsCollector != null ? statsCollector : new InstanceStatsCollector();
 		this.startTime = new Date();
 		
 		outputFormat = createOutputFormat();
@@ -136,7 +157,7 @@ public class XPlaneTranslatorImpl implements ITranslator{
 	}
 
 	protected XPOutputFormat createOutputFormat() {
-		return new XPOutputFormat(XPlaneOptionsProvider.getOptions().getObjectRenderLevel(), XPlaneOptionsProvider.getOptions().getFacadeRenderLevel());
+		return new XPOutputFormat(xplaneOptions.getObjectRenderLevel(), xplaneOptions.getFacadeRenderLevel());
 	}
 	
 	@Override
@@ -152,9 +173,9 @@ public class XPlaneTranslatorImpl implements ITranslator{
 			polyHandler.translationComplete();
 		}
 		writer.complete();
-		CountStats tileStats = StatsProvider.getTileStats(currentTile, false);
-		if (tileStats != null) {
-			System.out.println("Tile " + currentTile + ", generated: " + tileStats.getSummary().toLowerCase());
+		String tileSummary = statsCollector.getSummary(currentTile);
+		if (!tileSummary.isEmpty()) {
+			System.out.println("Tile " + currentTile + ", generated: " + tileSummary.toLowerCase());
 		} else {
 			System.out.println("Tile " + currentTile + " is empty, no generation stats");
 		}
@@ -258,77 +279,11 @@ public class XPlaneTranslatorImpl implements ITranslator{
 	 * @return
 	 */
 	protected int tryGetHeightByType(OsmPolygon polygon) {
-		SpecialFacadeType specialType = getSpecialBuildingType(polygon);
-		if (specialType == SpecialFacadeType.GARAGE) { //Garages are 1 level high by default
-			return (int) Math.round(levelHeight);
-		} else if (specialType == SpecialFacadeType.TANK) { //Tanks height == diameter, if not specified, 2 * diameter for gasometers			
-			double length = GeomUtils.computeEdgesLength(polygon.getPolyline());
-			int diameter = (int) Math.round(length / Math.PI);
-			if ("gasometer".equalsIgnoreCase(polygon.getTagValue(OsmConstants.MAN_MADE_TAG))) {
-				return diameter * 2;
-			}
-			return diameter;
-		}
-		return 0;
+		return buildingClassifier.tryGetHeightByType(polygon, levelHeight);
 	}
 
 	protected BuildingType getBuildingType(OsmPolygon polygon) {
-		String typeStr = polygon.getTagValue(BUILDING_TAG);
-		BuildingType type = BuildingType.fromId(typeStr);
-		if (type != null) {
-			return type;
-		}
-		if ("apartments".equals(typeStr)) {
-			return BuildingType.RESIDENTIAL;
-		}
-		// first, do we are on a residential object?
-		// yes if there is residential or house tag
-		// or if surface of the polygon is under the max surface for a
-		// residential house
-		// and height is under max residential height
-		if (OsmUtils.isValueInTags("residential", polygon.getTags())
-				|| OsmUtils.isValueInTags("house", polygon.getTags())) {
-			return BuildingType.RESIDENTIAL;
-		}
-		if (!StringUtils.stripToEmpty(polygon.getTagValue("shop")).isEmpty()) {
-			return BuildingType.COMMERCIAL;
-		}
-		if (typeStr != null) { //If we have building with no/unknown type - try to guess type from landuse tag of containing area 
-			String landuse = polygon.getTagValue(OsmConstants.LANDUSE_TAG);//landuse tag is being derived from are including this poly, if area analysis is turned on
-			if (!StringUtils.stripToEmpty(landuse).isEmpty()) {
-				type = BuildingType.fromId(landuse);
-				if (type != null) {
-					return type;
-				}
-			}
-			if ("retail".equals(landuse)) {
-				return BuildingType.COMMERCIAL;
-			}
-			if ("allotments".equals(landuse)) {
-				return BuildingType.RESIDENTIAL;
-			}
-			if ("railway".equals(landuse)) {
-				return BuildingType.INDUSTRIAL;
-			}
-			if (polygon.getArea() * 10000000 < ASSERTION_RESIDENTIAL_MAX_AREA
-				&& polygon.getHeight() < XPlaneOptionsProvider.getOptions()
-						.getResidentialMax()) {
-				return BuildingType.RESIDENTIAL;
-			}
-		}
-		// do we are on a building object?
-		// yes if there is industrial or Commercial tag
-		// or if surface of the polygon is above the max surface for a
-		// residential house
-		// and height is above max residential height
-		if (OsmUtils.isValueInTags("industrial", polygon.getTags())
-				|| OsmUtils.isValueInTags("сommercial", polygon.getTags())
-				|| polygon.getArea() * 10000000 > ASSERTION_RESIDENTIAL_MAX_AREA
-				|| polygon.getHeight() > XPlaneOptionsProvider.getOptions()
-						.getResidentialMax()) {
-			return BuildingType.INDUSTRIAL;
-		}
-		return BuildingType.RESIDENTIAL;
+		return buildingClassifier.getBuildingType(polygon);
 	}
 	
 	/**
@@ -340,7 +295,7 @@ public class XPlaneTranslatorImpl implements ITranslator{
 	 * @return Integer the facade index.
 	 */
 	public Integer computeFacadeIndex(OsmPolygon polygon) {
-		StatsProvider.getTileStats(currentTile, true).incCount("building");
+		statsCollector.incCount(currentTile, "building");
 		Integer result = null;
 		int index = dsfObjectsProvider.computeFacadeIndexFromRules(polygon);
 		if (index >= 0) {
@@ -348,12 +303,12 @@ public class XPlaneTranslatorImpl implements ITranslator{
 		}
 		SpecialFacadeType specialFacadeType = getSpecialBuildingType(polygon);
 		if (specialFacadeType != null) {
-			StatsProvider.getTileStats(currentTile, true).incCount(specialFacadeType.name());
+			statsCollector.incCount(currentTile, specialFacadeType.name());
 			return dsfObjectsProvider.computeSpecialFacadeDsfIndex(specialFacadeType, polygon);
 		}
 		// we check if we can use a sloped roof if the user wants them
 		BuildingType buildingType = getBuildingType(polygon);
-		StatsProvider.getTileStats(currentTile, true).incCount(buildingType.name());
+		statsCollector.incCount(currentTile, buildingType.name());
 		if (XPlaneOptionsProvider.getOptions().isGenerateSlopedRoofs()
 				&& polygon.isSimplePolygon() && polygon.getHeight() < 20) { //Suggesting that buildings higher than 20m usually have flat roofs
 			
@@ -384,17 +339,8 @@ public class XPlaneTranslatorImpl implements ITranslator{
 	 * @param polygon Polygon to check 
 	 * @return resulting type or <code>null</code> if this polygon soes not present special building
 	 */
-	private SpecialFacadeType getSpecialBuildingType(OsmPolygon polygon) {
-		if (XPlaneOptionsProvider.getOptions().isGenerateTanks()) { 
-			String manMade = polygon.getTagValue(OsmConstants.MAN_MADE_TAG);
-			if ("storage_tank".equals(manMade) || "fuel_storage_tank".equals(manMade) || "gasometer".equals(manMade)) {
-				return SpecialFacadeType.TANK;
-			}
-		}
-		if ("garages".equals(polygon.getTagValue(BUILDING_TAG)) || "garage".equals(polygon.getTagValue(BUILDING_TAG))) { //For now - we always generate garages if we generate buildings 
-			return SpecialFacadeType.GARAGE;
-		}
-		return null;
+	protected SpecialFacadeType getSpecialBuildingType(OsmPolygon polygon) {
+		return buildingClassifier.getSpecialBuildingType(polygon);
 	}
 
 	/**
@@ -445,7 +391,7 @@ public class XPlaneTranslatorImpl implements ITranslator{
 				object.setPolygon(new OsmPolygon(node.getId(), node
 						.getTags(), nodes, false));
 				writeObjectToDsf(object);
-				StatsProvider.getTileStats(currentTile, true).incCount("object");
+				statsCollector.incCount(currentTile, "object");
 			}
 		}
 	}
@@ -478,7 +424,7 @@ public class XPlaneTranslatorImpl implements ITranslator{
 								// nothing generated? try to generate a forest.
 								if (forestTranslator.handlePoly(poly) && translationListener != null) {
 									translationListener.processForest((OsmPolygon) poly);
-									StatsProvider.getTileStats(currentTile, true).incCount(forestTranslator.getId());
+									statsCollector.incCount(currentTile, forestTranslator.getId());
 								} 
 							}
 						}
@@ -495,22 +441,7 @@ public class XPlaneTranslatorImpl implements ITranslator{
 			((OsmPolygon) osmPolyline).setPolygon(GeomUtils.forceCCW(((OsmPolygon) osmPolyline)
 					.getPolygon()));
 			
-	//			if (!GeomUtils.isValid(osmPolygon.getPolygon())) {
-	//				System.out.println("XPlaneTranslatorImpl.processPolygon()");
-	//			}
-			// if we're on a single pass mode
-			// here we must check if the polygon is on more than one tile
-			// if that's the case , we must split it into several polys
-//			List<OsmPolyline> polygons = new ArrayList<>(); //TODO we shoudn't need to split it here anymore. Translator should get "clean" polygons - already splitted & clipped to tile size 
-//			if (GlobalOptionsProvider.getOptions().isSinglePass()) {
-//				polygons.addAll(osmPolyline.splitPolygonAroundTiles());
-//			}
-			// if not on a single pass mode, add this single polygon to the poly
-			// list
-//			else {
-//				polygons.add(osmPolyline);
-//			}
-//			return polygons;
+
 		}
 		boolean isArea = Arrays.stream(OsmConstants.SUPPORTED_AREA_TYPES).anyMatch(tag -> !StringUtils.isEmpty(osmPolyline.getTagValue(tag)));
 		
@@ -545,7 +476,7 @@ public class XPlaneTranslatorImpl implements ITranslator{
 		boolean processed = translator.handlePoly(poly);
 
 		if (processed) {
-			StatsProvider.getTileStats(currentTile, true).incCount(translator.getId());
+			statsCollector.incCount(currentTile, translator.getId());
 		}
 		
 		return processed;
@@ -627,7 +558,7 @@ public class XPlaneTranslatorImpl implements ITranslator{
 				if (translationListener != null) {
 					translationListener.polyProcessed(poly, handler);
 				}
-				StatsProvider.getTileStats(currentTile,true).incCount(handler.getId());
+				statsCollector.incCount(currentTile, handler.getId());
 				if (handler.isTerminating()) {
 					return true;
 				}
@@ -638,11 +569,7 @@ public class XPlaneTranslatorImpl implements ITranslator{
 
 	@Override
 	public boolean mustStoreNode(Node node) {
-		Boolean result = true;
-//		if (!GlobalOptionsProvider.getOptions().isSinglePass()) { //XXX debug
-//			result = GeomUtils.compareCoordinates(currentTile, node);
-//		}
-		return result;
+		return true;
 	}
 
 

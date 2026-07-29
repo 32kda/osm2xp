@@ -1,7 +1,8 @@
 package com.osm2xp.model.osm.polygon;
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 import com.osm2xp.core.model.osm.IHasTags;
 import com.osm2xp.core.model.osm.Node;
@@ -25,6 +26,7 @@ public class OsmPolyline implements IHasTags{
 	 */
 	protected boolean part;
 	protected Boolean valid = null;
+	protected Map<String, String> tagValueCache;
 
 	public OsmPolyline(long id, List<Tag> tags, List<Node> nodes, boolean part) {
 		super();
@@ -71,8 +73,13 @@ public class OsmPolyline implements IHasTags{
 	 */
 	@Override
 	public String getTagValue(String tagKey) {
-		Optional<Tag> first = tags.stream().filter(tag -> tagKey.equals(tag.getKey())).findFirst();
-		return first.isPresent() ? first.get().getValue() : null;
+		if (tagValueCache == null || tagValueCache.size() != tags.size()) {
+			tagValueCache = new HashMap<>();
+			for (Tag tag : tags) {
+				tagValueCache.put(tag.getKey(), tag.getValue());
+			}
+		}
+		return tagValueCache.get(tagKey);
 	}
 
 	public List<Node> getNodes() {

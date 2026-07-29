@@ -21,6 +21,7 @@ import com.osm2xp.classification.annotations.Ignore;
 import com.osm2xp.classification.annotations.Positive;
 import com.osm2xp.classification.annotations.Present;
 import com.osm2xp.classification.annotations.Result;
+import com.osm2xp.core.logging.Osm2xpLogger;
 
 public abstract class StringDelimitedWriter<T> implements Closeable{
 	
@@ -101,11 +102,9 @@ public abstract class StringDelimitedWriter<T> implements Closeable{
 					}
 				}
 			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Osm2xpLogger.log(e);
 			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Osm2xpLogger.log(e);
 			}
 		}
 		for (Field fld : boolFields) {
@@ -116,11 +115,9 @@ public abstract class StringDelimitedWriter<T> implements Closeable{
 				boolean value = fld.getBoolean(data);
 				builder.append(value?1:0);
 			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Osm2xpLogger.log(e);
 			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Osm2xpLogger.log(e);
 			}
 		}
 		for (Field fld : stringFields) {
@@ -139,11 +136,9 @@ public abstract class StringDelimitedWriter<T> implements Closeable{
 					builder.append(present?",1":",0");
 				}
 			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Osm2xpLogger.log(e);
 			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Osm2xpLogger.log(e);
 			}
 		}
 		try {
@@ -151,11 +146,9 @@ public abstract class StringDelimitedWriter<T> implements Closeable{
 			Object value = resultField.get(data);
 			builder.append(value != null?value.toString():"?");
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Osm2xpLogger.log(e);
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Osm2xpLogger.log(e);
 		}
 		return builder.toString();
 	}

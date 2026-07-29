@@ -12,10 +12,10 @@
 	  <build.folder.target.bin>../builds/${build.folder.bin}</build.folder.target.bin>
   </properties>
   
-  <repositories>
+   <repositories>
 		<repository>
 		   <id>nution</id>
-		   <url>http://maven.nuiton.org/release/</url>
+		   <url>https://maven.nuiton.org/releases/</url>
 		   <layout>default</layout>
          <snapshots>
 	        <enabled>false</enabled>

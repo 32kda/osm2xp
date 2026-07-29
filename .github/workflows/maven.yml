@@ -1,24 +1,45 @@
-name: Java CI
+name: Build & Test
 
-on: [push]
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master ]
 
 jobs:
   build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v1
-    - name: Set up JDK 1.8
-      uses: actions/setup-java@v1
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v4
       with:
-        java-version: 1.8
-    - name: Build with Maven
-      run: mvn -B package --file releng/pom.xml
-    - name: Upload artifact
-      uses: actions/upload-artifact@v1.0.0
-      with:       
-        # Artifact name
-        name: OSM2XP    
-        # Directory containing files to upload
-        path: builds/bin/
+        java-version: '11'
+        distribution: 'temurin'
+
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-m2-
+
+    - name: Build with Maven (core)
+      working-directory: releng-core
+      run: mvn clean compile install -DskipTests
+
+    - name: Build with Maven (console)
+      working-directory: releng-console
+      run: mvn clean compile install -DskipTests
+
+    - name: Run tests
+      working-directory: releng-core
+      run: mvn verify

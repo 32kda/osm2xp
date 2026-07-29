@@ -40,7 +40,7 @@ Export-Package: com.google.common.collect,
  org.apache.commons.io
 Require-Bundle: com.osm2xp.core,
  com.osm2xp.classification.core
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ClassPath: .,
  lib/commons-io.jar,
  lib/geonames-ws-client.jar,

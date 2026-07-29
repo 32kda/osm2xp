@@ -33,6 +33,7 @@ import com.osm2xp.stats.StatsProvider;
 import com.osm2xp.translators.ITranslator;
 import com.osm2xp.translators.ITranslatorProvider;
 import com.osm2xp.translators.TranslatorBuilder;
+import com.osm2xp.core.logging.Osm2xpLogger;
 import com.osm2xp.utils.ProcessExecutor;
 
 
@@ -115,8 +116,7 @@ public class App
     			try {
     				FileUtils.deleteDirectory(targetFolder);
     			} catch (IOException e) {
-    				System.out.println("Target folder " + sceneryName + " deletion failed, this can cause generation to fail. Reason:");
-    				e.printStackTrace();
+    				Osm2xpLogger.error("Target folder " + sceneryName + " deletion failed, this can cause generation to fail.", e);
     			}
     		}
     		
@@ -155,9 +155,9 @@ public class App
     			}
     			ProcessExecutor.getExecutor().shutdown();
     			System.out.println("Generation took " + formatTimeDelta(System.currentTimeMillis() - t1));
-    		} catch (DataSinkException e) {
-    			e.printStackTrace();
-    		}
+		} catch (DataSinkException e) {
+			Osm2xpLogger.error("Data sink error", e);
+		}
 		}
     }
 
@@ -226,8 +226,7 @@ public class App
 		try {
 			return parser.parse(options, args);
 		} catch (ParseException e) {
-			System.out.println("Invalid command line.");
-			e.printStackTrace();
+			Osm2xpLogger.error("Invalid command line.", e);
 		}
 		return null;
 	}

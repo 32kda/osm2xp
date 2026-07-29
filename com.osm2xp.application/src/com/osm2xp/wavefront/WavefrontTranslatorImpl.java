@@ -132,8 +132,7 @@ public class WavefrontTranslatorImpl implements ITranslator {
 			try {
 				filePath = OsmUtils.CreateTempFile(folderPath, osmPolygon);
 			} catch (IOException e2) {
-
-				e2.printStackTrace();
+				Osm2xpLogger.log(e2);
 			}
 			ConversionFacade cv = new ConversionFacade();
 			ObjTarget target = null;
@@ -167,7 +166,7 @@ public class WavefrontTranslatorImpl implements ITranslator {
 										.getPolylineFromOsmNodes(osmPolygon
 												.getNodes())));
 			} catch (IOException e) {
-				e.printStackTrace();
+				Osm2xpLogger.log(e);
 			}
 		}
 
@@ -207,7 +206,7 @@ public class WavefrontTranslatorImpl implements ITranslator {
 					exportOsmFileToObject(osmFile);
 					osmFile.deleteOnExit();
 				} catch (IOException e) {
-					e.printStackTrace();
+					Osm2xpLogger.log(e);
 				}
 			}
 		} else {
@@ -351,7 +350,7 @@ public class WavefrontTranslatorImpl implements ITranslator {
 		try {
 			cv.createRepresentations(osmFile, null, null, targets);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Osm2xpLogger.log(e);
 		}
 
 	}

@@ -32,9 +32,7 @@ public class TranslatorBuilder {
 		registerFactory(new ConsoleTranslatorFactory());
 		registerFactory(new G2XPLTranslatorFactory());
 		registerFactory(new OSMTranslatorFactory());
-//		registerFactory(new FlightGearTranslatorFactory());
-//		registerFactory(new FlyLegacyTranslatorFactory());
-//		registerFactory(new FSXTranslatorFactory());
+		registerFactory(new FlightGearTranslatorFactory());
 	}
 
 	public static void registerFactory(ITranslatorFactory factory) {

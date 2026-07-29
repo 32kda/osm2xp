@@ -140,8 +140,8 @@ public class MiscUtils {
 			errorGobbler.start();
 			outputGobbler.start();
 
-		} catch (Throwable t) {
-			t.printStackTrace();
+		} catch (Exception t) {
+			Osm2xpLogger.log(t);
 		}
 	}
 

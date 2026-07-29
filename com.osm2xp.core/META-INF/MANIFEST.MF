@@ -22,7 +22,7 @@ Export-Package: com.bbn.openmap.layer.vpf,
  math.geom2d.polygon,
  math.geom3d,
  org.apache.commons.lang
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ClassPath: .,
  lib/javaGeom.jar,
  lib/osmosis-pbf.jar,

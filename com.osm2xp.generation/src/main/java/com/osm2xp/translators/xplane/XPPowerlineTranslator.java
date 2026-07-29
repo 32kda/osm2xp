@@ -1,44 +1,41 @@
 package com.osm2xp.translators.xplane;
 
 import com.osm2xp.core.model.osm.IHasTags;
-import com.osm2xp.model.osm.polygon.OsmPolyline;
 import com.osm2xp.generation.options.XPlaneOptionsProvider;
 import com.osm2xp.generation.xplane.resources.XPOutputFormat;
 import com.osm2xp.writers.IWriter;
 
-public class XPPowerlineTranslator extends XPPathTranslator {
+public class XPPowerlineTranslator extends XPSimplePathTranslator {
 
 	public XPPowerlineTranslator(IWriter writer, IDRenumbererService idProvider, XPOutputFormat outputFormat) {
 		super(writer, outputFormat, idProvider);
 	}
 
 	@Override
-	public boolean handlePoly(OsmPolyline osmPolyline) {
-		if (!XPlaneOptionsProvider.getOptions().isGeneratePowerlines()) {
-			return false;
-		}
-		if ("line".equals(osmPolyline.getTagValue("power"))) {
-			addSegmentsFrom(osmPolyline);
-			return true; 
-		}
-		return false;
+	protected boolean isGenerationEnabled() {
+		return XPlaneOptionsProvider.getOptions().isGeneratePowerlines();
+	}
+
+	@Override
+	protected String getTagKey() {
+		return "power";
+	}
+
+	@Override
+	protected String getRequiredTagValue() {
+		return "line";
 	}
 
 	@Override
 	protected int getPathType(IHasTags polygon) {
-		return XPlaneOptionsProvider.getOptions().getPowerlineType(); //TODO using only one type for now
+		return XPlaneOptionsProvider.getOptions().getPowerlineType();
 	}
-	
-	@Override
-	protected boolean isBridge(IHasTags poly) {
-		return false; //Not supported for power lines
-	}
-	
+
 	@Override
 	protected int getBridgeRampLength() {
-		return 0;  //Not supported for power lines
+		return 0;
 	}
-	
+
 	@Override
 	public String getId() {
 		return "powerline";

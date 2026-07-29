@@ -215,12 +215,6 @@ public abstract class XPPathTranslator extends XPWritingTranslator {
 		return XPlaneOptionsProvider.getOptions().isGenerateBridges() && !StringUtils.isEmpty(poly.getTagValue("bridge"));
 	}
 
-//	private boolean isDifferentTiles(Node node, Node nextNode) {
-//		int latDiff = (int) (Math.floor(node.getLat()) - Math.floor(nextNode.getLat()));
-//		int lonDiff = (int) (Math.floor(node.getLon()) - Math.floor(nextNode.getLon()));
-//		return latDiff != 0 || lonDiff != 0;
-//	}
-
 	protected abstract int getPathType(IHasTags polygon); 
 
 }

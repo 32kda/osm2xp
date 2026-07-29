@@ -3,6 +3,8 @@ package com.osm2xp.generation.paths;
 import java.io.File;
 import java.net.URISyntaxException;
 
+import com.osm2xp.core.logging.Osm2xpLogger;
+
 public class DefaultPathsProvider implements IPathsProvider {
 	
 	protected File basicFolder;
@@ -35,7 +37,7 @@ public class DefaultPathsProvider implements IPathsProvider {
 					basicFolder = new File(new File("").getAbsolutePath());
 				}
 			} catch (URISyntaxException e) { //Shouldn't happen
-				e.printStackTrace();
+				Osm2xpLogger.log(e);
 				return new File(".");
 			}
 		}

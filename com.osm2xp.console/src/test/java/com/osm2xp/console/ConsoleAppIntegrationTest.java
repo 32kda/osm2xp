@@ -1,10 +1,15 @@
 package com.osm2xp.console;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -112,6 +117,107 @@ public class ConsoleAppIntegrationTest extends TestCase {
 		assertEquals(26, polDefCount);
 		assertEquals(6, objDefCount);
 		assertEquals(0, stack);
+	}
+
+	@Test
+	public void testFlightGearGeneration() throws Exception {
+		File basicFolder = new File(new File("").getAbsolutePath());
+		while (basicFolder != null && !isTestRootFolder(basicFolder)) {
+			basicFolder = basicFolder.getParentFile();
+		}
+		assertNotNull(basicFolder);
+		basicFolder = new File(basicFolder, "testdata");
+		assertTrue(basicFolder.isDirectory());
+		File targetDir = new File(basicFolder, TESTSCENERY_NAME);
+		FileUtils.deleteDirectory(targetDir);
+		StatsProvider.reinit();
+		List<String> argList = new ArrayList<String>();
+		argList.add(new File(basicFolder, "volchikha.osm.pbf").getAbsolutePath());
+		argList.add("-m");
+		argList.add("FLIGHT_GEAR");
+		argList.add("-c");
+		argList.add(basicFolder.getAbsolutePath());
+		argList.add("-s");
+		argList.add(TESTSCENERY_NAME);
+		com.osm2xp.console.App.main(argList.toArray(new String[0]));
+		assertTrue(targetDir.isDirectory());
+		// Check BuildingList.txt.gz exists (even if empty) when generateBuildings=true
+		File buildingListFile = new File(targetDir, "BuildingList.txt.gz");
+		if (!buildingListFile.isFile()) {
+			File[] gzFiles = targetDir.listFiles((dir, name) -> name.equals("BuildingList.txt.gz"));
+			if (gzFiles != null && gzFiles.length > 0) {
+				buildingListFile = gzFiles[0];
+			}
+		}
+		assertTrue("BuildingList.txt.gz not found", buildingListFile.isFile());
+		// Check for .stg files with BUILDING_LIST header
+		File[] stgFiles = targetDir.listFiles((dir, name) -> name.endsWith(".stg"));
+		assertNotNull("No .stg files found", stgFiles);
+		assertTrue("No .stg files found", stgFiles.length > 0);
+		boolean foundBuildingList = false;
+		for (File stgFile : stgFiles) {
+			List<String> lines = java.nio.file.Files.readAllLines(stgFile.toPath(), Charset.forName("UTF-8"));
+			for (String line : lines) {
+				if (line.startsWith("BUILDING_LIST")) {
+					foundBuildingList = true;
+					break;
+				}
+			}
+		}
+		assertTrue("No BUILDING_LIST found in .stg files", foundBuildingList);
+		// BuildingList.txt.gz should have entries when BUILDING_LIST header present
+		assertTrue("BuildingList.txt.gz should have building entries", buildingListFile.length() > 20);
+		// Validate each building entry
+		List<String> buildingLines = readGzipLines(buildingListFile);
+		assertTrue("No building entries in BuildingList.txt.gz", buildingLines.size() > 0);
+		for (String line : buildingLines) {
+			String[] parts = line.trim().split("\\s+");
+			assertEquals("Expected 14 fields in building entry: " + line, 14, parts.length);
+			double anchorLat = Double.parseDouble(parts[0]);
+			double anchorLon = Double.parseDouble(parts[1]);
+			double elevation = Double.parseDouble(parts[2]);
+			double streetAngle = Double.parseDouble(parts[3]);
+			int listType = Integer.parseInt(parts[4]);
+			double width = Double.parseDouble(parts[5]);
+			double depth = Double.parseDouble(parts[6]);
+			double facadeHeight = Double.parseDouble(parts[7]);
+			double roofHeight = Double.parseDouble(parts[8]);
+			int roofShape = Integer.parseInt(parts[9]);
+			int roofOrientation = Integer.parseInt(parts[10]);
+			int levels = Integer.parseInt(parts[11]);
+			// Coordinate sanity
+			assertTrue("Latitude out of range: " + anchorLat, anchorLat >= -90 && anchorLat <= 90);
+			assertTrue("Longitude out of range: " + anchorLon, anchorLon >= -180 && anchorLon <= 180);
+			// Height checks: facadeHeight > 1m and < 1000m
+			assertTrue("Facade height too low: " + facadeHeight, facadeHeight > 1.0);
+			assertTrue("Facade height too high: " + facadeHeight, facadeHeight < 1000.0);
+			assertTrue("Total height too high: " + (facadeHeight + roofHeight), facadeHeight + roofHeight < 1000.0);
+			// Perimeter: > 5m and < 5km
+			double perimeter = 2.0 * (width + depth);
+			assertTrue("Perimeter too small: " + perimeter, perimeter > 5.0);
+			assertTrue("Perimeter too large: " + perimeter, perimeter < 5000.0);
+			// Each side < 5km
+			assertTrue("Width too large: " + width, width < 5000.0);
+			assertTrue("Depth too large: " + depth, depth < 5000.0);
+			// Street angle in [0, 360)
+			assertTrue("Street angle out of range: " + streetAngle, streetAngle >= 0 && streetAngle < 360);
+			// Roof orientation is 0 or 1
+			assertTrue("Invalid roofOrientation: " + roofOrientation, roofOrientation == 0 || roofOrientation == 1);
+			// Levels >= 1
+			assertTrue("Levels < 1: " + levels, levels >= 1);
+		}
+	}
+
+	private List<String> readGzipLines(File gzFile) throws IOException {
+		List<String> lines = new ArrayList<>();
+		try (BufferedReader reader = new BufferedReader(
+				new InputStreamReader(new GZIPInputStream(new FileInputStream(gzFile)), StandardCharsets.UTF_8))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				lines.add(line);
+			}
+		}
+		return lines;
 	}
 
 	private boolean isTestRootFolder(File basicFolder) {

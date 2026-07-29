@@ -20,6 +20,7 @@ import math.geom2d.Box2D;
 import math.geom2d.Point2D;
 import math.geom2d.polygon.LinearCurve2D;
 import math.geom2d.polygon.LinearRing2D;
+import math.geom2d.polygon.Polygon2D;
 
 public class XPOutputFormat {
 
@@ -35,16 +36,25 @@ public class XPOutputFormat {
 	
 	private static final String EXCLUSIONS_WARNING_MSG = "Generate %s selected, but no exclusion '%s' turned on. This can result in artifacts in generated scenery.";
 
-	private int objectRenderLevel;
+	public static final String TARGET_XP11 = "xplane11";
+	public static final String TARGET_XP12 = "xplane12";
 
+	private int objectRenderLevel;
 	private int facadeRenderLevel;
-	
-	
+	private String dsfTarget = TARGET_XP12;
 	private IExclusionsProvider exclusionsProvider = new BasicExclusionsProvider();
 
 	public XPOutputFormat(int objectRenderLevel, int facadeRenderLevel) {
 		this.objectRenderLevel = objectRenderLevel;
 		this.facadeRenderLevel = facadeRenderLevel;
+	}
+
+	public void setDsfTarget(String target) {
+		this.dsfTarget = target;
+	}
+
+	public String getDsfTarget() {
+		return dsfTarget;
 	}
 
 	public String getHeaderString(Point2D tileCoordinates, Box2D exclusionBox, ResourceLibraryDescriptor resourceLibraryDescriptor) {
@@ -200,48 +210,53 @@ public class XPOutputFormat {
 	 */
 	protected String getDsfExclusions(String tileCoordinate) {
 		StringBuilder sb = new StringBuilder();
-		// Exclusions
+		Polygon2D exclusionPoly = exclusionsProvider.getExclusionPolygon();
+		String exclusionStr = exclusionPoly != null ? getPolygonExclusionStr(exclusionPoly) : tileCoordinate;
+
 		if (exclusionsProvider.isExcludeObj()) {
-//			// smart OBJ exclusion
-//			if (XPlaneOptionsProvider.getOptions().isSmartExclusions()) {
-//				sb.append(EXCLUSION_PLACEHOLDER + "\n");
-//			} else {
-			sb.append("PROPERTY sim/exclude_obj " + tileCoordinate);
-//			} 
+			sb.append("PROPERTY sim/exclude_obj " + exclusionStr);
 		} else if (exclusionsProvider.objectsGenerated()) {
 			Osm2xpLogger.warning(String.format(EXCLUSIONS_WARNING_MSG, "3D objects", "Objects"));
 		}
 		if (exclusionsProvider.isExcludeFac()) {
-			sb.append("PROPERTY sim/exclude_fac " + tileCoordinate);
+			sb.append("PROPERTY sim/exclude_fac " + exclusionStr);
 		} else if (exclusionsProvider.facadesGenerated()) {
 			Osm2xpLogger.warning(String.format(EXCLUSIONS_WARNING_MSG, "Facades, fence or tanks", "Facades"));
 		}
 		if (exclusionsProvider.isExcludeFor()) {
-			sb.append("PROPERTY sim/exclude_for " + tileCoordinate);
+			sb.append("PROPERTY sim/exclude_for " + exclusionStr);
 		} else if (exclusionsProvider.forestsGenerated()) {
 			Osm2xpLogger.warning(String.format(EXCLUSIONS_WARNING_MSG, "Forests", "Forests"));
 		}
 		if (exclusionsProvider.isExcludeNet()) {
-			sb.append("PROPERTY sim/exclude_net " + tileCoordinate);
+			sb.append("PROPERTY sim/exclude_net " + exclusionStr);
 		} else if (exclusionsProvider.networkGenerated()) {
 			Osm2xpLogger.warning(String.format(EXCLUSIONS_WARNING_MSG, "Roads, railways or powerlines", "Network"));
 		}
 		if (exclusionsProvider.isExcludeLin()) {
-			sb.append("PROPERTY sim/exclude_lin " + tileCoordinate);
+			sb.append("PROPERTY sim/exclude_lin " + exclusionStr);
 		}
 		if (exclusionsProvider.isExcludePol()) {
-			sb.append("PROPERTY sim/exclude_pol " + tileCoordinate);
+			sb.append("PROPERTY sim/exclude_pol " + exclusionStr);
 		} else if (exclusionsProvider.polysGenerated()) {
 			Osm2xpLogger.warning(String.format(EXCLUSIONS_WARNING_MSG, "Draped polygons", "Polygons"));
 		}
 		if (exclusionsProvider.isExcludeStr()) {
-			sb.append("PROPERTY sim/exclude_str " + tileCoordinate);
+			sb.append("PROPERTY sim/exclude_str " + exclusionStr);
 		}
 		if (exclusionsProvider.isExcludeBch()) {
-			sb.append("PROPERTY sim/exclude_bch " + tileCoordinate);
+			sb.append("PROPERTY sim/exclude_bch " + exclusionStr);
 		}
 
 		return sb.toString();
+	}
+
+	private String getPolygonExclusionStr(Polygon2D polygon) {
+		StringBuilder sb = new StringBuilder();
+		for (Point2D pt : polygon.vertices()) {
+			sb.append(formatDsfCoord(pt.x())).append("/").append(formatDsfCoord(pt.y())).append(" ");
+		}
+		return sb.toString().trim();
 	}
 
 	/**
