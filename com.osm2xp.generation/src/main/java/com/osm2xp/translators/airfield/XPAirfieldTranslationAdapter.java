@@ -52,9 +52,15 @@ public class XPAirfieldTranslationAdapter implements ISpecificTranslator {
 	private KdTree orphanRunwaysTree = new KdTree();
 	private LocalGeonameProvider provider;
 	private Box2D bbox;
+	private boolean perAirportAptDat;
 
 	public XPAirfieldTranslationAdapter(String outputFolder) {
-		workFolder = new File(outputFolder); 
+		this(outputFolder, false);
+	}
+
+	public XPAirfieldTranslationAdapter(String outputFolder, boolean perAirportAptDat) {
+		workFolder = new File(outputFolder);
+		this.perAirportAptDat = perAirportAptDat;
 	}
 	
 	protected boolean handlePoly(OsmPolyline osmPolyline) {
@@ -202,7 +208,8 @@ public class XPAirfieldTranslationAdapter implements ISpecificTranslator {
 			});
 		}
 		boolean writeAsMainAirfield = XPlaneOptionsProvider.getOptions().getAirfieldOptions().isUseSingleAptAsMain() && (airfieldList.size() + runwayList.size() == 1); //If we have only one airport/only one runway - write it as main airfield of scenario
-		XPAirfieldOutput airfieldOutput = new XPAirfieldOutput(writeAsMainAirfield ? workFolder : getMultiAirfieldsFolder(), writeAsMainAirfield);
+		File airfieldOutputFolder = perAirportAptDat ? workFolder : (writeAsMainAirfield ? workFolder : getMultiAirfieldsFolder());
+		XPAirfieldOutput airfieldOutput = createAirfieldOutput(airfieldOutputFolder, writeAsMainAirfield);
 		for (AirfieldData airfieldData : airfieldList) {
 			if (XPlaneOptionsProvider.getOptions().getAirfieldOptions().getIgnoredAirfields().contains(airfieldData.getICAO())) { //We can't check this at earlier stage since we need to ignore associated runways and other stuff as well
 				continue;
@@ -223,6 +230,10 @@ public class XPAirfieldTranslationAdapter implements ISpecificTranslator {
 		
 		StatsProvider.getCommonStats().setCount("Airfields", airfieldList.size());
 		StatsProvider.getCommonStats().setCount("Separate Runways", runwayList.size());
+	}
+
+	protected XPAirfieldOutput createAirfieldOutput(File airfieldOutputFolder, boolean writeAsMainAirfield) {
+		return new XPAirfieldOutput(airfieldOutputFolder, writeAsMainAirfield, perAirportAptDat);
 	}
 
 	protected File getMultiAirfieldsFolder() {

@@ -20,11 +20,17 @@ public class FlightGearBuildingAnalyzer {
 	private final Random random;
 	private final FlightGearOptions options;
 	private final double levelHeight;
+	private final FlightGearElevProber elevProber;
 
 	public FlightGearBuildingAnalyzer(FlightGearOptions options, Random random) {
+		this(options, random, null);
+	}
+
+	public FlightGearBuildingAnalyzer(FlightGearOptions options, Random random, FlightGearElevProber elevProber) {
 		this.options = options;
 		this.random = random;
 		this.levelHeight = GlobalOptionsProvider.getOptions().getLevelHeight();
+		this.elevProber = elevProber;
 	}
 
 	public FlightGearBuildingListEntry analyze(OsmPolygon polygon) {
@@ -70,6 +76,12 @@ public class FlightGearBuildingAnalyzer {
 		// Street angle
 		double streetAngle = calcStreetAngle(ring);
 
+		// Ground elevation via fgelev probing (outer ring points, take minimum)
+		double groundElev = probeGroundElevation(ring);
+		if (groundElev == FlightGearElevProber.NO_ELEV) {
+			return null;
+		}
+
 		// Roof orientation: 0 if ridge parallel to street, 1 if perpendicular
 		int roofOrientation = (streetAngle < 45 || streetAngle > 135) ? 0 : 1;
 
@@ -78,9 +90,26 @@ public class FlightGearBuildingAnalyzer {
 		int roofTexIdx = computeTextureIndex(center.x(), center.y(), 7);
 
 		return new FlightGearBuildingListEntry(
-				center.y(), center.x(), 0, streetAngle, listType,
+				center.y(), center.x(), groundElev, streetAngle, listType,
 				width, depth, facadeHeight, roofHeight, roofShape,
 				roofOrientation, levels, wallTexIdx, roofTexIdx);
+	}
+
+	private double probeGroundElevation(LinearRing2D ring) {
+		if (elevProber == null || elevProber.isDisabled()) {
+			return 0.0;
+		}
+		double minElev = Double.MAX_VALUE;
+		for (Point2D point : ring.vertices()) {
+			double elev = elevProber.probe(point.x(), point.y());
+			if (elev == FlightGearElevProber.NO_ELEV) {
+				return FlightGearElevProber.NO_ELEV;
+			}
+			if (elev < minElev) {
+				minElev = elev;
+			}
+		}
+		return minElev;
 	}
 
 	private boolean isConvex(LinearRing2D ring) {

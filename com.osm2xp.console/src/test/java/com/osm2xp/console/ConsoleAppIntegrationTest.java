@@ -141,19 +141,26 @@ public class ConsoleAppIntegrationTest extends TestCase {
 		argList.add(TESTSCENERY_NAME);
 		com.osm2xp.console.App.main(argList.toArray(new String[0]));
 		assertTrue(targetDir.isDirectory());
-		// Check BuildingList.txt.gz exists (even if empty) when generateBuildings=true
-		File buildingListFile = new File(targetDir, "BuildingList.txt.gz");
-		if (!buildingListFile.isFile()) {
-			File[] gzFiles = targetDir.listFiles((dir, name) -> name.equals("BuildingList.txt.gz"));
-			if (gzFiles != null && gzFiles.length > 0) {
-				buildingListFile = gzFiles[0];
+		// Airfields are generated using the same apt.dat 1050 workflow as X-Plane,
+		// but FlightGear gets one per-airport .dat file under NavData/apt/
+		File aptFile = new File(targetDir, "NavData/apt/xx00.dat");
+		checkApt(aptFile);
+		// Check BuildingList*.txt.gz exists (even if empty) when generateBuildings=true.
+		// LineFeatureList_*.txt.gz may also be present (roads/railways), filter to building lists only.
+		List<File> buildingListFiles = new ArrayList<>();
+		for (File candidate : findFiles(targetDir, ".txt.gz")) {
+			if (candidate.getName().startsWith("BuildingList_")) {
+				buildingListFiles.add(candidate);
 			}
 		}
-		assertTrue("BuildingList.txt.gz not found", buildingListFile.isFile());
-		// Check for .stg files with BUILDING_LIST header
-		File[] stgFiles = targetDir.listFiles((dir, name) -> name.endsWith(".stg"));
+		assertNotNull("No BuildingList txt.gz files found", buildingListFiles);
+		assertTrue("No BuildingList txt.gz files found", buildingListFiles.size() > 0);
+		File buildingListFile = buildingListFiles.get(0);
+		// Check for .stg files with BUILDING_LIST header, now placed in
+		// Objects/<bucket_path>/<tile_index>.stg folders
+		List<File> stgFiles = findFiles(targetDir, ".stg");
 		assertNotNull("No .stg files found", stgFiles);
-		assertTrue("No .stg files found", stgFiles.length > 0);
+		assertTrue("No .stg files found", stgFiles.size() > 0);
 		boolean foundBuildingList = false;
 		for (File stgFile : stgFiles) {
 			List<String> lines = java.nio.file.Files.readAllLines(stgFile.toPath(), Charset.forName("UTF-8"));
@@ -173,8 +180,10 @@ public class ConsoleAppIntegrationTest extends TestCase {
 		for (String line : buildingLines) {
 			String[] parts = line.trim().split("\\s+");
 			assertEquals("Expected 14 fields in building entry: " + line, 14, parts.length);
-			double anchorLat = Double.parseDouble(parts[0]);
-			double anchorLon = Double.parseDouble(parts[1]);
+			// FlightGear building list entries are local Cartesian metres relative to
+			// the STG BUILDING_LIST anchor: X=-north, Y=east, Z=elevation (MSL)
+			double x = Double.parseDouble(parts[0]);
+			double y = Double.parseDouble(parts[1]);
 			double elevation = Double.parseDouble(parts[2]);
 			double streetAngle = Double.parseDouble(parts[3]);
 			int listType = Integer.parseInt(parts[4]);
@@ -185,9 +194,11 @@ public class ConsoleAppIntegrationTest extends TestCase {
 			int roofShape = Integer.parseInt(parts[9]);
 			int roofOrientation = Integer.parseInt(parts[10]);
 			int levels = Integer.parseInt(parts[11]);
-			// Coordinate sanity
-			assertTrue("Latitude out of range: " + anchorLat, anchorLat >= -90 && anchorLat <= 90);
-			assertTrue("Longitude out of range: " + anchorLon, anchorLon >= -180 && anchorLon <= 180);
+			// Offsets are within a sub-bucket (0.125 degree tile), well under 20 km
+			assertTrue("X offset out of range: " + x, x >= -20000 && x <= 20000);
+			assertTrue("Y offset out of range: " + y, y >= -20000 && y <= 20000);
+			// Elevation sanity (MSL metres): allow small negative (below sea level) up to Himalayan heights
+			assertTrue("Elevation out of range: " + elevation, elevation >= -1000 && elevation < 10000);
 			// Height checks: facadeHeight > 1m and < 1000m
 			assertTrue("Facade height too low: " + facadeHeight, facadeHeight > 1.0);
 			assertTrue("Facade height too high: " + facadeHeight, facadeHeight < 1000.0);
@@ -206,6 +217,25 @@ public class ConsoleAppIntegrationTest extends TestCase {
 			// Levels >= 1
 			assertTrue("Levels < 1: " + levels, levels >= 1);
 		}
+	}
+
+	private List<File> findFiles(File dir, String suffix) {
+		List<File> result = new ArrayList<>();
+		if (dir == null || !dir.isDirectory()) {
+			return result;
+		}
+		File[] children = dir.listFiles();
+		if (children == null) {
+			return result;
+		}
+		for (File child : children) {
+			if (child.isDirectory()) {
+				result.addAll(findFiles(child, suffix));
+			} else if (child.getName().endsWith(suffix)) {
+				result.add(child);
+			}
+		}
+		return result;
 	}
 
 	private List<String> readGzipLines(File gzFile) throws IOException {

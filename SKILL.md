@@ -146,14 +146,28 @@ Priority-ordered fallback chain in `XPlaneTranslatorImpl.processPolyline()`:
 4. Roof shape: `roof:shape` tag → random distribution (flat=0.1, gabled=0.8, hipped=0.1)
 5. Size classification: SMALL (min≥3m, max≥4.5m) / MEDIUM (min≥10m, max≥15m) / LARGE (min≥20m, max≥30m) / UNSUITABLE
 6. Street angle from longest edge, roof orientation, texture indices
+7. Ground elevation: if fgelev probing is enabled, probes the outer-ring vertices and takes the minimum; buildings over water/`-9999`/`-1000` are rejected (see `FlightGearElevProber`)
 
-Output written to `BuildingList.txt.gz` (gzip) and `.stg` file header.
+Output written to `BuildingList_<index>.txt.gz` (gzip) and `.stg` file header.
 
 **BUILDING_LIST data format:**
-STG line: `BUILDING_LIST BuildingList.txt.gz OSMBuildings {lon_6f} {lat_6f} 0.00`
+STG line: `BUILDING_LIST BuildingList_<index>.txt.gz OSMBuildings {lon_6f} {lat_6f} 0.00`
 
-Data line (14 space-separated fields):
-`anchorLat anchorLon elevation streetAngle listType width depth facadeHeight roofHeight roofShape roofOrientation levels wallTexIdx roofTexIdx`
+Data line (14 space-separated fields) — local Cartesian metres relative to the STG anchor (X south, Y east, Z up), round-Earth sagitta corrected:
+`X Y Z streetAngle listType width depth facadeHeight roofHeight roofShape roofOrientation levels wallTexIdx roofTexIdx`
+where `X = -north`, `Y = east`, `Z = groundElev - calcHorizonElevLocal(...)` (see `FlightGearCoordinateUtils`, mirrors OSM2City).
+
+**Ground elevation (optional):** `FlightGearElevProber` locates the terrain sub-bucket tile for a lon/lat via `FlightGearBucket` (`<sceneryRoot>/Terrain/<band>/<cell>/<bucketIndex>.btg.gz`, the TerraSync on-disk layout) and spawns `fgelev --use-vpb --tile-file <tile>` subprocesses — one per sub-bucket tile, capped by an LRU pool (`MAX_PROCESSES=32`) — then queries them over stdin/stdout. This matches FlightGear ≥ 2024.1, whose `fgelev` is VPB-only and dropped `--tile-lon/--tile-lat`. Sentinels `-9999` (no reliable result) and `-1000` (hole/water); a missing tile also yields `NO_ELEV`. Configure `generateBuildingsElevation`, `fgelevPath`, `flightGearSceneryPath` in `FlightGearOptions.xml`. Terrain can be pre-fetched for a bounding box without running the sim via the cross-platform `tools/DownloadFgTerrain.java` tool (JDK 11+, single-file source launch). Without configuration OSM2XP falls back to elevation 0 (buildings at anchor level).
+
+### FlightGear Transportation (LINE_FEATURE_LIST)
+
+`FGRoadTranslator` / `FGRailTranslator` (`IPolyHandler`s, registered in `FlightGearTranslatorImpl` constructor, collected in `handlePoly` when `generateTransportation=true`) write real scenery at `translationComplete()`:
+- One gzipped list file per (bucket, material) named `LineFeatureList_<material>_<index>.txt.gz` next to the STG, managed by `FlightGearBucketOutput.getLineFeatureListWriter(material)`; the STG gets one `LINE_FEATURE_LIST <file> <material>` token per material via `setLineFeatureListHeaderWritten`.
+- Row format (per OSM way, mirrors osm2city `_process_line_feature_list`): `W {width:.2f} {isLit} 1 1 1 1 {lon:.6f} {lat:.6f} …` — width in metres, `isLit=0` always (no lit-area analysis yet), attributes `1 1 1 1`.
+- Material mapping: `ws30Freeway` for `motorway`/`trunk` (+ `_link`), `ws30Road` otherwise; `ws30Railway` for all accepted `railway=*` values. Widths: `FGRoadTranslator.estimateWidth` (12/8/6/4), railways from `gauge` tag via osm2city's `gauge/1000*128/57`.
+- Handlers resolve the bucket via `FlightGearBucketOutputProvider` (functional interface, wired in `FlightGearTranslatorImpl.init()` as `this::bucketOutputFor`).
+- **VPB terrain pipeline only** (FlightGear ≥ 2020.3 / WS30): `LINE_FEATURE_LIST` is ignored on legacy WS20 tiles. No elevation probing — wires drape onto terrain.
+- `FGPowerlineTranslator` stays comment-only (`# powerline …`) — no dedicated FG cable material exists (modern osm2city renders cables as glTF).
 
 All numeric formats must use `Locale.US` (period decimal separator).
 

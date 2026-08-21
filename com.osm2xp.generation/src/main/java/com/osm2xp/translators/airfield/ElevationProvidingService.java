@@ -1,11 +1,17 @@
 package com.osm2xp.translators.airfield;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
+
+import com.osm2xp.generation.options.FlightGearOptions;
+import com.osm2xp.generation.options.FlightGearOptionsProvider;
+import com.osm2xp.translators.flightgear.FlightGearElevProber;
 
 import math.geom2d.Point2D;
 
@@ -20,6 +26,8 @@ public class ElevationProvidingService extends GeoMetaProvidingService<Double> {
 	private static ElevationProvidingService instance;
 	
 	private List<Point2D> toGet = new ArrayList<Point2D>();
+
+	private FlightGearElevProber prober;
 	
 	public static synchronized ElevationProvidingService getInstance() {
 		if (instance == null) {
@@ -29,7 +37,40 @@ public class ElevationProvidingService extends GeoMetaProvidingService<Double> {
 	}
 		
 	public Double getElevation(Point2D point, boolean queryIfAbsent) {
+		Double elevation = getLocalElevation(point);
+		if (elevation != null) {
+			return elevation;
+		}
 		return getMeta(point, queryIfAbsent);
+	}
+
+	private Double getLocalElevation(Point2D point) {
+		if (prober == null) {
+			prober = createProber();
+		}
+		if (prober == null || prober.isDisabled()) {
+			return null;
+		}
+		double x = Math.floor(point.x() * 1000000) / 1000000.0;
+		double y = Math.floor(point.y() * 1000000) / 1000000.0;
+		Point2D roundedPoint = new Point2D(x, y);
+		Double cached = metaMap.get(roundedPoint);
+		if (cached != null) {
+			return cached;
+		}
+		double elev = prober.probe(point.x(), point.y());
+		if (elev == FlightGearElevProber.NO_ELEV) {
+			return null;
+		}
+		metaMap.put(roundedPoint, elev);
+		return elev;
+	}
+
+	private FlightGearElevProber createProber() {
+		FlightGearOptions options = FlightGearOptionsProvider.getOptions();
+		String fgelevPath = options.getFgelevPath();
+		File fgelevBinary = StringUtils.isNotBlank(fgelevPath) ? new File(fgelevPath) : null;
+		return new FlightGearElevProber(fgelevBinary, options.getFlightGearSceneryPath());
 	}
 
 	protected GetElevationCallable scheduleGetElevations() {

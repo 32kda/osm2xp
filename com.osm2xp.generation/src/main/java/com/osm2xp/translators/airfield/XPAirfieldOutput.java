@@ -50,15 +50,22 @@ public class XPAirfieldOutput {
 //            "PARAMETER[\"Central_Meridian\",0.0],UNIT[\"Meter\",1.0]]";
 
 	private static final String NAV_DATA_FOLDER_NAME = "Earth nav data";
+	private static final String NAV_DATA_APT_FOLDER_NAME = "NavData" + File.separator + "apt";
 	private static final String OSM2XP_AIRFIELD_PREFFIX = "osm2xp_";
 	private static final double METER_TO_FEET_COEF = 3.28084;
-	private File baseFolder;
+	protected File baseFolder;
 	private boolean writeMainAirfield;
+	private boolean perAirportAptDat;
 	private int fakeICAOIdx = 0;
 
 	public XPAirfieldOutput(File baseFolder, boolean writeMainAirfield) {
+		this(baseFolder, writeMainAirfield, false);
+	}
+
+	public XPAirfieldOutput(File baseFolder, boolean writeMainAirfield, boolean perAirportAptDat) {
 		this.baseFolder = baseFolder;
 		this.writeMainAirfield = writeMainAirfield;
+		this.perAirportAptDat = perAirportAptDat;
 		baseFolder.mkdirs();
 	}
 
@@ -101,7 +108,7 @@ public class XPAirfieldOutput {
 			}
 		}
 		defsList.add("99");
-		writeAptData(airfieldData.getId(), defsList.toArray(new String[0]));
+		writeAptData(airfieldData.getId(), icao, defsList.toArray(new String[0]));
 	}
 
 	private String getHelipadStr(HelipadData helipadData, int idx, AirfieldData airfieldData) {
@@ -297,19 +304,22 @@ public class XPAirfieldOutput {
 	public void writeSingleRunway(RunwayData runwayData) {
 		List<String> defsList = new ArrayList<String>();
 		defsList.addAll(getAptHeaderString());
+		String icao = checkGetICAO(runwayData);
 		defsList.add(String.format(Locale.ROOT, "1 %d 0 0 %s %s", (int) Math.round(runwayData.getElevation() * METER_TO_FEET_COEF),
-				checkGetICAO(runwayData), runwayData.getLabel()));
+				icao, runwayData.getLabel()));
 		defsList.add(getRunwayStr(runwayData));
 		defsList.add("99");
-		writeAptData(runwayData.getId(), defsList.toArray(new String[0]));
+		writeAptData(runwayData.getId(), icao, defsList.toArray(new String[0]));
 	}
 
-	protected void writeAptData(String aptId, String[] aptDefinition) {
+	protected void writeAptData(String aptId, String icao, String[] aptDefinition) {
 		if (aptDefinition.length == 0) {
 			return;
 		}
 		File dataFolder;
-		if (writeMainAirfield) {
+		if (perAirportAptDat) {
+			dataFolder = new File(new File(baseFolder, NAV_DATA_APT_FOLDER_NAME), icao);
+		} else if (writeMainAirfield) {
 			dataFolder = new File(baseFolder, NAV_DATA_FOLDER_NAME);
 		} else {
 			String folderName = aptId.replace('/','_');
@@ -320,7 +330,11 @@ public class XPAirfieldOutput {
 			dataFolder = new File(airfieldFolder, NAV_DATA_FOLDER_NAME);
 		}
 		dataFolder.mkdirs();
-		try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(new File(dataFolder, "apt.dat").toPath(),  StandardCharsets.UTF_8))) {
+		writeAptFile(new File(dataFolder, "apt.dat"), aptId, aptDefinition);
+	}
+
+	protected void writeAptFile(File outputFile, String aptId, String[] aptDefinition) {
+		try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(outputFile.toPath(),  StandardCharsets.UTF_8))) {
 			for (String string : aptDefinition) {
 				writer.println(string);
 			}

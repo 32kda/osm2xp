@@ -15,7 +15,7 @@ public class FlightGearTranslatorFactory implements ITileTranslatorFactory, ITra
 
 	@Override
 	public ITranslatorProvider getTranslatorProvider(File currentFile, String folderPath) {
-		return new DefaultTranslatorProvider(currentFile, folderPath, getOutputMode());
+		return new FlightGearTranslatorProvider(currentFile, folderPath, getOutputMode());
 	}
 
 	@Override

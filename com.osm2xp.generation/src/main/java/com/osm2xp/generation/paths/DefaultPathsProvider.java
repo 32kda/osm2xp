@@ -11,6 +11,8 @@ public class DefaultPathsProvider implements IPathsProvider {
 	protected File specFacadesFolder;
 	private File specObjectsFolder;
 	private File objectsFolder;
+	private File flightGearObjectsFolder;
+	private File flightGearSpecObjectsFolder;
 	private File forestsFolder;
 	private File xPlaneToolsFolder;
 	private File userResourcesFolder;
@@ -94,6 +96,30 @@ public class DefaultPathsProvider implements IPathsProvider {
 
 	public void setObjectsFolder(File objectsFolder) {
 		this.objectsFolder = objectsFolder;
+	}
+
+	@Override
+	public File getFlightGearObjectsFolder() {
+		if (flightGearObjectsFolder == null) {
+			return new File(getBasicFolder(), "/flightgear/objects");
+		}
+		return flightGearObjectsFolder;
+	}
+
+	public void setFlightGearObjectsFolder(File flightGearObjectsFolder) {
+		this.flightGearObjectsFolder = flightGearObjectsFolder;
+	}
+
+	@Override
+	public File getFlightGearSpecObjectsFolder() {
+		if (flightGearSpecObjectsFolder == null) {
+			return new File(getBasicFolder(), "/flightgear/specobjects");
+		}
+		return flightGearSpecObjectsFolder;
+	}
+
+	public void setFlightGearSpecObjectsFolder(File flightGearSpecObjectsFolder) {
+		this.flightGearSpecObjectsFolder = flightGearSpecObjectsFolder;
 	}
 
 	@Override

@@ -51,6 +51,8 @@ Please refer [Quick Start Guide](https://github.com/32kda/osm2xp/wiki/Quick-Star
 
 [Airfield generation](https://github.com/32kda/osm2xp/wiki/Airfield-Generation)
 
+[Installing the FlightGear output (incl. airports)](docs/flightgear-scenery-installation.md)
+
 Faced a problem? Please look at [basic troubleshooting information](https://github.com/32kda/osm2xp/wiki/Troubleshooting), maybe there's a solution. If not - feel free to open an issue here or report it in [this](https://forums.x-plane.org/index.php?/forums/topic/151582-osm2xp-30/) forum thread.
 
 ## Samples of generated scenarios

@@ -73,13 +73,48 @@ public class FlightGearOptionsProvider {
 		FlightGearObjectTagRules.add(new FlightGearObjectTagRule(new Tag(
 				OsmConstants.MAN_MADE_TAG, "lighthouse"), new ArrayList<ObjectFile>() {
 			{
-				add(new ObjectFile("Models/Communications/lighthouses.xml"));
+				add(new ObjectFile("Models/objects/capemay.ac"));
 			}
 		}, 0, true, false, false, 0, 0, 0, 0, false, 0, 0, false, false));
 		FlightGearObjectTagRules.add(new FlightGearObjectTagRule(new Tag(
 				OsmConstants.MAN_MADE_TAG, "water_tower"), new ArrayList<ObjectFile>() {
 			{
-				add(new ObjectFile("Models/Communications/water-tower.xml"));
+				add(new ObjectFile("Models/objects/watertower-3.ac"));
+			}
+		}, 0, true, false, false, 0, 0, 0, 0, false, 0, 0, false, false));
+		FlightGearObjectTagRules.add(new FlightGearObjectTagRule(new Tag(
+				OsmConstants.MAN_MADE_TAG, "cooling_tower"), new ArrayList<ObjectFile>() {
+			{
+				add(new ObjectFile("Models/specobjects/cooling_tower-100.ac"));
+				add(new ObjectFile("Models/specobjects/cooling_tower-80.ac"));
+				add(new ObjectFile("Models/specobjects/cooling_tower-160.ac"));
+				add(new ObjectFile("Models/specobjects/cooling_tower-50.ac"));
+			}
+		}, 0, true, false, false, 0, 0, 0, 0, false, 0, 0, false, false));
+		FlightGearObjectTagRules.add(new FlightGearObjectTagRule(new Tag(
+				OsmConstants.MAN_MADE_TAG, "chimney"), new ArrayList<ObjectFile>() {
+			{
+				add(new ObjectFile("Models/specobjects/chimney-100.ac"));
+				add(new ObjectFile("Models/specobjects/chimney-120.ac"));
+				add(new ObjectFile("Models/specobjects/chimney-150.ac"));
+				add(new ObjectFile("Models/specobjects/chimney-200.ac"));
+				add(new ObjectFile("Models/specobjects/chimney-30.ac"));
+				add(new ObjectFile("Models/specobjects/chimney-40.ac"));
+				add(new ObjectFile("Models/specobjects/chimney-50.ac"));
+				add(new ObjectFile("Models/specobjects/chimney-60.ac"));
+				add(new ObjectFile("Models/specobjects/chimney-80.ac"));
+			}
+		}, 0, true, false, false, 0, 0, 0, 0, false, 0, 0, false, false));
+		FlightGearObjectTagRules.add(new FlightGearObjectTagRule(new Tag(
+				"power", "generator"), new ArrayList<ObjectFile>() {
+			{
+				add(new ObjectFile("Models/objects/wind_turbine.ac"));
+			}
+		}, 0, true, false, false, 0, 0, 0, 0, false, 0, 0, false, false));
+		FlightGearObjectTagRules.add(new FlightGearObjectTagRule(new Tag(
+				OsmConstants.MAN_MADE_TAG, "crane"), new ArrayList<ObjectFile>() {
+			{
+				add(new ObjectFile("Models/objects/crane.ac"));
 			}
 		}, 0, true, false, false, 0, 0, 0, 0, false, 0, 0, false, false));
 

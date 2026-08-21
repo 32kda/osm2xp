@@ -17,7 +17,10 @@ import com.osm2xp.generation.options.rules.ObjectsRulesList;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = { "objectsRules", "generateBuildings",
-		"useBuildingList", "buildingListSmallMinSide",
+		"generateObjects", "generateBuildings3D", "useBuildingList",
+		"generateTransportation", "generateAirfields",
+		"generateBuildingsElevation", "fgelevPath", "flightGearSceneryPath",
+		"buildingListSmallMinSide",
 		"buildingListMediumMinSide", "buildingListLargeMinSide",
 		"buildingListSmallMaxLevels", "buildingListMediumMaxLevels",
 		"buildingListLargeMaxLevels", "buildingListAllowNeighbours",
@@ -31,7 +34,14 @@ public class FlightGearOptions {
 	protected FlightGearObjectsRulesList objectsRules;
 
 	protected boolean generateBuildings = true;
+	protected boolean generateObjects = true;
+	protected boolean generateBuildings3D = true;
 	protected boolean useBuildingList = true;
+	protected boolean generateTransportation = true;
+	protected boolean generateAirfields = true;
+	protected boolean generateBuildingsElevation = true;
+	protected String fgelevPath = "";
+	protected String flightGearSceneryPath = "";
 	protected double buildingListSmallMinSide = 3.0;
 	protected double buildingListMediumMinSide = 10.0;
 	protected double buildingListLargeMinSide = 20.0;
@@ -93,12 +103,68 @@ public class FlightGearOptions {
 		this.generateBuildings = generateBuildings;
 	}
 
+	public boolean isGenerateObjects() {
+		return generateObjects;
+	}
+
+	public void setGenerateObjects(boolean generateObjects) {
+		this.generateObjects = generateObjects;
+	}
+
+	public boolean isGenerateBuildings3D() {
+		return generateBuildings3D;
+	}
+
+	public void setGenerateBuildings3D(boolean generateBuildings3D) {
+		this.generateBuildings3D = generateBuildings3D;
+	}
+
 	public boolean isUseBuildingList() {
 		return useBuildingList;
 	}
 
 	public void setUseBuildingList(boolean useBuildingList) {
 		this.useBuildingList = useBuildingList;
+	}
+
+	public boolean isGenerateTransportation() {
+		return generateTransportation;
+	}
+
+	public void setGenerateTransportation(boolean generateTransportation) {
+		this.generateTransportation = generateTransportation;
+	}
+
+	public boolean isGenerateAirfields() {
+		return generateAirfields;
+	}
+
+	public void setGenerateAirfields(boolean generateAirfields) {
+		this.generateAirfields = generateAirfields;
+	}
+
+	public boolean isGenerateBuildingsElevation() {
+		return generateBuildingsElevation;
+	}
+
+	public void setGenerateBuildingsElevation(boolean generateBuildingsElevation) {
+		this.generateBuildingsElevation = generateBuildingsElevation;
+	}
+
+	public String getFgelevPath() {
+		return fgelevPath;
+	}
+
+	public void setFgelevPath(String fgelevPath) {
+		this.fgelevPath = fgelevPath;
+	}
+
+	public String getFlightGearSceneryPath() {
+		return flightGearSceneryPath;
+	}
+
+	public void setFlightGearSceneryPath(String flightGearSceneryPath) {
+		this.flightGearSceneryPath = flightGearSceneryPath;
 	}
 
 	public double getBuildingListSmallMinSide() {

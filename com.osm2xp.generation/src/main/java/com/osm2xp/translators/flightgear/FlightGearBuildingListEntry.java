@@ -4,9 +4,9 @@ import java.util.Locale;
 
 public class FlightGearBuildingListEntry {
 
-	private final double anchorLat;
-	private final double anchorLon;
-	private final double elevation;
+	private final double lat;
+	private final double lon;
+	private final double groundElev;
 	private final double streetAngle;
 	private final BuildingListType listType;
 	private final double width;
@@ -19,12 +19,12 @@ public class FlightGearBuildingListEntry {
 	private final int wallTextureIndex;
 	private final int roofTextureIndex;
 
-	public FlightGearBuildingListEntry(double anchorLat, double anchorLon, double elevation, double streetAngle,
+	public FlightGearBuildingListEntry(double lat, double lon, double groundElev, double streetAngle,
 			BuildingListType listType, double width, double depth, double facadeHeight, double roofHeight,
 			RoofShape roofShape, int roofOrientation, int levels, int wallTextureIndex, int roofTextureIndex) {
-		this.anchorLat = anchorLat;
-		this.anchorLon = anchorLon;
-		this.elevation = elevation;
+		this.lat = lat;
+		this.lon = lon;
+		this.groundElev = groundElev;
 		this.streetAngle = streetAngle;
 		this.listType = listType;
 		this.width = width;
@@ -38,16 +38,16 @@ public class FlightGearBuildingListEntry {
 		this.roofTextureIndex = roofTextureIndex;
 	}
 
-	public double getAnchorLat() {
-		return anchorLat;
+	public double getLat() {
+		return lat;
 	}
 
-	public double getAnchorLon() {
-		return anchorLon;
+	public double getLon() {
+		return lon;
 	}
 
-	public double getElevation() {
-		return elevation;
+	public double getGroundElev() {
+		return groundElev;
 	}
 
 	public double getStreetAngle() {
@@ -94,9 +94,20 @@ public class FlightGearBuildingListEntry {
 		return roofTextureIndex;
 	}
 
-	public String formatDataLine() {
-		return String.format(Locale.US, "-%.1f %.1f %.1f %.0f %d %.1f %.1f %.1f %.1f %d %d %d %d %d\n",
-				anchorLat, anchorLon, elevation, streetAngle, listType.getValue(),
+	/**
+	 * Formats the building list data line. FlightGear expects offsets in local
+	 * Cartesian metres relative to the STG BUILDING_LIST anchor, in a Z-up frame
+	 * where X points south and Y points east. The elevation is the ground
+	 * elevation at this building corrected for the round-Earth sagitta, so that
+	 * the building drapes over the flat terrain mesh.
+	 */
+	public String formatDataLine(double anchorLon, double anchorLat) {
+		double[] local = FlightGearCoordinateUtils.toLocal(lon, lat, anchorLon, anchorLat);
+		double east = local[0];
+		double north = local[1];
+		double z = groundElev - FlightGearCoordinateUtils.calcHorizonElevLocal(east, north);
+		return String.format(Locale.US, "%.1f %.1f %.1f %.0f %d %.1f %.1f %.1f %.1f %d %d %d %d %d\n",
+				-north, east, z, streetAngle, listType.getValue(),
 				width, depth, facadeHeight, roofHeight, roofShape.getValue(),
 				roofOrientation, levels, wallTextureIndex, roofTextureIndex);
 	}

@@ -9,7 +9,6 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src/main/java"/>
-	<classpathentry kind="src" path="src/test/java"/>
 	<classpathentry kind="src" path="src/main/resources"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-io.jar" sourcepath="C:/Users/32kda/AppData/Local/Temp/.org.sf.feeling.decompiler1579783205424/source/commons-io-2.6-sources-1579783274596.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/geonames-ws-client.jar" sourcepath="C:/Users/32kda/AppData/Local/Temp/.org.sf.feeling.decompiler1568263035740/source/geonames-ws-client-1.1.9-sources-1568294391814.jar"/>
