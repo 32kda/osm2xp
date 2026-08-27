@@ -141,11 +141,11 @@ Priority-ordered fallback chain in `XPlaneTranslatorImpl.processPolyline()`:
 
 `FlightGearBuildingAnalyzer.analyze(OsmPolygon)`:
 1. Convexity check (rejects non-convex polygons)
-2. Local bbox computation + area deviation check (rejects area ratio < 0.9 — L-shaped, courtyards)
+2. PCA-oriented minimum rectangle (vertex covariance → principal axis → min/max projections) + area-ratio check (rejects `polygonArea / rectArea < 0.85` — L/T/U/X/H shapes, triangles)
 3. Level analysis: `height` tag → `building:levels` tag → distribution table fallback
 4. Roof shape: `roof:shape` tag → random distribution (flat=0.1, gabled=0.8, hipped=0.1)
 5. Size classification: SMALL (min≥3m, max≥4.5m) / MEDIUM (min≥10m, max≥15m) / LARGE (min≥20m, max≥30m) / UNSUITABLE
-6. Street angle from longest edge, roof orientation, texture indices
+6. Street angle from PCA principal axis, roof orientation, texture indices
 7. Ground elevation: if fgelev probing is enabled, probes the outer-ring vertices and takes the minimum; buildings over water/`-9999`/`-1000` are rejected (see `FlightGearElevProber`)
 
 Output written to `BuildingList_<index>.txt.gz` (gzip) and `.stg` file header.
@@ -167,7 +167,7 @@ where `X = -north`, `Y = east`, `Z = groundElev - calcHorizonElevLocal(...)` (se
 - Material mapping: `ws30Freeway` for `motorway`/`trunk` (+ `_link`), `ws30Road` otherwise; `ws30Railway` for all accepted `railway=*` values. Widths: `FGRoadTranslator.estimateWidth` (12/8/6/4), railways from `gauge` tag via osm2city's `gauge/1000*128/57`.
 - Handlers resolve the bucket via `FlightGearBucketOutputProvider` (functional interface, wired in `FlightGearTranslatorImpl.init()` as `this::bucketOutputFor`).
 - **VPB terrain pipeline only** (FlightGear ≥ 2020.3 / WS30): `LINE_FEATURE_LIST` is ignored on legacy WS20 tiles. No elevation probing — wires drape onto terrain.
-- `FGPowerlineTranslator` stays comment-only (`# powerline …`) — no dedicated FG cable material exists (modern osm2city renders cables as glTF).
+- `FGPowerlineTranslator` places a shared pylon model (`OBJECT_SHARED_AGL Models/Power/…`) at every node of `power=line`/`power=minor_line` ways. Model selection mirrors osm2city `_calc_and_map_powerline` (wooden pole / H-frame / steel-single / generic 25m·50m), driven by way tags (`cables`, `height`, `material`, `design`) and the max segment length; heading follows the line (middle-angle at interior nodes). Cables/wires are not rendered yet (osm2city emits them as glTF).
 
 All numeric formats must use `Locale.US` (period decimal separator).
 

@@ -83,30 +83,13 @@ public class FlightGearOptionsProvider {
 			}
 		}, 0, true, false, false, 0, 0, 0, 0, false, 0, 0, false, false));
 		FlightGearObjectTagRules.add(new FlightGearObjectTagRule(new Tag(
-				OsmConstants.MAN_MADE_TAG, "cooling_tower"), new ArrayList<ObjectFile>() {
+				"generator:source", "wind"), new ArrayList<ObjectFile>() {
 			{
-				add(new ObjectFile("Models/specobjects/cooling_tower-100.ac"));
-				add(new ObjectFile("Models/specobjects/cooling_tower-80.ac"));
-				add(new ObjectFile("Models/specobjects/cooling_tower-160.ac"));
-				add(new ObjectFile("Models/specobjects/cooling_tower-50.ac"));
+				add(new ObjectFile("Models/objects/wind_turbine.ac"));
 			}
 		}, 0, true, false, false, 0, 0, 0, 0, false, 0, 0, false, false));
 		FlightGearObjectTagRules.add(new FlightGearObjectTagRule(new Tag(
-				OsmConstants.MAN_MADE_TAG, "chimney"), new ArrayList<ObjectFile>() {
-			{
-				add(new ObjectFile("Models/specobjects/chimney-100.ac"));
-				add(new ObjectFile("Models/specobjects/chimney-120.ac"));
-				add(new ObjectFile("Models/specobjects/chimney-150.ac"));
-				add(new ObjectFile("Models/specobjects/chimney-200.ac"));
-				add(new ObjectFile("Models/specobjects/chimney-30.ac"));
-				add(new ObjectFile("Models/specobjects/chimney-40.ac"));
-				add(new ObjectFile("Models/specobjects/chimney-50.ac"));
-				add(new ObjectFile("Models/specobjects/chimney-60.ac"));
-				add(new ObjectFile("Models/specobjects/chimney-80.ac"));
-			}
-		}, 0, true, false, false, 0, 0, 0, 0, false, 0, 0, false, false));
-		FlightGearObjectTagRules.add(new FlightGearObjectTagRule(new Tag(
-				"power", "generator"), new ArrayList<ObjectFile>() {
+				"generator:method", "wind_turbine"), new ArrayList<ObjectFile>() {
 			{
 				add(new ObjectFile("Models/objects/wind_turbine.ac"));
 			}

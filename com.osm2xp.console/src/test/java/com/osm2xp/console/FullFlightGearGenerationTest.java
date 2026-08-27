@@ -9,7 +9,9 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.FileUtils;
@@ -152,6 +154,8 @@ public class FullFlightGearGenerationTest extends TestCase {
 		int industrialDecls = 0;
 		int waterTowerDecls = 0;
 		int windTurbineDecls = 0;
+		Set<String> chimneyModels = new HashSet<>();
+		Set<String> coolingTowerModels = new HashSet<>();
 		for (File stgFile : stgFiles) {
 			List<String> lines = Files.readAllLines(stgFile.toPath(), Charset.forName("UTF-8"));
 			for (String line : lines) {
@@ -162,7 +166,7 @@ public class FullFlightGearGenerationTest extends TestCase {
 						&& (line.contains("ws30Road") || line.contains("ws30Freeway"))) {
 					roadLineFeatures++;
 				}
-				if (line.startsWith("# powerline ")) {
+				if (line.startsWith("OBJECT_SHARED_AGL Models/Power/")) {
 					powerlineComments++;
 				}
 				if (line.startsWith("BUILDING_LIST")) {
@@ -170,6 +174,13 @@ public class FullFlightGearGenerationTest extends TestCase {
 				}
 				if (line.startsWith("OBJECT_SHARED_AGL Models/specobjects/")) {
 					specObjectDecls++;
+					String modelName = specModelName(line);
+					if (modelName.startsWith("chimney")) {
+						chimneyModels.add(modelName);
+					}
+					if (modelName.startsWith("cooling_tower")) {
+						coolingTowerModels.add(modelName);
+					}
 				}
 				if (line.startsWith("OBJECT_SHARED_AGL Models/objects/house/")) {
 					houseDecls++;
@@ -190,9 +201,10 @@ public class FullFlightGearGenerationTest extends TestCase {
 		}
 
 		System.out.println("STG declarations -> road LINE_FEATURE_LIST: " + roadLineFeatures
-				+ ", rail LINE_FEATURE_LIST: " + railLineFeatures + ", powerline comments: " + powerlineComments
+				+ ", rail LINE_FEATURE_LIST: " + railLineFeatures + ", powerline pylons: " + powerlineComments
 				+ ", BUILDING_LIST headers: " + buildingListHeaders);
-		System.out.println("STG object declarations -> specobjects(rule): " + specObjectDecls
+		System.out.println("STG object declarations -> specobjects(size): " + specObjectDecls
+				+ ", chimney sizes: " + chimneyModels.size() + ", cooling_tower sizes: " + coolingTowerModels.size()
 				+ ", house(size): " + houseDecls + ", industrial(size): " + industrialDecls
 				+ ", water_tower(rule): " + waterTowerDecls + ", wind_turbine(rule): " + windTurbineDecls
 				+ ", crane(rule): " + craneDecls);
@@ -202,12 +214,16 @@ public class FullFlightGearGenerationTest extends TestCase {
 		// Roads
 		assertTrue("No road LINE_FEATURE_LIST found in .stg files", roadLineFeatures > 0);
 		// Power lines
-		assertTrue("No # powerline comments found in .stg files", powerlineComments > 0);
+		assertTrue("No pylon OBJECT_SHARED_AGL declarations found in .stg files", powerlineComments > 0);
 		// Building list headers referencing the BuildingList files
 		assertTrue("No BUILDING_LIST found in .stg files", buildingListHeaders > 0);
-		// Rule-based 3D objects (specobjects + water towers + wind turbines + cranes)
+		// Rule-based 3D objects (water towers + wind turbines + cranes)
 		assertTrue("No rule-based specobject declarations (chimney/cooling_tower) found",
 				specObjectDecls > 0);
+		assertTrue("No chimney OBJECT_SHARED_AGL declarations found", chimneyModels.size() > 0);
+		assertTrue("No cooling_tower OBJECT_SHARED_AGL declarations found", coolingTowerModels.size() > 0);
+		assertTrue("Expected multiple chimney sizes to be selected, found: " + chimneyModels,
+				chimneyModels.size() > 1);
 		assertTrue("No water_tower OBJECT_SHARED_AGL declarations found", waterTowerDecls > 0);
 		assertTrue("No wind_turbine OBJECT_SHARED_AGL declarations found", windTurbineDecls > 0);
 		assertTrue("No crane OBJECT_SHARED_AGL declarations found", craneDecls > 0);
@@ -223,6 +239,13 @@ public class FullFlightGearGenerationTest extends TestCase {
 		if (powerlinesCount > 0) {
 			System.out.println("  Powerlines counted in StatsProvider: " + powerlinesCount);
 		}
+	}
+
+	private String specModelName(String line) {
+		String prefix = "Models/specobjects/";
+		int start = line.indexOf(prefix) + prefix.length();
+		int end = line.indexOf(".ac", start) + ".ac".length();
+		return line.substring(start, end);
 	}
 
 	private List<File> findFiles(File dir, String suffix) {

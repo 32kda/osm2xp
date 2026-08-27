@@ -18,8 +18,9 @@ import com.osm2xp.generation.options.rules.ObjectsRulesList;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = { "objectsRules", "generateBuildings",
 		"generateObjects", "generateBuildings3D", "useBuildingList",
-		"generateTransportation", "generateAirfields",
-		"generateBuildingsElevation", "fgelevPath", "flightGearSceneryPath",
+		"generateTransportation", "generateAirfields", "generateChimneys",
+		"generateCoolingTowers", "generateBuildingsElevation", "fgelevPath",
+		"flightGearSceneryPath",
 		"buildingListSmallMinSide",
 		"buildingListMediumMinSide", "buildingListLargeMinSide",
 		"buildingListSmallMaxLevels", "buildingListMediumMaxLevels",
@@ -39,6 +40,8 @@ public class FlightGearOptions {
 	protected boolean useBuildingList = true;
 	protected boolean generateTransportation = true;
 	protected boolean generateAirfields = true;
+	protected boolean generateChimneys = true;
+	protected boolean generateCoolingTowers = true;
 	protected boolean generateBuildingsElevation = true;
 	protected String fgelevPath = "";
 	protected String flightGearSceneryPath = "";
@@ -49,7 +52,7 @@ public class FlightGearOptions {
 	protected int buildingListMediumMaxLevels = 8;
 	protected int buildingListLargeMaxLevels = 22;
 	protected boolean buildingListAllowNeighbours = true;
-	protected double buildingListAreaDeviation = 0.9;
+	protected double buildingListAreaDeviation = 0.85;
 	protected double buildingListDistDeviation = 0.8;
 	protected int buildingTextureGroupRadius = 0;
 	protected double roofShapeFlatRatio = 0.1;
@@ -141,6 +144,22 @@ public class FlightGearOptions {
 
 	public void setGenerateAirfields(boolean generateAirfields) {
 		this.generateAirfields = generateAirfields;
+	}
+
+	public boolean isGenerateChimneys() {
+		return generateChimneys;
+	}
+
+	public void setGenerateChimneys(boolean generateChimneys) {
+		this.generateChimneys = generateChimneys;
+	}
+
+	public boolean isGenerateCoolingTowers() {
+		return generateCoolingTowers;
+	}
+
+	public void setGenerateCoolingTowers(boolean generateCoolingTowers) {
+		this.generateCoolingTowers = generateCoolingTowers;
 	}
 
 	public boolean isGenerateBuildingsElevation() {

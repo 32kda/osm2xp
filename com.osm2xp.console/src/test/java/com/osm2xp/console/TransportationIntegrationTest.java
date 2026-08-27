@@ -108,7 +108,7 @@ public class TransportationIntegrationTest extends TestCase {
 				if (line.startsWith("LINE_FEATURE_LIST") && line.contains("ws30Railway")) {
 					hasRailLineFeatures = true;
 				}
-				if (line.startsWith("# powerline ")) {
+				if (line.startsWith("OBJECT_SHARED_AGL Models/Power/")) {
 					hasPowerlineComments = true;
 				}
 			}
@@ -120,7 +120,7 @@ public class TransportationIntegrationTest extends TestCase {
 			System.out.println("  Railway LINE_FEATURE_LIST found in .stg files");
 		}
 		if (hasPowerlineComments) {
-			System.out.println("  Powerline comments found in .stg files");
+			System.out.println("  Powerline pylon declarations found in .stg files");
 		}
 
 		// Per-material gzipped list files must exist next to the STG files

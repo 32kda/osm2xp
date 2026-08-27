@@ -16,8 +16,16 @@ public class FlightGearBucket {
 	/** Latitude extent of one tile, in degrees. */
 	public static final double SG_BUCKET_SPAN = 0.125;
 
-	/** SimGear's <code>SG_EPSILON</code>, used for boundary-epsilon flooring. */
-	private static final double SG_EPSILON = 1e-5;
+	/**
+	 * Boundary-epsilon for flooring. Must be far below the granularity of OSM
+	 * coordinates (~1e-7 degrees) so a point just <em>below</em> a tile boundary is not
+	 * floored into the neighbouring tile. A coarse value (e.g. 1e-5, ~1.1 m) makes
+	 * <code>bucketFor</code> disagree with the tile assignment in
+	 * <code>MultiTileDataConverter</code>, causing two tiles to open the same STG file
+	 * (second <code>FileOutputStream</code> truncates the first), which corrupts the STG
+	 * with NUL-padded holes.
+	 */
+	private static final double SG_EPSILON = 1e-9;
 
 	private final int lon;
 	private final int lat;

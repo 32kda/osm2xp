@@ -3,9 +3,8 @@ package com.osm2xp.translators.flightgear;
 /**
  * Local Cartesian coordinate conversion for FlightGear scenery, mirroring the
  * flat-earth / round-earth logic used by OSM2City
- * (example/osm2city/utils/coordinates.py).
  * <p>
- * FlightGear building lists expect offsets in metres relative to the STG
+ * FlightGear building lists expect offsets in meters relative to the STG
  * BUILDING_LIST anchor in a Z-up frame where X points south and Y points east.
  */
 public final class FlightGearCoordinateUtils {

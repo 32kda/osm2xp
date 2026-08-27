@@ -1,5 +1,7 @@
 package com.osm2xp.translators.flightgear;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import com.osm2xp.generation.options.FlightGearOptions;
@@ -43,19 +45,14 @@ public class FlightGearBuildingAnalyzer {
 		Point2D center = polygon.getCenter();
 
 		LinearCurve2D local = GeomUtils.linearCurve2DToLocal(ring, center);
-		double[] bbox = computeLocalBbox(local);
-		double width = (bbox[1] - bbox[0]) * SCALE;
-		double depth = (bbox[3] - bbox[2]) * SCALE;
-		if (depth > width) {
-			double temp = width;
-			width = depth;
-			depth = temp;
-		}
+		PcaRectangle rect = computePcaRectangle(local);
 
-		// Area deviation check
+		double width = rect.width * SCALE;
+		double depth = rect.depth * SCALE;
+
+		// Area deviation check: reject footprints poorly approximated by a rectangle
 		double localArea = computeLocalArea(local);
-		double bboxArea = (bbox[1] - bbox[0]) * (bbox[3] - bbox[2]);
-		if (bboxArea <= 0 || (localArea / bboxArea) <= options.getBuildingListAreaDeviation()) {
+		if (rect.area <= 0 || (localArea / rect.area) < options.getBuildingListAreaDeviation()) {
 			return null;
 		}
 
@@ -73,8 +70,8 @@ public class FlightGearBuildingAnalyzer {
 			return null;
 		}
 
-		// Street angle
-		double streetAngle = calcStreetAngle(ring);
+		// Street angle from PCA principal axis
+		double streetAngle = rect.angle;
 
 		// Ground elevation via fgelev probing (outer ring points, take minimum)
 		double groundElev = probeGroundElevation(ring);
@@ -199,9 +196,9 @@ public class FlightGearBuildingAnalyzer {
 	private double computeRoofHeight(RoofShape roofShape, double width) {
 		switch (roofShape) {
 			case GABLED:
-				return width / 3.0;
+				return Math.min(4, width / 3.0);
 			case HIPPED:
-				return width * 0.2;
+				return Math.min(4, width * 0.2);
 			default:
 				return 0;
 		}
@@ -232,43 +229,74 @@ public class FlightGearBuildingAnalyzer {
 		return BuildingListType.UNSUITABLE;
 	}
 
-	private double calcStreetAngle(LinearRing2D ring) {
-		double longestLength = 0;
-		Point2D longestStart = null;
-		Point2D longestEnd = null;
-
-		for (LineSegment2D segment : ring.edges()) {
-			double length = GeomUtils.latLonDistance(
-					segment.firstPoint().y(), segment.firstPoint().x(),
-					segment.lastPoint().y(), segment.lastPoint().x());
-			if (length > longestLength) {
-				longestLength = length;
-				longestStart = segment.firstPoint();
-				longestEnd = segment.lastPoint();
-			}
-		}
-
-		if (longestStart == null) {
-			return 0.0;
-		}
-
-		return GeomUtils.getTrueBearing(longestStart, longestEnd);
-	}
-
-	private double[] computeLocalBbox(LinearCurve2D curve) {
-		double minX = Double.MAX_VALUE, maxX = -Double.MAX_VALUE;
-		double minY = Double.MAX_VALUE, maxY = -Double.MAX_VALUE;
+	private PcaRectangle computePcaRectangle(LinearCurve2D curve) {
+		List<Point2D> pts = new ArrayList<>();
 		for (Point2D p : curve.vertices()) {
-			if (p.x() < minX)
-				minX = p.x();
-			if (p.x() > maxX)
-				maxX = p.x();
-			if (p.y() < minY)
-				minY = p.y();
-			if (p.y() > maxY)
-				maxY = p.y();
+			pts.add(p);
 		}
-		return new double[] { minX, maxX, minY, maxY };
+		if (pts.size() > 1 && pts.get(0).equals(pts.get(pts.size() - 1))) {
+			pts.remove(pts.size() - 1);
+		}
+		int n = pts.size();
+		if (n == 0) {
+			return new PcaRectangle(0, 0, 0, 0);
+		}
+
+		double mx = 0, my = 0;
+		for (Point2D p : pts) {
+			mx += p.x();
+			my += p.y();
+		}
+		mx /= n;
+		my /= n;
+
+		double sxx = 0, syy = 0, sxy = 0;
+		for (Point2D p : pts) {
+			double dx = p.x() - mx;
+			double dy = p.y() - my;
+			sxx += dx * dx;
+			syy += dy * dy;
+			sxy += dx * dy;
+		}
+
+		double trace = sxx + syy;
+		double disc = Math.sqrt((sxx - syy) * (sxx - syy) / 4.0 + sxy * sxy);
+		double lambda = trace / 2.0 + disc;
+
+		double vx, vy;
+		if (Math.abs(sxy) < 1e-12) {
+			vx = sxx >= syy ? 1.0 : 0.0;
+			vy = sxx >= syy ? 0.0 : 1.0;
+		} else {
+			vx = sxy;
+			vy = lambda - sxx;
+			double len = Math.hypot(vx, vy);
+			vx /= len;
+			vy /= len;
+		}
+
+		double minU = Double.MAX_VALUE, maxU = -Double.MAX_VALUE;
+		double minV = Double.MAX_VALUE, maxV = -Double.MAX_VALUE;
+		for (Point2D p : pts) {
+			double u = p.x() * vx + p.y() * vy;
+			double v = p.x() * (-vy) + p.y() * vx;
+			minU = Math.min(minU, u);
+			maxU = Math.max(maxU, u);
+			minV = Math.min(minV, v);
+			maxV = Math.max(maxV, v);
+		}
+
+		double width = maxU - minU;
+		double depth = maxV - minV;
+		double angle = (Math.toDegrees(Math.atan2(vx, vy)) + 360) % 360;
+		if (depth > width) {
+			double tmp = width;
+			width = depth;
+			depth = tmp;
+			angle = (angle + 90) % 360;
+		}
+
+		return new PcaRectangle(width, depth, width * depth, angle);
 	}
 
 	private double computeLocalArea(LinearCurve2D curve) {
@@ -282,5 +310,19 @@ public class FlightGearBuildingAnalyzer {
 
 	private int computeTextureIndex(double lon, double lat, int seed) {
 		return Math.abs((int) (lon * 1000 + lat * 1000 + seed * 777)) % 32;
+	}
+
+	private static final class PcaRectangle {
+		final double width;
+		final double depth;
+		final double area;
+		final double angle;
+
+		PcaRectangle(double width, double depth, double area, double angle) {
+			this.width = width;
+			this.depth = depth;
+			this.area = area;
+			this.angle = angle;
+		}
 	}
 }

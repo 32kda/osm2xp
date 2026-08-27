@@ -33,8 +33,11 @@ import com.osm2xp.translators.flightgear.FlightGearBuildingAnalyzer;
 import com.osm2xp.translators.flightgear.FlightGearBuildingListEntry;
 import com.osm2xp.translators.flightgear.FlightGearBucket;
 import com.osm2xp.translators.flightgear.FlightGearBucketOutput;
+import com.osm2xp.translators.flightgear.FlightGearChimneyTranslator;
+import com.osm2xp.translators.flightgear.FlightGearCoolingTowerTranslator;
 import com.osm2xp.translators.flightgear.FlightGearElevProber;
 import com.osm2xp.translators.flightgear.FlightGearModelsProvider;
+import com.osm2xp.translators.flightgear.FlightGearSiloTranslator;
 import com.osm2xp.translators.flightgear.TransportationData;
 import com.osm2xp.translators.flightgear.TransportationParsingService;
 import com.osm2xp.translators.flightgear.TransportationValidator;
@@ -72,8 +75,11 @@ public class FlightGearTranslatorImpl implements ITranslator {
         polyHandlers.add(new FGRailTranslator());
         polyHandlers.add(new FGPowerlineTranslator());
 
-        // 3D object handlers (rule-based and building-size), following the X-Plane translators
-        objectHandlers.add(new FGRulesObjectTranslator());
+        // 3D object handlers (rule-based, special and building-size), following the X-Plane translators
+		objectHandlers.add(new FlightGearCoolingTowerTranslator());
+		objectHandlers.add(new FlightGearChimneyTranslator());
+		objectHandlers.add(new FlightGearSiloTranslator());
+		objectHandlers.add(new FGRulesObjectTranslator());
         objectHandlers.add(new FGBuildingObjectTranslator());
     }
 
@@ -166,6 +172,17 @@ public class FlightGearTranslatorImpl implements ITranslator {
     }
 
     private FlightGearBucketOutput bucketOutputFor(double lon, double lat) {
+        // Clamp to the interior of this tile so a coordinate exactly on the tile
+        // boundary (e.g. lon == tile.x + 1.0, produced by the tile clipper) resolves
+        // to THIS tile's bucket rather than the neighbouring tile's. Without this, two
+        // tiles can open the same .stg file (the second FileOutputStream truncates the
+        // first), corrupting the STG with NUL-padded holes.
+        double minLon = currentTile.x();
+        double maxLon = minLon + 1.0 - 1e-6;
+        double minLat = currentTile.y();
+        double maxLat = minLat + 1.0 - 1e-6;
+        lon = Math.min(Math.max(lon, minLon), maxLon);
+        lat = Math.min(Math.max(lat, minLat), maxLat);
         FlightGearBucket bucket = FlightGearBucket.bucketFor(lon, lat);
         FlightGearOptions options = FlightGearOptionsProvider.getOptions();
         return bucketOutputs.computeIfAbsent(bucket.getIndex(),

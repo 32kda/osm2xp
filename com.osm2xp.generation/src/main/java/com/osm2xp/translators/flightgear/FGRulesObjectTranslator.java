@@ -123,7 +123,9 @@ public class FGRulesObjectTranslator implements IPolyHandler {
 				}
 			}
 		}
-		if (!matchingRules.isEmpty()) {
+		if (matchingRules.size() == 1) {
+			return matchingRules.get(0);
+		} else if (!matchingRules.isEmpty()) {
 			return matchingRules.get(random.nextInt(matchingRules.size()));
 		}
 		return null;
