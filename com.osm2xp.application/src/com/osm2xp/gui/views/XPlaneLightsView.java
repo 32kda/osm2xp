@@ -1,10 +1,10 @@
 package com.osm2xp.gui.views;
 
-import org.eclipse.core.databinding.beans.PojoProperties;
+import org.eclipse.core.databinding.beans.typed.PojoProperties;
 import org.eclipse.help.HelpSystem;
 import org.eclipse.help.IContext;
 import org.eclipse.help.IContextProvider;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -52,7 +52,7 @@ public class XPlaneLightsView extends AbstractOptionsView implements IContextPro
 				btnGenerateLights = new Button(this, SWT.CHECK);
 				btnGenerateLights.setText("Generate Street Lights (using objects/object strings)");
 				GridDataFactory.fillDefaults().applyTo(btnGenerateLights);
-				bindingContext.bindValue(WidgetProperties.selection().observe(btnGenerateLights),
+				bindingContext.bindValue(WidgetProperties.buttonSelection().observe(btnGenerateLights),
 						PojoProperties.value("generateStreetLights").observe(options));
 				
 				toolkit.createLabel(this, "Choose this option if you want to generate separate lights for no-light roads.");
@@ -95,7 +95,7 @@ public class XPlaneLightsView extends AbstractOptionsView implements IContextPro
 				btnGenerateHighwayLights.setToolTipText("Generate lights for highway roads (highway=motorway or highway=trunk)");
 				GridDataFactory.fillDefaults().span(2,1).applyTo(btnGenerateHighwayLights);
 
-				bindingContext.bindValue(WidgetProperties.selection().observe(btnGenerateHighwayLights),		
+				bindingContext.bindValue(WidgetProperties.buttonSelection().observe(btnGenerateHighwayLights),		
 						PojoProperties.value("generateHighwayLights").observe(options));
 				
 				toolkit.createLabel(this,"Street Lights interval, m").setLayoutData(GridDataFactory.swtDefaults().create());

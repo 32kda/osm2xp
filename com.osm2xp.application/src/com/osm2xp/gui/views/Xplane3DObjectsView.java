@@ -1,10 +1,10 @@
 package com.osm2xp.gui.views;
 
-import org.eclipse.core.databinding.beans.PojoProperties;
+import org.eclipse.core.databinding.beans.typed.PojoProperties;
 import org.eclipse.help.HelpSystem;
 import org.eclipse.help.IContext;
 import org.eclipse.help.IContextProvider;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
@@ -49,11 +49,11 @@ public class Xplane3DObjectsView extends AbstractOptionsView implements IContext
 				btnGenerateCoolingTowers.setToolTipText("Generate Cooling Towers by selecting best-fit model");
 				GridDataFactory.fillDefaults().applyTo(btnGenerateCoolingTowers);
 
-				bindingContext.bindValue(WidgetProperties.selection().observe(btnGenerateObjects),		
+				bindingContext.bindValue(WidgetProperties.buttonSelection().observe(btnGenerateObjects),		
 						PojoProperties.value("generateObj").observe(XPlaneOptionsProvider.getOptions()));
-				bindingContext.bindValue(WidgetProperties.selection().observe(btnGenerateChimneys),		
+				bindingContext.bindValue(WidgetProperties.buttonSelection().observe(btnGenerateChimneys),		
 						PojoProperties.value("generateChimneys").observe(XPlaneOptionsProvider.getOptions()));
-				bindingContext.bindValue(WidgetProperties.selection().observe(btnGenerateCoolingTowers),		
+				bindingContext.bindValue(WidgetProperties.buttonSelection().observe(btnGenerateCoolingTowers),		
 						PojoProperties.value("generateCoolingTowers").observe(XPlaneOptionsProvider.getOptions()));
 			}
 			

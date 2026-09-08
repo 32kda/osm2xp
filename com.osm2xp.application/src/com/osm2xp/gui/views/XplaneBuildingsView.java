@@ -1,10 +1,10 @@
 package com.osm2xp.gui.views;
 
-import org.eclipse.core.databinding.beans.PojoProperties;
+import org.eclipse.core.databinding.beans.typed.PojoProperties;
 import org.eclipse.help.HelpSystem;
 import org.eclipse.help.IContext;
 import org.eclipse.help.IContextProvider;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
@@ -55,13 +55,13 @@ public class XplaneBuildingsView extends AbstractOptionsView implements IContext
 				btnGenerateTanks.setToolTipText("Generate Tanks/Gasometers using special facade");
 				GridDataFactory.fillDefaults().applyTo(btnGenerateTanks);
 
-				bindingContext.bindValue(WidgetProperties.selection().observe(btnGenerateBuildings),		
+				bindingContext.bindValue(WidgetProperties.buttonSelection().observe(btnGenerateBuildings),		
 						PojoProperties.value("generateBuildings").observe(XPlaneOptionsProvider.getOptions()));
-				bindingContext.bindValue(WidgetProperties.selection().observe(btnGenerateObjBuildings),		
+				bindingContext.bindValue(WidgetProperties.buttonSelection().observe(btnGenerateObjBuildings),		
 						PojoProperties.value("generateObjBuildings").observe(XPlaneOptionsProvider.getOptions()));
-				bindingContext.bindValue(WidgetProperties.selection().observe(btnGenerateFence),		
+				bindingContext.bindValue(WidgetProperties.buttonSelection().observe(btnGenerateFence),		
 						PojoProperties.value("generateFence").observe(XPlaneOptionsProvider.getOptions()));
-				bindingContext.bindValue(WidgetProperties.selection().observe(btnGenerateTanks),		
+				bindingContext.bindValue(WidgetProperties.buttonSelection().observe(btnGenerateTanks),		
 						PojoProperties.value("generateTanks").observe(XPlaneOptionsProvider.getOptions()));
 			}
 			

@@ -1,7 +1,7 @@
 package com.osm2xp.gui.views;
 
-import org.eclipse.core.databinding.beans.PojoProperties;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.core.databinding.beans.typed.PojoProperties;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
@@ -46,13 +46,13 @@ public class XPlaneNetworkView extends AbstractOptionsView {
 				btnGenerateBridges.setToolTipText("Generate bridges for roads and railways.");
 				GridDataFactory.fillDefaults().applyTo(btnGenerateBridges);
 
-				bindingContext.bindValue(WidgetProperties.selection().observe(btnGenerateRoads),		
+				bindingContext.bindValue(WidgetProperties.buttonSelection().observe(btnGenerateRoads),		
 						PojoProperties.value("generateRoads").observe(XPlaneOptionsProvider.getOptions()));
-				bindingContext.bindValue(WidgetProperties.selection().observe(btnGenerateRail),		
+				bindingContext.bindValue(WidgetProperties.buttonSelection().observe(btnGenerateRail),		
 						PojoProperties.value("generateRailways").observe(XPlaneOptionsProvider.getOptions()));
-				bindingContext.bindValue(WidgetProperties.selection().observe(btnGeneratePower),		
+				bindingContext.bindValue(WidgetProperties.buttonSelection().observe(btnGeneratePower),		
 						PojoProperties.value("generatePowerlines").observe(XPlaneOptionsProvider.getOptions()));
-				bindingContext.bindValue(WidgetProperties.selection().observe(btnGenerateBridges),		
+				bindingContext.bindValue(WidgetProperties.buttonSelection().observe(btnGenerateBridges),		
 						PojoProperties.value("generateBridges").observe(XPlaneOptionsProvider.getOptions()));
 			}
 			

@@ -1,7 +1,7 @@
 package com.osm2xp.gui.views;
 
-import org.eclipse.core.databinding.beans.PojoProperties;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.core.databinding.beans.typed.PojoProperties;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
@@ -39,7 +39,7 @@ public class XplanePolyView extends AbstractOptionsView {
 				btnGeneratePolys.setText("Generate Draped Polygons");
 				btnGeneratePolys.setToolTipText("Generate draped polygons - for items like parking areas and other paved surfaces");
 				GridDataFactory.fillDefaults().applyTo(btnGeneratePolys);
-				bindingContext.bindValue(WidgetProperties.selection().observe(btnGeneratePolys),		
+				bindingContext.bindValue(WidgetProperties.buttonSelection().observe(btnGeneratePolys),		
 						PojoProperties.value("generatePolys").observe(XPlaneOptionsProvider.getOptions()));
 			}
 		};

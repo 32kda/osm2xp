@@ -1,10 +1,10 @@
 package com.osm2xp.gui.views;
 
-import org.eclipse.core.databinding.beans.PojoProperties;
+import org.eclipse.core.databinding.beans.typed.PojoProperties;
 import org.eclipse.help.HelpSystem;
 import org.eclipse.help.IContext;
 import org.eclipse.help.IContextProvider;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
@@ -40,7 +40,7 @@ public class XplaneForestsView extends AbstractOptionsView implements IContextPr
 				Button btnGenerateForests = new Button(this, SWT.CHECK);
 				btnGenerateForests.setText("Generate Forests");
 				GridDataFactory.fillDefaults().applyTo(btnGenerateForests);
-				bindingContext.bindValue(WidgetProperties.selection().observe(btnGenerateForests),
+				bindingContext.bindValue(WidgetProperties.buttonSelection().observe(btnGenerateForests),
 						PojoProperties.value("generateFor").observe(XPlaneOptionsProvider.getOptions()));
 			}
 		};
