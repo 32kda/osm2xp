@@ -45,9 +45,8 @@ import math.geom2d.line.LineSegment2D;
  *
  * @author osm2xp
  */
-public class FGBuildingObjectTranslator implements IPolyHandler {
+public class FGBuildingObjectTranslator extends FlightGearObjectTranslator {
 
-	private static final String STG_PATTERN = "OBJECT_SHARED_AGL %s %.6f %.6f 0 %1.2f 0 0\n";
 
 	private final Multimap<OSMBuildingType, ModelWithSize> modelsByType = ArrayListMultimap.create();
 	private FlightGearStgWriterProvider stgWriterProvider;
@@ -104,7 +103,11 @@ public class FGBuildingObjectTranslator implements IPolyHandler {
 		}
 		OSMBuildingType buildingType = TypeProvider.getBuildingType(osmPolyline.getTags());
 		if (buildingType == null) {
-			return false;
+			if (GeomUtils.computeEdgesLength(osmPolyline.getPolyline()) < 80) {
+				buildingType = OSMBuildingType.HOUSE;
+			} else {				
+				return false;
+			}
 		}
 		LineSegment2D edge0 = polygon.getPolyline().edge(0);
 		LineSegment2D edge1 = polygon.getPolyline().edge(1);

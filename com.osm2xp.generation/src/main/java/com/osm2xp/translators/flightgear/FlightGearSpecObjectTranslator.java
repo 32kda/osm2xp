@@ -1,20 +1,12 @@
 package com.osm2xp.translators.flightgear;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
-import com.osm2xp.core.logging.Osm2xpLogger;
 import com.osm2xp.generation.paths.PathsService;
 import com.osm2xp.model.osm.polygon.OsmPolygon;
 import com.osm2xp.model.osm.polygon.OsmPolyline;
-import com.osm2xp.stats.CountStats;
-import com.osm2xp.stats.StatsProvider;
-import com.osm2xp.translators.FlightGearStgWriterProvider;
-import com.osm2xp.translators.IPolyHandler;
 
 import math.geom2d.Point2D;
 
@@ -37,11 +29,9 @@ import math.geom2d.Point2D;
  *
  * @author osm2xp
  */
-public abstract class FlightGearSpecObjectTranslator implements IPolyHandler {
+public abstract class FlightGearSpecObjectTranslator extends FlightGearObjectTranslator {
 
 	private static final String AC_EXT = ".ac";
-
-	private static final String STG_PATTERN = "OBJECT_SHARED_AGL %s %.6f %.6f 0 0.00 0 0\n";
 
 
 
@@ -57,8 +47,6 @@ public abstract class FlightGearSpecObjectTranslator implements IPolyHandler {
 	}
 
 	protected List<ObjectDef> objectDefs = new ArrayList<>();
-
-	private FlightGearStgWriterProvider stgWriterProvider;
 
 	public FlightGearSpecObjectTranslator() {
 		if (generationEnabled()) {
@@ -131,11 +119,6 @@ public abstract class FlightGearSpecObjectTranslator implements IPolyHandler {
 	}
 
 	@Override
-	public void setStgWriterProvider(FlightGearStgWriterProvider stgWriterProvider) {
-		this.stgWriterProvider = stgWriterProvider;
-	}
-
-	@Override
 	public boolean handlePoly(OsmPolyline osmPolyline) {
 		if (!(osmPolyline instanceof OsmPolygon)) { // We support only polygon-based objects for now
 			return false;
@@ -151,7 +134,7 @@ public abstract class FlightGearSpecObjectTranslator implements IPolyHandler {
 				return false;
 			}
 			Point2D center = osmPolygon.getCenter();
-			writeObject(modelFile, center);
+			writeObject(modelFile, center.y(), center.x(), 0);
 			return true;
 		}
 		return false;
@@ -190,26 +173,6 @@ public abstract class FlightGearSpecObjectTranslator implements IPolyHandler {
 	protected abstract int getObjectSize(OsmPolygon osmPolygon);
 
 	protected abstract String getObjectFilePreffix();
-
-	private void writeObject(String modelPath, Point2D origin) {
-		if (stgWriterProvider == null) {
-			Osm2xpLogger.warning("FG spec object translator: no STG writer provider set, skipping object");
-			return;
-		}
-		BufferedWriter writer = stgWriterProvider.getStgWriter(origin.x(), origin.y());
-		if (writer == null) {
-			return;
-		}
-		try {
-			writer.write(String.format(Locale.ROOT, STG_PATTERN, modelPath, origin.x(), origin.y()));
-			CountStats countStats = StatsProvider.getCommonStats();
-			if (countStats != null) {
-				countStats.incCount("object");
-			}
-		} catch (IOException e) {
-			Osm2xpLogger.error("Error writing FlightGear spec object declaration", e);
-		}
-	}
 
 	@Override
 	public void translationComplete() {

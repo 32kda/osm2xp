@@ -37,6 +37,7 @@ public class FlightGearBucketOutput {
 	private BufferedWriter stgWriter;
 	private BufferedWriter buildingListWriter;
 	private boolean buildingListHeaderWritten;
+	private boolean closed;
 
 	public FlightGearBucketOutput(File sceneryRoot, FlightGearBucket bucket, boolean generateBuildings) {
 		this.bucket = bucket;
@@ -135,6 +136,10 @@ public class FlightGearBucketOutput {
 	}
 
 	public void close() {
+		if (closed) {
+			return;
+		}
+		closed = true;
 		if (stgWriter != null) {
 			try {
 				stgWriter.close();

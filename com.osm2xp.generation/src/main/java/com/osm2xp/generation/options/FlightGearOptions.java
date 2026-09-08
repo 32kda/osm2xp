@@ -18,7 +18,8 @@ import com.osm2xp.generation.options.rules.ObjectsRulesList;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = { "objectsRules", "generateBuildings",
 		"generateObjects", "generateBuildings3D", "useBuildingList",
-		"generateTransportation", "generateAirfields", "generateChimneys",
+		"generateTransportation", "generateAirfields", "generateAirfieldsBtg",
+		"generateChimneys",
 		"generateCoolingTowers", "generateBuildingsElevation", "fgelevPath",
 		"flightGearSceneryPath",
 		"buildingListSmallMinSide",
@@ -40,17 +41,18 @@ public class FlightGearOptions {
 	protected boolean useBuildingList = true;
 	protected boolean generateTransportation = true;
 	protected boolean generateAirfields = true;
+	protected boolean generateAirfieldsBtg = true;
 	protected boolean generateChimneys = true;
 	protected boolean generateCoolingTowers = true;
 	protected boolean generateBuildingsElevation = true;
 	protected String fgelevPath = "";
 	protected String flightGearSceneryPath = "";
 	protected double buildingListSmallMinSide = 3.0;
-	protected double buildingListMediumMinSide = 10.0;
-	protected double buildingListLargeMinSide = 20.0;
+	protected double buildingListMediumMinSide = 7.0;
+	protected double buildingListLargeMinSide = 9.0;
 	protected int buildingListSmallMaxLevels = 3;
-	protected int buildingListMediumMaxLevels = 8;
-	protected int buildingListLargeMaxLevels = 22;
+	protected int buildingListMediumMaxLevels = 9;
+	protected int buildingListLargeMaxLevels = 50;
 	protected boolean buildingListAllowNeighbours = true;
 	protected double buildingListAreaDeviation = 0.85;
 	protected double buildingListDistDeviation = 0.8;
@@ -144,6 +146,14 @@ public class FlightGearOptions {
 
 	public void setGenerateAirfields(boolean generateAirfields) {
 		this.generateAirfields = generateAirfields;
+	}
+
+	public boolean isGenerateAirfieldsBtg() {
+		return generateAirfieldsBtg;
+	}
+
+	public void setGenerateAirfieldsBtg(boolean generateAirfieldsBtg) {
+		this.generateAirfieldsBtg = generateAirfieldsBtg;
 	}
 
 	public boolean isGenerateChimneys() {

@@ -32,6 +32,9 @@ public abstract class AbstractTileDataConverter extends AbstractOSMDataConverter
 			tileTranslationAdapter.complete();
 		}
 		super.complete();
+		if (translatorProvider != null) {
+			translatorProvider.close();
+		}
 	}
 
 	@Override

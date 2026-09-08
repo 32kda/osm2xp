@@ -1,14 +1,10 @@
 package com.osm2xp.translators.flightgear;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.Random;
 
-import com.osm2xp.core.logging.Osm2xpLogger;
 import com.osm2xp.core.model.osm.Node;
 import com.osm2xp.core.model.osm.Tag;
 import com.osm2xp.generation.options.FlightGearOptions;
@@ -18,10 +14,6 @@ import com.osm2xp.generation.options.rules.FlightGearObjectTagRule;
 import com.osm2xp.generation.options.rules.RulesUtil;
 import com.osm2xp.model.osm.polygon.OsmPolygon;
 import com.osm2xp.model.osm.polygon.OsmPolyline;
-import com.osm2xp.stats.CountStats;
-import com.osm2xp.stats.StatsProvider;
-import com.osm2xp.translators.FlightGearStgWriterProvider;
-import com.osm2xp.translators.IPolyHandler;
 import com.osm2xp.utils.MiscUtils;
 import com.osm2xp.utils.geometry.GeomUtils;
 import com.osm2xp.utils.osm.OsmUtils;
@@ -39,18 +31,11 @@ import math.geom2d.polygon.LinearRing2D;
  *
  * @author osm2xp
  */
-public class FGRulesObjectTranslator implements IPolyHandler {
+public class FGRulesObjectTranslator extends FlightGearObjectTranslator {
 
 	private static final String OBJ_EXT = ".ac";
-	private static final String STG_PATTERN = "OBJECT_SHARED_AGL %s %.6f %.6f 0 %1.2f 0 0\n";
 
-	private FlightGearStgWriterProvider stgWriterProvider;
 	private final Random random = new Random();
-
-	@Override
-	public void setStgWriterProvider(FlightGearStgWriterProvider stgWriterProvider) {
-		this.stgWriterProvider = stgWriterProvider;
-	}
 
 	@Override
 	public boolean handlePoly(OsmPolyline osmPolyline) {
@@ -86,7 +71,7 @@ public class FGRulesObjectTranslator implements IPolyHandler {
 		if (chosen == null) {
 			return false;
 		}
-		writeObject(chosen.getPath(), origin, angle);
+		writeObject(chosen.getPath(), origin.y(), origin.x(), angle);
 		return true;
 	}
 
@@ -200,7 +185,7 @@ public class FGRulesObjectTranslator implements IPolyHandler {
 		if (rule.isRandomAngle()) {
 			angle = Double.valueOf(MiscUtils.getRandomInt(0, 360));
 		}
-		writeObject(chosen.getPath(), new Point2D(node.getLon(), node.getLat()), angle);
+		writeObject(chosen.getPath(), node.getLat(), node.getLon(), angle);
 		return true;
 	}
 
@@ -223,26 +208,6 @@ public class FGRulesObjectTranslator implements IPolyHandler {
 		}
 		List<ObjectFile> objectsFiles = rule.getObjectsFiles();
 		return objectsFiles.get(random.nextInt(objectsFiles.size()));
-	}
-
-	private void writeObject(String modelPath, Point2D origin, double angle) {
-		if (stgWriterProvider == null) {
-			Osm2xpLogger.warning("FG object translator: no STG writer provider set, skipping object");
-			return;
-		}
-		BufferedWriter writer = stgWriterProvider.getStgWriter(origin.x(), origin.y());
-		if (writer == null) {
-			return;
-		}
-		try {
-			writer.write(String.format(Locale.ROOT, STG_PATTERN, modelPath, origin.x(), origin.y(), angle));
-			CountStats countStats = StatsProvider.getCommonStats();
-			if (countStats != null) {
-				countStats.incCount("object");
-			}
-		} catch (IOException e) {
-			Osm2xpLogger.error("Error writing FlightGear object declaration", e);
-		}
 	}
 
 	private double calculateAngle(LinearRing2D polygon, FlightGearObjectTagRule rule) {

@@ -33,6 +33,7 @@ import com.osm2xp.translators.flightgear.FlightGearBuildingAnalyzer;
 import com.osm2xp.translators.flightgear.FlightGearBuildingListEntry;
 import com.osm2xp.translators.flightgear.FlightGearBucket;
 import com.osm2xp.translators.flightgear.FlightGearBucketOutput;
+import com.osm2xp.translators.flightgear.FlightGearBucketOutputRegistry;
 import com.osm2xp.translators.flightgear.FlightGearChimneyTranslator;
 import com.osm2xp.translators.flightgear.FlightGearCoolingTowerTranslator;
 import com.osm2xp.translators.flightgear.FlightGearElevProber;
@@ -52,7 +53,6 @@ import math.geom2d.Point2D;
 public class FlightGearTranslatorImpl implements ITranslator {
     private Point2D currentTile;
     private String folderPath;
-    private static final String FLIGHT_GEAR_OBJECT_DECLARATION = "OBJECT_SHARED_AGL {0} {1} {2} {3} {4} {5} {6}\n";
     private final Random random = new Random();
 
     private final List<IPolyHandler> polyHandlers = new ArrayList<>();
@@ -61,14 +61,21 @@ public class FlightGearTranslatorImpl implements ITranslator {
     private final TransportationValidator transportationValidator = new TransportationValidator();
     private ValidationReport transportReport;
 
-    private final Map<Long, FlightGearBucketOutput> bucketOutputs = new HashMap<>();
+    private final FlightGearBucketOutputRegistry bucketOutputRegistry;
     private FlightGearStgWriterProvider stgWriterProvider;
     private FlightGearElevProber elevProber;
 
     public FlightGearTranslatorImpl(Point2D currentTile, String folderPath) {
+        this(currentTile, folderPath, new FlightGearBucketOutputRegistry(new File(folderPath),
+                FlightGearOptionsProvider.getOptions().isGenerateBuildings()));
+    }
+
+    public FlightGearTranslatorImpl(Point2D currentTile, String folderPath,
+            FlightGearBucketOutputRegistry bucketOutputRegistry) {
         super();
         this.currentTile = currentTile;
         this.folderPath = folderPath;
+        this.bucketOutputRegistry = bucketOutputRegistry;
 
         // Register poly handlers (order matters — most specific first)
         polyHandlers.add(new FGRoadTranslator());
@@ -148,6 +155,9 @@ public class FlightGearTranslatorImpl implements ITranslator {
             StatsProvider.getCommonStats().incCount("building");
             try {
                 FlightGearBucketOutput output = bucketOutputFor(entry.getLon(), entry.getLat());
+                if (output == null) {
+                    return;
+                }
                 BufferedWriter buildingListWriter = output.getBuildingListWriter();
                 if (buildingListWriter != null) {
                     buildingListWriter.write(entry.formatDataLine(
@@ -172,21 +182,21 @@ public class FlightGearTranslatorImpl implements ITranslator {
     }
 
     private FlightGearBucketOutput bucketOutputFor(double lon, double lat) {
-        // Clamp to the interior of this tile so a coordinate exactly on the tile
-        // boundary (e.g. lon == tile.x + 1.0, produced by the tile clipper) resolves
-        // to THIS tile's bucket rather than the neighbouring tile's. Without this, two
-        // tiles can open the same .stg file (the second FileOutputStream truncates the
-        // first), corrupting the STG with NUL-padded holes.
+        // A coordinate on (or past) the tile's right/top edge belongs to the
+        // neighbouring tile, whose own converter will place it in the correct bucket.
+        // Skip it here: clamping it into this tile's interior used to map such boundary
+        // points (e.g. lon == tile.x + 1.0, produced by the tile clipper) into the last
+        // bucket of this tile, producing FlightGear "incorrect bucket" warnings, and it
+        // could also open a neighbouring tile's STG file from this tile and corrupt it.
         double minLon = currentTile.x();
-        double maxLon = minLon + 1.0 - 1e-6;
         double minLat = currentTile.y();
-        double maxLat = minLat + 1.0 - 1e-6;
-        lon = Math.min(Math.max(lon, minLon), maxLon);
-        lat = Math.min(Math.max(lat, minLat), maxLat);
+        if (lon >= minLon + 1.0 || lat >= minLat + 1.0) {
+            return null;
+        }
+        lon = Math.max(lon, minLon);
+        lat = Math.max(lat, minLat);
         FlightGearBucket bucket = FlightGearBucket.bucketFor(lon, lat);
-        FlightGearOptions options = FlightGearOptionsProvider.getOptions();
-        return bucketOutputs.computeIfAbsent(bucket.getIndex(),
-                key -> new FlightGearBucketOutput(new File(folderPath), bucket, options.isGenerateBuildings()));
+        return bucketOutputRegistry.getBucketOutput(bucket);
     }
 
     @Override
@@ -198,10 +208,6 @@ public class FlightGearTranslatorImpl implements ITranslator {
 
         for (IPolyHandler objectHandler : objectHandlers) {
             objectHandler.translationComplete();
-        }
-
-        for (FlightGearBucketOutput output : bucketOutputs.values()) {
-            output.close();
         }
 
         if (elevProber != null) {
@@ -241,8 +247,10 @@ public class FlightGearTranslatorImpl implements ITranslator {
         FlightGearOptions options = FlightGearOptionsProvider.getOptions();
         File parentDir = new File(folderPath);
         parentDir.mkdirs();
-        bucketOutputs.clear();
-		stgWriterProvider = (lon, lat) -> bucketOutputFor(lon, lat).getStgWriter();
+		stgWriterProvider = (lon, lat) -> {
+			FlightGearBucketOutput output = bucketOutputFor(lon, lat);
+			return output == null ? null : output.getStgWriter();
+		};
 		for (IPolyHandler handler : polyHandlers) {
 			handler.setStgWriterProvider(stgWriterProvider);
 			handler.setBucketOutputProvider(this::bucketOutputFor);
@@ -310,6 +318,6 @@ public class FlightGearTranslatorImpl implements ITranslator {
     }
 
     public Map<Long, FlightGearBucketOutput> getBucketOutputs() {
-        return bucketOutputs;
+        return bucketOutputRegistry.getBucketOutputs();
     }
 }

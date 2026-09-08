@@ -62,6 +62,14 @@ public class XPAirfieldTranslationAdapter implements ISpecificTranslator {
 		workFolder = new File(outputFolder);
 		this.perAirportAptDat = perAirportAptDat;
 	}
+
+	protected List<AirfieldData> getAirfieldList() {
+		return airfieldList;
+	}
+
+	protected File getWorkFolder() {
+		return workFolder;
+	}
 	
 	protected boolean handlePoly(OsmPolyline osmPolyline) {
 		if (!XPlaneOptionsProvider.getOptions().getAirfieldOptions().isGenerateAirfields()) {

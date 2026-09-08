@@ -11,8 +11,6 @@ import com.osm2xp.core.model.osm.Node;
 import com.osm2xp.generation.options.FlightGearOptions;
 import com.osm2xp.generation.options.FlightGearOptionsProvider;
 import com.osm2xp.model.osm.polygon.OsmPolyline;
-import com.osm2xp.translators.FlightGearStgWriterProvider;
-import com.osm2xp.translators.IPolyHandler;
 import com.osm2xp.utils.geometry.GeomUtils;
 
 import math.geom2d.Point2D;
@@ -31,7 +29,7 @@ import math.geom2d.Point2D;
  *
  * @author osm2xp
  */
-public class FGPowerlineTranslator implements IPolyHandler {
+public class FGPowerlineTranslator extends FlightGearObjectTranslator {
 
     private static final String POWER_PYLON_WOODEN_POLE_14M = "Models/Power/wooden_pole_14m.ac";
     private static final String POWER_PYLON_H_FRAME_STEEL_25M = "Models/Power/Transmission_25m_Steel_H.ac";
@@ -41,20 +39,12 @@ public class FGPowerlineTranslator implements IPolyHandler {
     private static final String POWER_PYLON_GENERIC_PYLON_50M = "Models/Power/generic_pylon_50m.ac";
     private static final String POWER_PYLON_GENERIC_PYLON_100M = "Models/Power/generic_pylon_100m.ac";
 
-    private static final String STG_PATTERN = "OBJECT_SHARED_AGL %s %.6f %.6f 0 %1.2f 0 0\n";
-
     private final List<OsmPolyline> powerlines = new ArrayList<>();
     private BufferedWriter stgWriter;
-    private FlightGearStgWriterProvider stgWriterProvider;
 
     @Override
     public void setStgWriter(BufferedWriter stgWriter) {
         this.stgWriter = stgWriter;
-    }
-
-    @Override
-    public void setStgWriterProvider(FlightGearStgWriterProvider stgWriterProvider) {
-        this.stgWriterProvider = stgWriterProvider;
     }
 
     @Override

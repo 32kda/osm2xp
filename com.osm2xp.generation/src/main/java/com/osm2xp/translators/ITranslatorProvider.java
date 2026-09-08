@@ -9,5 +9,12 @@ public interface ITranslatorProvider {
 	public Collection<ISpecificTranslator> createAdditinalAdapters();
 	
 	public ITranslator getTranslator(Point2D currentTile);
-	
+
+	/**
+	 * Releases any run-scoped resources held by this provider. Called once, after
+	 * all translators have completed. The default implementation does nothing.
+	 */
+	default void close() {
+	}
+
 }

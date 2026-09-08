@@ -39,6 +39,7 @@ public class FlightGearElevProber {
 
 	private final File fgelevBinary;
 	private final File sceneryRoot;
+	private final FlightGearElevationIndex elevationIndex;
 	private boolean disabled;
 	private boolean spawnErrorLogged;
 	private int record;
@@ -60,10 +61,29 @@ public class FlightGearElevProber {
 	private final Map<String, ProcessInfo> processes = new HashMap<>();
 
 	public FlightGearElevProber(File fgelevBinary, String sceneryPath) {
+		this(fgelevBinary, sceneryPath, null);
+	}
+
+	/**
+	 * Constructs a prober that optionally uses an in-process
+	 * {@link FlightGearElevationIndex} over the given {@code Terrain} directory
+	 * instead of spawning {@code fgelev}. When {@code terrainRoot} is provided the
+	 * index is preferred and {@code fgelevBinary} is ignored.
+	 *
+	 * @param fgelevBinary path to the {@code fgelev} executable (may be {@code null}
+	 *            when an index is used)
+	 * @param sceneryPath FlightGear scenery root (ignored when an index is used)
+	 * @param terrainRoot the {@code Terrain} directory of the scenery, or
+	 *            {@code null} to fall back to {@code fgelev}
+	 */
+	public FlightGearElevProber(File fgelevBinary, String sceneryPath, File terrainRoot) {
 		this.fgelevBinary = fgelevBinary;
 		this.sceneryRoot = sceneryPath == null ? null : new File(sceneryPath);
-		this.disabled = fgelevBinary == null || !fgelevBinary.isFile()
-				|| sceneryRoot == null || !sceneryRoot.isDirectory();
+		this.elevationIndex = terrainRoot == null ? null : new FlightGearElevationIndex(terrainRoot);
+		this.disabled = elevationIndex != null
+				? elevationIndex.isDisabled()
+				: fgelevBinary == null || !fgelevBinary.isFile()
+						|| sceneryRoot == null || !sceneryRoot.isDirectory();
 	}
 
 	public boolean isDisabled() {
@@ -78,6 +98,10 @@ public class FlightGearElevProber {
 	public double probe(double lon, double lat) {
 		if (disabled) {
 			return 0.0;
+		}
+		if (elevationIndex != null) {
+			double elevation = elevationIndex.probe(lon, lat);
+			return Double.isNaN(elevation) ? NO_ELEV : elevation;
 		}
 		File tileFile = tileFileFor(lon, lat);
 		if (tileFile == null || !tileFile.isFile()) {

@@ -45,7 +45,8 @@ public class TransportationIntegrationTest extends TestCase {
 		argList.add("-s");
 		argList.add(TESTSCENERY_NAME);
 		FlightGearOptionsProvider.getOptions().setFgelevPath("D:\\Games\\FlightGear 2024.1\\bin\\fgelev.exe");
-        FlightGearOptionsProvider.getOptions().setFlightGearSceneryPath("D:\\Games\\FlightGear 2024.1\\TerraSync");
+		FlightGearOptionsProvider.getOptions().setFlightGearSceneryPath("D:\\Games\\FlightGear 2024.1\\TerraSync");
+//		FlightGearOptionsProvider.getOptions().setGenerateAirfieldsBtg(false);
 		com.osm2xp.console.App.main(argList.toArray(new String[0]));
 
 		assertTrue("Target directory not created", targetDir.isDirectory());
@@ -89,7 +90,8 @@ public class TransportationIntegrationTest extends TestCase {
 		assertTrue("StatsProvider reports " + roadsCount + " roads, should be > 0", roadsCount > 0);
 		assertTrue("StatsProvider reports " + powerlinesCount + " powerlines, should be >= 0", powerlinesCount >= 0);
 
-		// Check .stg files (now inside Objects/<bucket_path>/ folders) contain LINE_FEATURE_LIST entries
+		// Check .stg files (now inside Objects/<bucket_path>/ folders) contain
+		// LINE_FEATURE_LIST entries
 		List<File> stgFiles = findFiles(targetDir, ".stg");
 		assertNotNull("No .stg files found", stgFiles);
 		assertTrue("No .stg files found", stgFiles.size() > 0);
@@ -135,8 +137,10 @@ public class TransportationIntegrationTest extends TestCase {
 		}
 		assertTrue("No LineFeatureList_*.txt.gz list files found", hasLineFeatureList);
 
-		// Shared 3D models bundled with osm2xp are copied into Models/objects and Models/specobjects
-		// so that OBJECT_SHARED_AGL declarations in the STG tiles resolve for FlightGear.
+		// Shared 3D models bundled with osm2xp are copied into Models/objects and
+		// Models/specobjects
+		// so that OBJECT_SHARED_AGL declarations in the STG tiles resolve for
+		// FlightGear.
 		File modelsObjectsDir = new File(targetDir, "Models/objects");
 		File modelsSpecObjectsDir = new File(targetDir, "Models/specobjects");
 		assertTrue("Models/objects folder not copied into " + targetDir, modelsObjectsDir.isDirectory());
@@ -157,8 +161,7 @@ public class TransportationIntegrationTest extends TestCase {
 				}
 			}
 		}
-		System.out.println(
-				"Object declarations referencing Models/ in .stg files: " + objectDeclarationCount);
+		System.out.println("Object declarations referencing Models/ in .stg files: " + objectDeclarationCount);
 		if (hasObjectDeclarations) {
 			System.out.println("  Shared 3D models are placed and referenced by the generated scenery");
 		}

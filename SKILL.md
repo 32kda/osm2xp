@@ -215,7 +215,7 @@ Handled by `AbstractOSMDataConverter.visit(Relation)` at `com.osm2xp.generation/
 - **Commons-IO** (`commons-io:2.6`) — file utilities.
 - **Commons-Lang** (`commons-lang:2.6`) — StringUtils, ArrayUtils.
 - **ICU4J** (`com.ibm.icu:icu4j:65.1`) — text transliteration (ICAO code generation for airfields).
-- **JAXB** (`com.sun.xml.bind:jaxb-impl:2.2.11`) — XML binding for options files.
+- **JAXB** (`org.glassfish.jaxb:jaxb-runtime:2.3.1`) — XML binding for options files.
 - **Geonames WS Client** (`org.geonames:geonames-ws-client:1.1.9`) — airport name resolution.
 - **JSON-simple** (`com.googlecode.json-simple:1.1`) — JSON parsing.
 

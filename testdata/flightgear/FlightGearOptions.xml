@@ -1,6 +1,77 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <FlightGearOptions>
-    <ObjectsRules/>
+    <ObjectsRules>
+        <rules>
+            <tag value="generator" key="power"/>
+            <objectsFiles>
+                <path>Models/objects/wind_turbine.ac</path>
+            </objectsFiles>
+            <angle>0</angle>
+            <randomAngle>true</randomAngle>
+            <polygonAngle>false</polygonAngle>
+            <sizeCheck>false</sizeCheck>
+            <xVectorMinLength>0</xVectorMinLength>
+            <xVectorMaxLength>0</xVectorMaxLength>
+            <yVectorMinLength>0</yVectorMinLength>
+            <yVectorMaxLength>0</yVectorMaxLength>
+            <areaCheck>false</areaCheck>
+            <minArea>0</minArea>
+            <maxArea>0</maxArea>
+            <simplePolygonOnly>false</simplePolygonOnly>
+            <usePolygonAngle>false</usePolygonAngle>
+            <rotationPointX>50</rotationPointX>
+            <rotationPointY>50</rotationPointY>
+        </rules>
+        <rules>
+            <tag value="water_tower" key="man_made"/>
+            <objectsFiles>
+                <path>Models/objects/watertower-3.ac</path>
+            </objectsFiles>
+            <angle>0</angle>
+            <randomAngle>true</randomAngle>
+            <polygonAngle>false</polygonAngle>
+            <sizeCheck>false</sizeCheck>
+            <xVectorMinLength>0</xVectorMinLength>
+            <xVectorMaxLength>0</xVectorMaxLength>
+            <yVectorMinLength>0</yVectorMinLength>
+            <yVectorMaxLength>0</yVectorMaxLength>
+            <areaCheck>false</areaCheck>
+            <minArea>0</minArea>
+            <maxArea>0</maxArea>
+            <simplePolygonOnly>false</simplePolygonOnly>
+            <usePolygonAngle>false</usePolygonAngle>
+            <rotationPointX>50</rotationPointX>
+            <rotationPointY>50</rotationPointY>
+        </rules>
+        <rules>
+            <tag value="crane" key="man_made"/>
+            <objectsFiles>
+                <path>Models/objects/crane.ac</path>
+            </objectsFiles>
+            <angle>0</angle>
+            <randomAngle>true</randomAngle>
+            <polygonAngle>false</polygonAngle>
+            <sizeCheck>false</sizeCheck>
+            <xVectorMinLength>0</xVectorMinLength>
+            <xVectorMaxLength>0</xVectorMaxLength>
+            <yVectorMinLength>0</yVectorMinLength>
+            <yVectorMaxLength>0</yVectorMaxLength>
+            <areaCheck>false</areaCheck>
+            <minArea>0</minArea>
+            <maxArea>0</maxArea>
+            <simplePolygonOnly>false</simplePolygonOnly>
+            <usePolygonAngle>false</usePolygonAngle>
+            <rotationPointX>50</rotationPointX>
+            <rotationPointY>50</rotationPointY>
+        </rules>
+    </ObjectsRules>
     <generateBuildings>true</generateBuildings>
+    <generateObjects>true</generateObjects>
+    <generateBuildings3D>true</generateBuildings3D>
     <useBuildingList>true</useBuildingList>
+    <generateTransportation>true</generateTransportation>
+    <generateAirfields>true</generateAirfields>
+    <generateAirfieldsBtg>false</generateAirfieldsBtg>
+    <generateChimneys>true</generateChimneys>
+    <generateCoolingTowers>true</generateCoolingTowers>
 </FlightGearOptions>

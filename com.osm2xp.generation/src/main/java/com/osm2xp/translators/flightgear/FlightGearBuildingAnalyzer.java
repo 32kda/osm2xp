@@ -220,13 +220,13 @@ public class FlightGearBuildingAnalyzer {
 			return BuildingListType.MEDIUM;
 		}
 
-		if (levels <= options.getBuildingListLargeMaxLevels()
-				&& minSide >= options.getBuildingListLargeMinSide()
-				&& maxSide >= options.getBuildingListLargeMinSide() * 1.5) {
-			return BuildingListType.LARGE;
-		}
+//		if (levels <= options.getBuildingListLargeMaxLevels()
+//				&& minSide >= options.getBuildingListLargeMinSide()
+//				&& maxSide >= options.getBuildingListLargeMinSide() * 1.5) {
+//			return BuildingListType.LARGE;
+//		}
 
-		return BuildingListType.UNSUITABLE;
+		return BuildingListType.LARGE;
 	}
 
 	private PcaRectangle computePcaRectangle(LinearCurve2D curve) {
