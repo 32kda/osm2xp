@@ -201,6 +201,43 @@ public class FlightGearBucket {
 		return y;
 	}
 
+	/** West edge of the tile, in degrees longitude. */
+	public double getMinLon() {
+		return lon + x * span;
+	}
+
+	/** East edge of the tile, in degrees longitude. */
+	public double getMaxLon() {
+		return getMinLon() + span;
+	}
+
+	/** South edge of the tile, in degrees latitude. */
+	public double getMinLat() {
+		return lat + y * SG_BUCKET_SPAN;
+	}
+
+	/** North edge of the tile, in degrees latitude. */
+	public double getMaxLat() {
+		return getMinLat() + SG_BUCKET_SPAN;
+	}
+
+	@Override
+	public int hashCode() {
+		return Long.hashCode(getIndex());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof FlightGearBucket)) {
+			return false;
+		}
+		FlightGearBucket other = (FlightGearBucket) obj;
+		return lon == other.lon && lat == other.lat && x == other.x && y == other.y;
+	}
+
 	@Override
 	public String toString() {
 		return getIndex() + " (" + genBasePath() + ")";
