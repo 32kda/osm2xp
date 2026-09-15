@@ -250,6 +250,60 @@ public class BtgCsgConverter {
 		return new ClipResult(result, uniqueCrossings);
 	}
 
+	/** Result of a cell-based cut: untouched faces plus the faces removed (hole). */
+	public static final class CellCut {
+		public final List<BtgFace> keptFaces;
+		public final List<TerrainFace> removedFaces;
+
+		CellCut(List<BtgFace> keptFaces, List<TerrainFace> removedFaces) {
+			this.keptFaces = keptFaces;
+			this.removedFaces = removedFaces;
+		}
+	}
+
+	/**
+	 * Cell-based cut: every terrain face whose triangle intersects the cut footprint
+	 * is removed <em>entirely</em>; all other faces are kept untouched (original
+	 * vertices, normals, texcoords). No triangle is clipped or re-triangulated, so
+	 * the kept terrain stays conforming with the hole boundary, and a skirt built
+	 * from the removed faces shares the exact hole-boundary vertices.
+	 */
+	public CellCut cellCut(BtgTile tile, Polygon cutPolygon) {
+		float[] vertices = tile.getVertices();
+		BtgVector3 center = tile.getCenter();
+		double cx = center.getX();
+		double cy = center.getY();
+		double cz = center.getZ();
+		Envelope envelope = cutPolygon.getEnvelopeInternal();
+
+		List<BtgFace> kept = new ArrayList<>();
+		List<TerrainFace> removed = new ArrayList<>();
+		for (BtgFace face : tile.getFaces()) {
+			double[] p0 = toLocal(vertices, cx, cy, cz, face.getA());
+			double[] p1 = toLocal(vertices, cx, cy, cz, face.getB());
+			double[] p2 = toLocal(vertices, cx, cy, cz, face.getC());
+			if (!intersectsRegion(envelope, p0, p1, p2)) {
+				kept.add(face);
+				continue;
+			}
+			TerrainFace local = new TerrainFace(face.getA(), face.getB(), face.getC(), p0, p1, p2, face.getMaterial());
+			Polygon triangle = facePolygon(local);
+			if (!triangle.isEmpty() && triangle.intersects(cutPolygon)) {
+				removed.add(local);
+			} else {
+				kept.add(face);
+			}
+		}
+		return new CellCut(kept, removed);
+	}
+
+	/** The triangle of a local-frame terrain face, in the east/north plane. */
+	public Polygon facePolygon(TerrainFace face) {
+		return geometryFactory.createPolygon(new Coordinate[] {
+				new Coordinate(face.e0, face.n0), new Coordinate(face.e1, face.n1),
+				new Coordinate(face.e2, face.n2), new Coordinate(face.e0, face.n0) });
+	}
+
 	/**
 	 * Twice the signed area of a triangle in the east/north plane; positive = CCW.
 	 */
@@ -468,6 +522,11 @@ public class BtgCsgConverter {
 			faceIndices.add(new int[] { v0, v1, v2, t0, t1, t2 });
 			triangleMaterials.add(triangle.material);
 		}
+	}
+
+	/** Terrain altitude at (east, north), interpolated over the source face. */
+	public static double altitude(TerrainFace face, double east, double north) {
+		return interpolateAltitude(face, east, north);
 	}
 
 	/**

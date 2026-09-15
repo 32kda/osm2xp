@@ -136,20 +136,19 @@ public class FlightGearAirportCutWriter {
 
 		Set<FlightGearBucket> buckets = bucketsFor(cutPolygon, datum);
 
-		// Pass 1 (cut mode only): cut each tile, collecting the seam vertices on
-		// the cut boundary.
+		// Pass 1 (cut mode only): partition each tile into untouched faces and
+		// removed faces (the hole). No triangle is clipped or re-triangulated, so
+		// the kept terrain stays conforming with the hole boundary.
 		Map<FlightGearBucket, TileCut> cuts = new HashMap<>();
-		List<double[]> crossings = new ArrayList<>();
 		if (cutTerrain) {
 			for (FlightGearBucket bucket : buckets) {
 				BtgTile terrain = prober.getTile(bucket);
 				if (terrain == null) {
 					continue;
 				}
-				TileCut cut = clipTile(converter, terrain, cutPolygon);
-				if (cut != null) {
+				TileCut cut = partitionTile(converter, terrain, cutPolygon);
+				if (cut != null && !cut.removedFaces.isEmpty()) {
 					cuts.put(bucket, cut);
-					crossings.addAll(cut.crossings);
 				}
 			}
 			if (cuts.isEmpty()) {
@@ -157,26 +156,23 @@ public class FlightGearAirportCutWriter {
 			}
 		}
 
-		// Densify the cut footprint with the seam vertices so the skirt rim and
-		// the clipped terrain share vertices (stitched, not merely coincident).
-		// In overlay mode there is no cut, so the plain footprint is the rim.
-		// TEMP diagnostic: when GENERATE_SKIRT is off, the skirt (and the
-		// densification it needs) is skipped entirely.
+		// Overlay mode: the terrain is untouched, so the skirt is the smooth ring
+		// between the cut footprint and the plate.
 		Map<FlightGearBucket, List<Polygon>> skirtByTile = new HashMap<>();
-		if (GENERATE_SKIRT) {
-			Polygon stitchedCut = cutTerrain ? densify(cutPolygon, crossings) : cutPolygon;
-			Geometry skirtRing = stitchedCut.difference(hull);
+		if (!cutTerrain && GENERATE_SKIRT) {
+			Geometry skirtRing = cutPolygon.difference(hull);
 			skirtByTile = splitGeometryByTile(skirtRing, datum);
 		}
 
-		// Pass 2: assemble the overlay in one shared vertex pool and write.
+		// Pass 2: assemble the overlay (plate + skirt) and write.
 		if (cutTerrain) {
 			for (Map.Entry<FlightGearBucket, TileCut> entry : cuts.entrySet()) {
 				FlightGearBucket bucket = entry.getKey();
 				TileCut cut = entry.getValue();
-				List<BtgCsgConverter.Triangle> overlay = buildOverlay(bucket, plateElevation, plateByTile, skirtByTile,
-						hull, buffer, prober, datumLon, datumLat);
-				BtgTile merged = converter.rebuild(cut.terrain, cut.outsideFaces, cut.triangles, overlay);
+				List<BtgCsgConverter.Triangle> overlay = buildOverlay(bucket, plateElevation, plateByTile,
+						cut.removedFaces, skirtByTile, hull, buffer, prober, datumLon, datumLat);
+				// Keep the untouched faces; plate + skirt fill the removed hole.
+				BtgTile merged = converter.rebuild(cut.terrain, cut.keptFaces, new ArrayList<>(), overlay);
 				writeTile(merged, bucket, sceneryRoot, airfield, elevation);
 			}
 		} else {
@@ -185,8 +181,8 @@ public class FlightGearAirportCutWriter {
 				if (terrain == null) {
 					continue;
 				}
-				List<BtgCsgConverter.Triangle> overlay = buildOverlay(bucket, plateElevation, plateByTile, skirtByTile,
-						hull, buffer, prober, datumLon, datumLat);
+				List<BtgCsgConverter.Triangle> overlay = buildOverlay(bucket, plateElevation, plateByTile,
+						null, skirtByTile, hull, buffer, prober, datumLon, datumLat);
 				// Keep every original terrain face and overlay the airfield on top.
 				BtgTile merged = converter.rebuild(terrain, terrain.getFaces(), new ArrayList<>(), overlay);
 				writeTile(merged, bucket, sceneryRoot, airfield, plateElevation);
@@ -197,8 +193,8 @@ public class FlightGearAirportCutWriter {
 	/** Builds the flat plate + sloped skirt overlay triangles for one tile. */
 	private List<BtgCsgConverter.Triangle> buildOverlay(FlightGearBucket bucket, double elevation,
 			Map<FlightGearBucket, List<SurfacePolygon>> plateByTile,
-			Map<FlightGearBucket, List<Polygon>> skirtByTile, Polygon hull, double buffer,
-			FlightGearTerrainElevationProber prober, double datumLon, double datumLat) {
+			List<BtgCsgConverter.TerrainFace> removedFaces, Map<FlightGearBucket, List<Polygon>> skirtByTile,
+			Polygon hull, double buffer, FlightGearTerrainElevationProber prober, double datumLon, double datumLat) {
 		List<BtgCsgConverter.Triangle> overlay = new ArrayList<>();
 		if (GENERATE_PLATE) {
 			for (SurfacePolygon surface : plateByTile.getOrDefault(bucket, new ArrayList<>())) {
@@ -213,53 +209,73 @@ public class FlightGearAirportCutWriter {
 				}
 			}
 		}
-		for (Polygon piece : skirtByTile.getOrDefault(bucket, new ArrayList<>())) {
-			for (double[] triangle : triangulator.triangulateSimple(piece, "skirt")) {
-				if (triangle.length != 6) {
-					Osm2xpLogger.error("Skirt triangulation produced a " + (triangle.length / 2)
-							+ "-vertex polygon instead of a triangle; skipping");
-					continue;
+		if (GENERATE_SKIRT) {
+			if (removedFaces != null && !removedFaces.isEmpty()) {
+				// Cut mode: the skirt is the part of each removed terrain triangle
+				// outside the plate (hull). Its outer rim keeps the removed triangle's
+				// own edges (welds to the untouched terrain); its inner rim is the hull
+				// (welds to the plate).
+				for (BtgCsgConverter.TerrainFace removed : removedFaces) {
+					Geometry piece = facePolygon(removed).difference(hull);
+					for (Polygon p : GeomUtils.flatMapToPoly(piece)) {
+						for (double[] triangle : triangulator.triangulateSimple(p, "skirt")) {
+							if (triangle.length != 6) {
+								Osm2xpLogger.error("Skirt triangulation produced a " + (triangle.length / 2)
+										+ "-vertex polygon instead of a triangle; skipping");
+								continue;
+							}
+							overlay.add(lift(triangle, elevation, hull, buffer, removed));
+						}
+					}
 				}
-				overlay.add(lift(triangle, elevation, hull, buffer, prober, datumLon, datumLat));
+			} else {
+				// Overlay mode: smooth ring between the footprint and the plate.
+				for (Polygon piece : skirtByTile.getOrDefault(bucket, new ArrayList<>())) {
+					for (double[] triangle : triangulator.triangulateSimple(piece, "skirt")) {
+						if (triangle.length != 6) {
+							Osm2xpLogger.error("Skirt triangulation produced a " + (triangle.length / 2)
+									+ "-vertex polygon instead of a triangle; skipping");
+							continue;
+						}
+						overlay.add(liftSmooth(triangle, elevation, hull, buffer, prober, datumLon, datumLat));
+					}
+				}
 			}
 		}
 		return overlay;
 	}
 
-	/** One tile's cut: the clipped terrain plus its untouched faces and seam vertices. */
+	private Polygon facePolygon(BtgCsgConverter.TerrainFace face) {
+		return geometryFactory.createPolygon(new Coordinate[] {
+				new Coordinate(face.e0, face.n0), new Coordinate(face.e1, face.n1),
+				new Coordinate(face.e2, face.n2), new Coordinate(face.e0, face.n0) });
+	}
+
+	/** One tile's cell-based cut: the untouched faces and the removed (hole) faces. */
 	private static final class TileCut {
 		final BtgTile terrain;
-		final List<BtgFace> outsideFaces;
-		final List<BtgCsgConverter.Triangle> triangles;
-		final List<double[]> crossings;
+		final List<BtgFace> keptFaces;
+		final List<BtgCsgConverter.TerrainFace> removedFaces;
 
-		TileCut(BtgTile terrain, List<BtgFace> outsideFaces, List<BtgCsgConverter.Triangle> triangles,
-				List<double[]> crossings) {
+		TileCut(BtgTile terrain, List<BtgFace> keptFaces, List<BtgCsgConverter.TerrainFace> removedFaces) {
 			this.terrain = terrain;
-			this.outsideFaces = outsideFaces;
-			this.triangles = triangles;
-			this.crossings = crossings;
+			this.keptFaces = keptFaces;
+			this.removedFaces = removedFaces;
 		}
 	}
 
-	/** Clips the buffered convex polygon out of a single terrain tile. */
-	private TileCut clipTile(BtgCsgConverter converter, BtgTile terrain, Polygon cutPolygon) {
-		Envelope region = cutPolygon.getEnvelopeInternal();
-		region.expandBy(REGION_MARGIN_M);
-		BtgCsgConverter.TerrainPartition partition = converter.partition(terrain, region);
-		if (partition.getInside().isEmpty()) {
-			return null;
-		}
-		if (partition.getInside().size() > MAX_CUT_FACES) {
-			Osm2xpLogger.warning("Skipping terrain cut: region contains " + partition.getInside().size()
-					+ " faces (limit " + MAX_CUT_FACES + ")");
-			return null;
-		}
+	/** Removes the terrain faces intersecting the cut footprint (no clipping). */
+	private TileCut partitionTile(BtgCsgConverter converter, BtgTile terrain, Polygon cutPolygon) {
 		try {
-			BtgCsgConverter.ClipResult clip = converter.clipTerrain(partition.getInside(), cutPolygon);
-			return new TileCut(terrain, partition.getOutside(), clip.triangles, clip.crossings);
+			BtgCsgConverter.CellCut cut = converter.cellCut(terrain, cutPolygon);
+			if (cut.removedFaces.size() > MAX_CUT_FACES) {
+				Osm2xpLogger.warning("Skipping terrain cut: " + cut.removedFaces.size() + " faces (limit "
+						+ MAX_CUT_FACES + ")");
+				return null;
+			}
+			return new TileCut(terrain, cut.keptFaces, cut.removedFaces);
 		} catch (Throwable t) {
-			Osm2xpLogger.error("Error cutting terrain tile, leaving it untouched", t);
+			Osm2xpLogger.error("Error partitioning terrain tile, leaving it untouched", t);
 			return null;
 		}
 	}
@@ -426,6 +442,23 @@ public class FlightGearAirportCutWriter {
 	}
 
 	private BtgCsgConverter.Triangle lift(double[] triangle, double elevation, Polygon hull, double buffer,
+			BtgCsgConverter.TerrainFace face) {
+		double[] z = new double[3];
+		for (int i = 0; i < 3; i++) {
+			double east = triangle[2 * i];
+			double north = triangle[2 * i + 1];
+			double t = clamp(distanceToHull(hull, east, north) / buffer, 0.0, 1.0);
+			// Use the source terrain face's own altitude so the skirt rim welds to the
+			// untouched terrain (no probe round-trip error).
+			double altitude = BtgCsgConverter.altitude(face, east, north);
+			z[i] = Double.isNaN(altitude) ? elevation : elevation + t * (altitude - elevation);
+		}
+		return new BtgCsgConverter.Triangle(triangle[0], triangle[1], z[0], triangle[2], triangle[3], z[1],
+				triangle[4], triangle[5], z[2], FlightGearAirfieldMaterials.SKIRT);
+	}
+
+	/** Smooth skirt (overlay mode): blends from the plate to the probed terrain. */
+	private BtgCsgConverter.Triangle liftSmooth(double[] triangle, double elevation, Polygon hull, double buffer,
 			FlightGearTerrainElevationProber prober, double datumLon, double datumLat) {
 		double[] z = new double[3];
 		for (int i = 0; i < 3; i++) {
