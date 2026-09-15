@@ -17,7 +17,7 @@ import math.geom2d.polygon.LinearRing2D;
 
 public class FlightGearBuildingAnalyzer {
 
-	private static final double SCALE = 111320.0;
+	private static final double SCALE = 111320.0; 
 
 	private final Random random;
 	private final FlightGearOptions options;
@@ -37,10 +37,6 @@ public class FlightGearBuildingAnalyzer {
 
 	public FlightGearBuildingListEntry analyze(OsmPolygon polygon) {
 		LinearRing2D ring = polygon.getPolygon();
-
-		if (!isConvex(ring)) {
-			return null;
-		}
 
 		Point2D center = polygon.getCenter();
 
@@ -70,8 +66,11 @@ public class FlightGearBuildingAnalyzer {
 			return null;
 		}
 
-		// Street angle from PCA principal axis
-		double streetAngle = rect.angle;
+		// Street angle: BUILDING_LIST expects the front-to-back heading (perpendicular to
+		// the street-facing facade), while PCA gives the long-axis bearing. The front
+		// facade of a building normally runs along its long side, so the street angle is
+		// the short axis = long axis + 90 deg.
+		double streetAngle = (rect.angle + 90) % 360;
 
 		// Ground elevation via fgelev probing (outer ring points, take minimum)
 		double groundElev = probeGroundElevation(ring);
@@ -79,8 +78,8 @@ public class FlightGearBuildingAnalyzer {
 			return null;
 		}
 
-		// Roof orientation: 0 if ridge parallel to street, 1 if perpendicular
-		int roofOrientation = (streetAngle < 45 || streetAngle > 135) ? 0 : 1;
+		// Roof orientation: 0 if ridge parallel to front (long side), 1 if perpendicular
+		int roofOrientation = (width >= depth) ? 0 : 1;
 
 		// Texture indices from deterministic pseudo-random
 		int wallTexIdx = computeTextureIndex(center.x(), center.y(), 0);
