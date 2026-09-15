@@ -8,7 +8,7 @@ public class PolygonUtil {
 	public static Line2D getMedianLine(Point2D[] points) {
 		Point2D centerpoint = Point2D.centroid(points);
 		Point2D[] newPoints = new Point2D[points.length];
-		double factor = Math.cos(centerpoint.y());
+		double factor = Math.cos(Math.toRadians(centerpoint.y()));
 		for (int i = 0; i < newPoints.length; i++) {
 			double x = (points[i].x() - centerpoint.x()) * factor;
 			double y = points[i].y() - centerpoint.y();

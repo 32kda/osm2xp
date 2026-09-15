@@ -79,16 +79,6 @@
 							    <version>65.1</version>
 							</dependency>
 							<dependency>
-							    <groupId>eu.mihosoft.vrl.jcsg</groupId>
-							    <artifactId>jcsg</artifactId>
-							    <version>0.5.7</version>
-							</dependency>
-							<dependency>
-							    <groupId>eu.mihosoft.vvecmath</groupId>
-							    <artifactId>vvecmath</artifactId>
-							    <version>0.3.8</version>
-							</dependency>
-							<dependency>
 							    <groupId>junit</groupId>
 							    <artifactId>junit</artifactId>
 							    <version>4.13.2</version>
@@ -111,16 +101,6 @@
 	</build>
 
 	<dependencies>
-		<dependency>
-			<groupId>eu.mihosoft.vrl.jcsg</groupId>
-			<artifactId>jcsg</artifactId>
-			<version>0.5.7</version>
-		</dependency>
-		<dependency>
-			<groupId>eu.mihosoft.vvecmath</groupId>
-			<artifactId>vvecmath</artifactId>
-			<version>0.3.8</version>
-		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>

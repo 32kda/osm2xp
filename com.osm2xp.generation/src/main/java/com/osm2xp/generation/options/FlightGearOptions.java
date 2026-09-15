@@ -19,6 +19,7 @@ import com.osm2xp.generation.options.rules.ObjectsRulesList;
 @XmlType(name = "", propOrder = { "objectsRules", "generateBuildings",
 		"generateObjects", "generateBuildings3D", "useBuildingList",
 		"generateTransportation", "generateAirfields", "generateAirfieldsBtg",
+		"generateAirfieldsBtgCut",
 		"generateChimneys",
 		"generateCoolingTowers", "generateBuildingsElevation", "fgelevPath",
 		"flightGearSceneryPath",
@@ -42,6 +43,7 @@ public class FlightGearOptions {
 	protected boolean generateTransportation = true;
 	protected boolean generateAirfields = true;
 	protected boolean generateAirfieldsBtg = true;
+	protected boolean generateAirfieldsBtgCut = false;
 	protected boolean generateChimneys = true;
 	protected boolean generateCoolingTowers = true;
 	protected boolean generateBuildingsElevation = true;
@@ -154,6 +156,14 @@ public class FlightGearOptions {
 
 	public void setGenerateAirfieldsBtg(boolean generateAirfieldsBtg) {
 		this.generateAirfieldsBtg = generateAirfieldsBtg;
+	}
+
+	public boolean isGenerateAirfieldsBtgCut() {
+		return generateAirfieldsBtgCut;
+	}
+
+	public void setGenerateAirfieldsBtgCut(boolean generateAirfieldsBtgCut) {
+		this.generateAirfieldsBtgCut = generateAirfieldsBtgCut;
 	}
 
 	public boolean isGenerateChimneys() {

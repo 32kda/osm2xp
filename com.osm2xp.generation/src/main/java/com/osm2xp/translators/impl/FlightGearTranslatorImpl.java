@@ -278,7 +278,8 @@ public class FlightGearTranslatorImpl implements ITranslator {
         }
         String fgelevPath = options.getFgelevPath();
         File fgelevBinary = StringUtils.isNotBlank(fgelevPath) ? new File(fgelevPath) : null;
-        FlightGearElevProber prober = new FlightGearElevProber(fgelevBinary, options.getFlightGearSceneryPath());
+        //FIXME poor params for elevation prober here
+        FlightGearElevProber prober = new FlightGearElevProber(fgelevBinary, options.getFlightGearSceneryPath(), new File(options.getFlightGearSceneryPath(), "Terrain"));
         if (prober.isDisabled()) {
             Osm2xpLogger.warning("Building elevation probing is disabled: configure fgelevPath and "
                     + "flightGearSceneryPath for terrain-accurate building elevations.");

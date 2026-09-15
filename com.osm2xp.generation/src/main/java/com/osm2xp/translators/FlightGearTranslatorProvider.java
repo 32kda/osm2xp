@@ -27,6 +27,10 @@ public class FlightGearTranslatorProvider extends DefaultTranslatorProvider {
 		super(binaryFile, folderPath, outputFomat);
 		this.bucketOutputRegistry = new FlightGearBucketOutputRegistry(new File(folderPath),
 				FlightGearOptionsProvider.getOptions().isGenerateBuildings());
+		// Defensive: make sure buffered STG/list writers are flushed even if the run
+		// is aborted before ITranslatorProvider.close() is reached (otherwise the
+		// 8 KB-buffered writers leave truncated files that FlightGear cannot parse).
+		Runtime.getRuntime().addShutdownHook(new Thread(bucketOutputRegistry::closeAll, "osm2xp-stg-flush"));
 	}
 
 	@Override

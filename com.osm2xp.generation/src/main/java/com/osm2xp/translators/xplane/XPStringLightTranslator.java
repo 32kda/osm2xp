@@ -40,7 +40,6 @@ public class XPStringLightTranslator implements IXPLightTranslator{
 		}
 	}
 	
-	@SuppressWarnings("restriction")
 	protected List<LinearCurve2D> getLightStrings(LinearCurve2D baseLine, double length, double distance, boolean doubleSided) {		
 		List<LinearCurve2D> resList = new ArrayList<>();
 		LinearCurve2D shortenedLine = getShortenedLine(baseLine, length, distance);

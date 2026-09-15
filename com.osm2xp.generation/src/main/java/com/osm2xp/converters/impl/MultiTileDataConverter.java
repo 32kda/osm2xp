@@ -12,7 +12,7 @@ import com.osm2xp.translators.impl.TileTranslationAdapter;
 import math.geom2d.Point2D;
 
 /**
- * OSM dta converter with ability to automatically detect tiles and split parsed data around several polygons 
+ * OSM data converter with ability to automatically detect tiles and split parsed data around several polygons 
  * using JTS library to clip, cut, simplify and fix OSM polygons 
  * 
  * @author Dmitry Karpenko, OnPositive

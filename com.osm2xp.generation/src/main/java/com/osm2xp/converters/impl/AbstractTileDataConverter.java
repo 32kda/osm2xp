@@ -28,12 +28,24 @@ public abstract class AbstractTileDataConverter extends AbstractOSMDataConverter
 	}
 
 	public void complete() {
-		for (ISpecificTranslator tileTranslationAdapter : translationAdapters) {
-			tileTranslationAdapter.complete();
-		}
-		super.complete();
-		if (translatorProvider != null) {
-			translatorProvider.close();
+		try {
+			for (ISpecificTranslator tileTranslationAdapter : translationAdapters) {
+				try {
+					tileTranslationAdapter.complete();
+				} catch (Throwable t) {
+					Osm2xpLogger.error("Error completing translation adapter "
+							+ tileTranslationAdapter.getClass().getName(), t);
+				}
+			}
+			super.complete();
+		} finally {
+			if (translatorProvider != null) {
+				try {
+					translatorProvider.close();
+				} catch (Throwable t) {
+					Osm2xpLogger.error("Error closing translator provider", t);
+				}
+			}
 		}
 	}
 

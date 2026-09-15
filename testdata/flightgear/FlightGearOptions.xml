@@ -72,6 +72,7 @@
     <generateTransportation>true</generateTransportation>
     <generateAirfields>true</generateAirfields>
     <generateAirfieldsBtg>false</generateAirfieldsBtg>
+    <generateAirfieldsBtgCut>false</generateAirfieldsBtgCut>
     <generateChimneys>true</generateChimneys>
     <generateCoolingTowers>true</generateCoolingTowers>
 </FlightGearOptions>

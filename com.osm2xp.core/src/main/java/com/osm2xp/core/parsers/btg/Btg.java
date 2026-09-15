@@ -11,6 +11,8 @@ import java.nio.file.Path;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import com.osm2xp.core.logging.Osm2xpLogger;
+
 /**
  * Entry point for reading and writing FlightGear BTG terrain tiles.
  * <p>
@@ -48,19 +50,23 @@ public final class Btg {
 	 * is not closed by this method.
 	 */
 	public static BtgTile read(InputStream input) throws IOException {
-		BufferedInputStream buffered = new BufferedInputStream(input);
-		buffered.mark(2);
-		int b0 = buffered.read();
-		int b1 = buffered.read();
-		buffered.reset();
-
-		BtgParser parser = new BtgParserImpl();
-		if (b0 == 0x1F && b1 == 0x8B) {
-			try (GZIPInputStream gzip = new GZIPInputStream(buffered)) {
-				return parser.parse(gzip);
+		try (BufferedInputStream buffered = new BufferedInputStream(input)) { 
+			buffered.mark(2);
+			int b0 = buffered.read();
+			int b1 = buffered.read();
+			buffered.reset();
+	
+			BtgParser parser = new BtgParserImpl();
+			if (b0 == 0x1F && b1 == 0x8B) {
+				try (GZIPInputStream gzip = new GZIPInputStream(buffered)) {
+					return parser.parse(gzip);
+				}
 			}
+			return parser.parse(buffered);
+		} catch (Exception e) {
+			Osm2xpLogger.error("Error reading BTG", e);			
 		}
-		return parser.parse(buffered);
+		return null;
 	}
 
 	/**
