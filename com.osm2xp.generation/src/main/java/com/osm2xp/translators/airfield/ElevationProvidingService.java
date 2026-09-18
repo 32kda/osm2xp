@@ -24,16 +24,31 @@ public class ElevationProvidingService extends GeoMetaProvidingService<Double> {
 	private static final String ELEVATION_PROP = "elevation";
 
 	private static ElevationProvidingService instance;
-	
+
+	/** Run-scoped terrain root (the working folder), set by the FlightGear provider. */
+	private static File terrainRoot;
+
 	private List<Point2D> toGet = new ArrayList<Point2D>();
 
 	private FlightGearElevProber prober;
-	
+
 	public static synchronized ElevationProvidingService getInstance() {
 		if (instance == null) {
 			instance = new ElevationProvidingService();
 		}
 		return instance;
+	}
+
+	/**
+	 * Sets the terrain root used for local elevation probing and drops any cached
+	 * prober, so a new generation run reads the terrain it just downloaded.
+	 */
+	public static synchronized void setTerrainRoot(File root) {
+		terrainRoot = root;
+		if (instance != null && instance.prober != null) {
+			instance.prober.close();
+			instance.prober = null;
+		}
 	}
 		
 	public Double getElevation(Point2D point, boolean queryIfAbsent) {
@@ -70,7 +85,12 @@ public class ElevationProvidingService extends GeoMetaProvidingService<Double> {
 		FlightGearOptions options = FlightGearOptionsProvider.getOptions();
 		String fgelevPath = options.getFgelevPath();
 		File fgelevBinary = StringUtils.isNotBlank(fgelevPath) ? new File(fgelevPath) : null;
-		return new FlightGearElevProber(fgelevBinary, options.getFlightGearSceneryPath());
+		if (terrainRoot != null) {
+			// Cached source tiles; read BTG in-process (no fgelev required).
+			return new FlightGearElevProber(fgelevBinary, terrainRoot.getPath(), terrainRoot);
+		}
+		String sceneryPath = options.getFlightGearSceneryPath();
+		return new FlightGearElevProber(fgelevBinary, StringUtils.isNotBlank(sceneryPath) ? sceneryPath : null);
 	}
 
 	protected GetElevationCallable scheduleGetElevations() {

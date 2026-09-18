@@ -147,6 +147,15 @@ public class App
     			}
     			StatsProvider.reinit();
     			
+    			try {
+    				IVisitingParser preprocessParser = ParserBuilder.getPreprocessParser(inputFile, translatorProvider, dataSink);
+    				if (preprocessParser != null) {
+    					preprocessParser.process();
+    				}
+    			} catch (Exception e) {
+    				Osm2xpLogger.error("Error preprocessing input file: ", e);
+    			}
+    			
     			parser.process();
     			if (parser instanceof IVisitingParser && ((IVisitingParser) parser).getVisitor() instanceof MultiTileDataConverter) {
     				System.out.println("Finished generation of " +  ((AbstractTileDataConverter) ((IVisitingParser) parser).getVisitor()).getTilesCount() + " tiles, target folder " + sceneryName);

@@ -50,7 +50,7 @@ public class FGPowerlineTranslator extends FlightGearObjectTranslator {
     @Override
     public boolean handlePoly(OsmPolyline osmPolyline) {
         FlightGearOptions options = FlightGearOptionsProvider.getOptions();
-        if (!options.isGenerateTransportation()) {
+        if (!options.isGeneratePowerLines()) {
             return false;
         }
         String power = osmPolyline.getTagValue("power");

@@ -170,9 +170,21 @@ public class FlightGearBucket {
 				hem, topLon, pole, topLat, hem, mainLon, pole, mainLat);
 	}
 
+	/**
+	 * VPB (WS3.0) base name below the {@code vpb/} scenery suffix (SimGear
+	 * <code>SGBucket::gen_vpb_base</code>), e.g. <code>e080n50/e085n51/ws_e085n51</code>.
+	 * The root terrain tile is {@code vpb/<genVpbBase()>.osgb}; used by the future
+	 * VPB tile locator.
+	 */
+	public String genVpbBase() {
+		String basePath = genBasePath();
+		int slash = basePath.indexOf('/');
+		String cell = slash < 0 ? basePath : basePath.substring(slash + 1);
+		return basePath + "/ws_" + cell;
+	}
+
 	/** Longitude of the tile center (SimGear <code>get_center_lon</code>). */
-	public double getCenterLon() {
-		return lon + x * span + span / 2;
+	public double getCenterLon() {		return lon + x * span + span / 2;
 	}
 
 	/** Latitude of the tile center (SimGear <code>get_center_lat</code>). */

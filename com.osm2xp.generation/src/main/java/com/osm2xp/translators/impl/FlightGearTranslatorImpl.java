@@ -26,7 +26,7 @@ import com.osm2xp.translators.IPolyHandler;
 import com.osm2xp.translators.ITranslator;
 import com.osm2xp.translators.flightgear.FGBuildingObjectTranslator;
 import com.osm2xp.translators.flightgear.FGRailTranslator;
-import com.osm2xp.translators.flightgear.FGRoadTranslator;
+import com.osm2xp.translators.flightgear.FlightGearRoadTranslator;
 import com.osm2xp.translators.flightgear.FGPowerlineTranslator;
 import com.osm2xp.translators.flightgear.FGRulesObjectTranslator;
 import com.osm2xp.translators.flightgear.FlightGearBuildingAnalyzer;
@@ -43,6 +43,10 @@ import com.osm2xp.translators.flightgear.TransportationData;
 import com.osm2xp.translators.flightgear.TransportationParsingService;
 import com.osm2xp.translators.flightgear.TransportationValidator;
 import com.osm2xp.translators.flightgear.TransportationValidator.ValidationReport;
+import com.osm2xp.translators.flightgear.terrain.TerrainCache;
+import com.osm2xp.translators.flightgear.terrain.TerrainFormat;
+import com.osm2xp.translators.flightgear.terrain.TerrainServices;
+import com.osm2xp.translators.flightgear.terrain.TerrainTileLocator;
 import com.osm2xp.utils.FilesUtils;
 import com.osm2xp.utils.geometry.GeomUtils;
 import com.osm2xp.utils.osm.OsmUtils;
@@ -62,6 +66,7 @@ public class FlightGearTranslatorImpl implements ITranslator {
     private ValidationReport transportReport;
 
     private final FlightGearBucketOutputRegistry bucketOutputRegistry;
+    private final File terrainCacheDir;
     private FlightGearStgWriterProvider stgWriterProvider;
     private FlightGearElevProber elevProber;
 
@@ -72,13 +77,20 @@ public class FlightGearTranslatorImpl implements ITranslator {
 
     public FlightGearTranslatorImpl(Point2D currentTile, String folderPath,
             FlightGearBucketOutputRegistry bucketOutputRegistry) {
+        this(currentTile, folderPath, bucketOutputRegistry,
+                TerrainCache.resolveCacheDir(new File(folderPath), null));
+    }
+
+    public FlightGearTranslatorImpl(Point2D currentTile, String folderPath,
+            FlightGearBucketOutputRegistry bucketOutputRegistry, File terrainCacheDir) {
         super();
         this.currentTile = currentTile;
         this.folderPath = folderPath;
         this.bucketOutputRegistry = bucketOutputRegistry;
+        this.terrainCacheDir = terrainCacheDir;
 
         // Register poly handlers (order matters — most specific first)
-        polyHandlers.add(new FGRoadTranslator());
+        polyHandlers.add(new FlightGearRoadTranslator());
         polyHandlers.add(new FGRailTranslator());
         polyHandlers.add(new FGPowerlineTranslator());
 
@@ -121,7 +133,7 @@ public class FlightGearTranslatorImpl implements ITranslator {
         FlightGearOptions options = FlightGearOptionsProvider.getOptions();
 
         // 1. Try poly handlers (roads, railways, powerlines)
-        if (options.isGenerateTransportation()) {
+        if (options.isGenerateTransportation() || options.isGeneratePowerLines()) {
             for (IPolyHandler handler : polyHandlers) {
                 if (handler.handlePoly(osmPolyline)) {
                     StatsProvider.getTileStats(currentTile, true).incCount(handler.getId());
@@ -278,11 +290,20 @@ public class FlightGearTranslatorImpl implements ITranslator {
         }
         String fgelevPath = options.getFgelevPath();
         File fgelevBinary = StringUtils.isNotBlank(fgelevPath) ? new File(fgelevPath) : null;
-        //FIXME poor params for elevation prober here
-        FlightGearElevProber prober = new FlightGearElevProber(fgelevBinary, options.getFlightGearSceneryPath(), new File(options.getFlightGearSceneryPath(), "Terrain"));
+        TerrainTileLocator locator;
+        try {
+            locator = TerrainServices.createLocator(TerrainFormat.fromString(options.getTerrainFormat()));
+        } catch (UnsupportedOperationException e) {
+            Osm2xpLogger.warning(e.getMessage());
+            return null;
+        }
+        // The source_tiles cache is prepared by FlightGearTerrainPreprocessor; for
+        // BTG it is read in-process (no fgelev binary required).
+        FlightGearElevProber prober = new FlightGearElevProber(fgelevBinary,
+                terrainCacheDir == null ? null : terrainCacheDir.getPath(), terrainCacheDir, locator);
         if (prober.isDisabled()) {
-            Osm2xpLogger.warning("Building elevation probing is disabled: configure fgelevPath and "
-                    + "flightGearSceneryPath for terrain-accurate building elevations.");
+            Osm2xpLogger.warning("Building elevation probing is disabled: no terrain found under "
+                    + terrainCacheDir + ".");
         }
         return prober;
     }

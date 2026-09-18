@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
@@ -22,7 +21,6 @@ import com.osm2xp.core.logging.Osm2xpLogger;
 import com.osm2xp.core.parsers.btg.Btg;
 import com.osm2xp.core.parsers.btg.BtgTile;
 import com.osm2xp.core.parsers.btg.BtgVector3;
-import com.osm2xp.generation.options.FlightGearOptionsProvider;
 import com.osm2xp.translators.airfield.AirfieldData;
 import com.osm2xp.translators.airfield.RunwayData;
 import com.osm2xp.translators.flightgear.FlightGearBucket;
@@ -51,10 +49,8 @@ public class FlightGearAirportBtgWriter {
 
 	private final GeometryFactory geometryFactory = new GeometryFactory();
 
-	public void write(AirfieldData airfield, File sceneryRoot) {
-		String terrainRoot = FlightGearOptionsProvider.getOptions().getFlightGearSceneryPath();
-		FlightGearTerrainElevationProber prober = new FlightGearTerrainElevationProber(
-				StringUtils.isNotBlank(terrainRoot) ? new File(terrainRoot) : null);
+	public void write(AirfieldData airfield, File sourceTerrainDir, File outputSceneryRoot) {
+		FlightGearTerrainElevationProber prober = new FlightGearTerrainElevationProber(sourceTerrainDir);
 		if (!prober.isAvailable()) {
 			return;
 		}
@@ -74,7 +70,7 @@ public class FlightGearAirportBtgWriter {
 		BtgVector3 center = new BtgVector3(centerEcef[0], centerEcef[1], centerEcef[2]);
 
 		for (Map.Entry<FlightGearBucket, List<SurfacePolygon>> entry : byTile.entrySet()) {
-			writeTile(airfield, sceneryRoot, prober, datum, elevation, center, entry.getKey(), entry.getValue());
+			writeTile(airfield, outputSceneryRoot, prober, datum, elevation, center, entry.getKey(), entry.getValue());
 		}
 	}
 

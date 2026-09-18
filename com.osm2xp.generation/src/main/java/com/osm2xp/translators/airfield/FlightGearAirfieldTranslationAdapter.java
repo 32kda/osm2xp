@@ -1,14 +1,15 @@
 package com.osm2xp.translators.airfield;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.Locale;
+import java.util.Set;
 
 import com.osm2xp.core.logging.Osm2xpLogger;
+import com.osm2xp.generation.options.FlightGearOptions;
 import com.osm2xp.generation.options.FlightGearOptionsProvider;
-import com.osm2xp.generation.options.XPlaneOptionsProvider;
 import com.osm2xp.translators.airfield.btg.FlightGearAirportCutWriter;
-import com.osm2xp.translators.flightgear.FlightGearTerrainDownloader;
-
-import math.geom2d.Box2D;
+import com.osm2xp.translators.flightgear.FlightGearExistingAirfields;
 
 /**
  * FlightGear airfield translation adapter, reusing the X-Plane airfield
@@ -22,6 +23,11 @@ import math.geom2d.Box2D;
  * supported by {@link FlightGearAirportCutWriter}: cut-and-fill (a hole in the
  * terrain) when {@code generateAirfieldsBtgCut} is on, otherwise the plate +
  * skirt are overlaid on the untouched terrain.
+ * <p>
+ * The terrain is prepared up-front by
+ * {@code FlightGearTerrainPreprocessor} (via
+ * {@code FlightGearTranslatorProvider.createPreprocessors}); this adapter no
+ * longer downloads it.
  *
  * @author osm2xp
  */
@@ -29,10 +35,12 @@ public class FlightGearAirfieldTranslationAdapter extends XPAirfieldTranslationA
 
 	private final FlightGearAirportCutWriter cutWriter = new FlightGearAirportCutWriter();
 
-	private Box2D bbox;
+	private final File terrainCacheDir;
+	private Set<String> existingAirfields;
 
-	public FlightGearAirfieldTranslationAdapter(String outputFolder) {
+	public FlightGearAirfieldTranslationAdapter(String outputFolder, File terrainCacheDir) {
 		super(outputFolder, true);
+		this.terrainCacheDir = terrainCacheDir;
 	}
 
 	@Override
@@ -41,9 +49,31 @@ public class FlightGearAirfieldTranslationAdapter extends XPAirfieldTranslationA
 	}
 
 	@Override
-	public void processBoundingBox(Box2D bbox) {
-		super.processBoundingBox(bbox);
-		this.bbox = bbox;
+	protected boolean isAirfieldIgnored(AirfieldData airfieldData) {
+		if (super.isAirfieldIgnored(airfieldData)) {
+			return true;
+		}
+		String icao = airfieldData.getICAO();
+		if (icao == null) {
+			return false;
+		}
+		if (FlightGearOptionsProvider.getOptions().getIgnoredAirfields().contains(icao)) {
+			return true;
+		}
+		return getExistingAirfields().contains(icao.toUpperCase(Locale.ROOT));
+	}
+
+	private Set<String> getExistingAirfields() {
+		if (existingAirfields == null) {
+			FlightGearOptions options = FlightGearOptionsProvider.getOptions();
+			if (options.isIgnoreExistingAirfields()) {
+				existingAirfields = FlightGearExistingAirfields
+						.findExisting(new File(options.getFlightGearSceneryPath()));
+			} else {
+				existingAirfields = Collections.emptySet();
+			}
+		}
+		return existingAirfields;
 	}
 
 	@Override
@@ -53,39 +83,16 @@ public class FlightGearAirfieldTranslationAdapter extends XPAirfieldTranslationA
 			return;
 		}
 		boolean cut = FlightGearOptionsProvider.getOptions().isGenerateAirfieldsBtgCut();
-		try {
-			downloadTerrain();
-		} catch (Throwable t) {
-			Osm2xpLogger.error("Error downloading FlightGear terrain for airfield BTG", t);
-		}
 		for (AirfieldData airfield : getAirfieldList()) {
-			String icao = airfield.getICAO();
-			if (icao != null
-					&& XPlaneOptionsProvider.getOptions().getAirfieldOptions().getIgnoredAirfields().contains(icao)) {
+			if (isAirfieldIgnored(airfield)) {
 				continue;
 			}
 			try {
-				cutWriter.write(airfield, getWorkFolder(), cut);
+				cutWriter.write(airfield, terrainCacheDir, getWorkFolder(), cut);
 			} catch (Throwable t) {
 				Osm2xpLogger.error("Error generating FlightGear airfield BTG for " + airfield.getId(), t);
 			}
 		}
-	}
-
-	private void downloadTerrain() {
-		if (bbox == null) {
-			return;
-		}
-		String sceneryPath = FlightGearOptionsProvider.getOptions().getFlightGearSceneryPath();
-		if (sceneryPath == null || sceneryPath.trim().isEmpty()) {
-			return;
-		}
-		java.io.File sceneryRoot = new java.io.File(sceneryPath);
-		if (!sceneryRoot.isDirectory()) {
-			return;
-		}
-		new FlightGearTerrainDownloader().download(bbox.getMinX(), bbox.getMinY(), bbox.getMaxX(), bbox.getMaxY(),
-				sceneryRoot);
 	}
 
 }

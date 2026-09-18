@@ -64,7 +64,7 @@ public class FGRailTranslator implements IPolyHandler {
     @Override
     public boolean handlePoly(OsmPolyline osmPolyline) {
         FlightGearOptions options = FlightGearOptionsProvider.getOptions();
-        if (!options.isGenerateTransportation()) {
+        if (!options.isGenerateTransportation() || !options.isGenerateRailways()) {
             return false;
         }
         String railway = osmPolyline.getTagValue("railway");

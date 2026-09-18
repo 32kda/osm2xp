@@ -15,20 +15,21 @@ import com.osm2xp.core.parsers.btg.BtgTile;
  * TerraSync uses), without spawning external processes.
  * <p>
  * A tile is resolved with {@link FlightGearBucket} at
- * {@code <sceneryRoot>/Terrain/<band>/<cell>/<index>.btg.gz} and cached for the
- * duration of the generation run.
+ * {@code <terrainDir>/<band>/<cell>/<index>.btg.gz} and cached for the duration
+ * of the generation run. {@code terrainDir} is the {@code source_tiles} cache or
+ * a generated {@code Terrain/} directory.
  */
 public class FlightGearTerrainElevationProber {
 
-	private final File sceneryRoot;
+	private final File terrainDir;
 	private final Map<Long, BtgTile> tileCache = new HashMap<>();
 
-	public FlightGearTerrainElevationProber(File sceneryRoot) {
-		this.sceneryRoot = sceneryRoot;
+	public FlightGearTerrainElevationProber(File terrainDir) {
+		this.terrainDir = terrainDir;
 	}
 
 	public boolean isAvailable() {
-		return sceneryRoot != null && sceneryRoot.isDirectory();
+		return terrainDir != null && terrainDir.isDirectory();
 	}
 
 	/** Loads (and caches) the terrain tile for the given bucket, or {@code null}. */
@@ -37,7 +38,7 @@ public class FlightGearTerrainElevationProber {
 		if (cached != null) {
 			return cached;
 		}
-		File tileFile = new File(new File(sceneryRoot, "Terrain"),
+		File tileFile = new File(terrainDir,
 				bucket.genBasePath() + File.separator + bucket.getIndex() + ".btg.gz");
 		BtgTile tile = null;
 		if (tileFile.isFile()) {

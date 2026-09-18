@@ -55,29 +55,21 @@ public class AirfieldGeometryBuilder {
 		this.anchorLon = datum.x();
 		this.anchorLat = datum.y();
 
-		List<SurfacePolygon> surfaces = new ArrayList<>();
-		List<Geometry> pavements = new ArrayList<>();
+		// Collect pavements grouped by priority (highest first): runways, helipads,
+		// taxiways, aprons. Within each group the first polygon wins.
+		List<SurfacePolygon> ordered = new ArrayList<>();
 
 		for (RunwayData runway : airfield.getUniqueRunways()) {
 			Polygon polygon = buildRunwayPolygon(runway);
 			if (polygon != null) {
-				pavements.add(polygon);
-				surfaces.add(new SurfacePolygon(polygon, FlightGearAirfieldMaterials.runwaySurface(runway)));
+				ordered.add(new SurfacePolygon(polygon, FlightGearAirfieldMaterials.runwaySurface(runway)));
 			}
 		}
 
 		for (HelipadData helipad : airfield.getHelipads()) {
 			Polygon polygon = buildHelipadPolygon(helipad);
 			if (polygon != null) {
-				pavements.add(polygon);
-				surfaces.add(new SurfacePolygon(polygon, FlightGearAirfieldMaterials.helipadSurface(airfield.isHard())));
-			}
-		}
-
-		for (OsmPolygon apron : airfield.getApronAreas()) {
-			for (Polygon polygon : buildApronPolygons(apron)) {
-				pavements.add(polygon);
-				surfaces.add(new SurfacePolygon(polygon, FlightGearAirfieldMaterials.apronSurface(airfield.isHard())));
+				ordered.add(new SurfacePolygon(polygon, FlightGearAirfieldMaterials.helipadSurface(airfield.isHard())));
 			}
 		}
 
@@ -87,21 +79,76 @@ public class AirfieldGeometryBuilder {
 		for (TaxiLane lane : airfield.getTaxiLanes()) {
 			double width = lane.getWidth() > 0 ? lane.getWidth() : taxiwayWidth;
 			for (Polygon polygon : toPolygons(bufferPolyline(lane.getLine(), width / 2.0))) {
-				pavements.add(polygon);
-				surfaces.add(new SurfacePolygon(polygon, FlightGearAirfieldMaterials.taxiwaySurface(airfield.isHard())));
+				ordered.add(new SurfacePolygon(polygon, FlightGearAirfieldMaterials.taxiwaySurface(airfield.isHard())));
 			}
 		}
 
-		if (!pavements.isEmpty()) {
-			Geometry pavementUnion = union(pavements);
-			Geometry skirt = pavementUnion.buffer(SKIRT_MARGIN_METERS);
-			Geometry grass = skirt.difference(pavementUnion);
+		for (OsmPolygon apron : airfield.getApronAreas()) {
+			for (Polygon polygon : buildApronPolygons(apron)) {
+				ordered.add(new SurfacePolygon(polygon, FlightGearAirfieldMaterials.apronSurface(airfield.isHard())));
+			}
+		}
+
+		// Emit in priority order, cutting each surface out of the accumulated
+		// higher-priority area, so pavements never overlap (runways on top, then
+		// helipads, taxiways and finally aprons).
+		PriorityCut cut = cutByPriority(ordered);
+		List<SurfacePolygon> surfaces = cut.surfaces;
+
+		// Grass clearing ring around the whole pavement area (below all pavements).
+		if (cut.union != null && !cut.union.isEmpty()) {
+			Geometry skirt = cut.union.buffer(SKIRT_MARGIN_METERS);
+			Geometry grass = skirt.difference(cut.union);
 			for (Polygon polygon : toPolygons(grass)) {
 				surfaces.add(new SurfacePolygon(polygon, FlightGearAirfieldMaterials.SKIRT));
 			}
 		}
 
 		return surfaces;
+	}
+
+	/** Result of the priority cut: the non-overlapping surfaces plus their union. */
+	static final class PriorityCut {
+		final List<SurfacePolygon> surfaces;
+		final Geometry union;
+
+		PriorityCut(List<SurfacePolygon> surfaces, Geometry union) {
+			this.surfaces = surfaces;
+			this.union = union;
+		}
+	}
+
+	/**
+	 * Cuts the ordered surfaces so they never overlap: each surface is diffed
+	 * against the accumulated higher-priority area (runways on top, then helipads,
+	 * taxiways and finally aprons; within each group the first polygon wins).
+	 */
+	PriorityCut cutByPriority(List<SurfacePolygon> ordered) {
+		List<SurfacePolygon> surfaces = new ArrayList<>();
+		Geometry accum = null;
+		for (SurfacePolygon surface : ordered) {
+			Polygon polygon = surface.getPolygon();
+			Geometry remaining = polygon;
+			if (accum != null) {
+				try {
+					remaining = polygon.difference(accum);
+				} catch (RuntimeException e) {
+					// numerical failure - keep the whole polygon rather than drop it
+					remaining = polygon;
+				}
+			}
+			for (Polygon piece : toPolygons(remaining)) {
+				surfaces.add(new SurfacePolygon(piece, surface.getMaterial()));
+			}
+			try {
+				Geometry union = (accum == null) ? polygon : accum.union(polygon);
+				Geometry fixed = GeomUtils.fix(union);
+				accum = (fixed != null) ? fixed : union;
+			} catch (RuntimeException e) {
+				// keep the previous accumulator
+			}
+		}
+		return new PriorityCut(surfaces, accum);
 	}
 
 	private Polygon buildRunwayPolygon(RunwayData runway) {

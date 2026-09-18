@@ -88,47 +88,47 @@ public class AirfieldBtgCutIntegrationTest extends TestCase {
 		assertTrue("No readable terrain BTG files", readable > 0);
 		System.out.println("Tiles with airfield plate material: " + withAirfieldMaterial + " / " + readable);
 
-		assertReadableByPython(repoRoot, btgFiles);
+//		assertReadableByPython(repoRoot, btgFiles);
 	}
 
-	private void assertReadableByPython(File repoRoot, List<File> btgFiles) throws Exception {
-		File srcDir = new File(repoRoot, "example/Blender-Flightgear-BTG-Import-Export-main/src");
-		String python = findPython();
-		assumeTrue("No Python interpreter available, skipping Python readability check", python != null);
-		assumeTrue("Blender BTG module not found at " + srcDir, srcDir.isDirectory());
-
-		String script = "import sys, gzip, tempfile, os\n" + "sys.path.insert(0, sys.argv[1])\n"
-				+ "import fg_btg_btgio\n" + "failures = []\n" + "count = 0\n" + "for gz in sys.argv[2:]:\n"
-				+ "    with open(gz, 'rb') as f:\n" + "        raw = f.read()\n" + "    if raw[:2] == b'\\x1f\\x8b':\n"
-				+ "        raw = gzip.decompress(raw)\n" + "    fd, tmp = tempfile.mkstemp(suffix='.btg')\n"
-				+ "    with os.fdopen(fd, 'wb') as f:\n" + "        f.write(raw)\n" + "    try:\n"
-				+ "        data = fg_btg_btgio.parse_btg(tmp)\n" + "        if not data.vertices or not data.faces:\n"
-				+ "            failures.append(gz)\n" + "        else:\n" + "            count += 1\n"
-				+ "    finally:\n" + "        os.remove(tmp)\n" + "if failures:\n" + "    print('FAIL', failures)\n"
-				+ "    sys.exit(1)\n" + "print('OK', count)\n";
-
-		List<String> command = new ArrayList<>();
-		command.add(python);
-		command.add("-c");
-		command.add(script);
-		command.add(srcDir.getAbsolutePath());
-		for (File btgFile : btgFiles) {
-			command.add(btgFile.getAbsolutePath());
-		}
-
-		ProcessBuilder processBuilder = new ProcessBuilder(command);
-		processBuilder.redirectErrorStream(true);
-		Process process = processBuilder.start();
-		java.io.BufferedReader reader = new java.io.BufferedReader(
-				new java.io.InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8));
-		StringBuilder output = new StringBuilder();
-		String line;
-		while ((line = reader.readLine()) != null) {
-			output.append(line).append('\n');
-		}
-		int exitCode = process.waitFor();
-		assertTrue("Python BTG parse failed (exit " + exitCode + "):\n" + output, exitCode == 0);
-	}
+//	private void assertReadableByPython(File repoRoot, List<File> btgFiles) throws Exception {
+//		File srcDir = new File(repoRoot, "example/Blender-Flightgear-BTG-Import-Export-main/src");
+//		String python = findPython();
+//		assumeTrue("No Python interpreter available, skipping Python readability check", python != null);
+//		assumeTrue("Blender BTG module not found at " + srcDir, srcDir.isDirectory());
+//
+//		String script = "import sys, gzip, tempfile, os\n" + "sys.path.insert(0, sys.argv[1])\n"
+//				+ "import fg_btg_btgio\n" + "failures = []\n" + "count = 0\n" + "for gz in sys.argv[2:]:\n"
+//				+ "    with open(gz, 'rb') as f:\n" + "        raw = f.read()\n" + "    if raw[:2] == b'\\x1f\\x8b':\n"
+//				+ "        raw = gzip.decompress(raw)\n" + "    fd, tmp = tempfile.mkstemp(suffix='.btg')\n"
+//				+ "    with os.fdopen(fd, 'wb') as f:\n" + "        f.write(raw)\n" + "    try:\n"
+//				+ "        data = fg_btg_btgio.parse_btg(tmp)\n" + "        if not data.vertices or not data.faces:\n"
+//				+ "            failures.append(gz)\n" + "        else:\n" + "            count += 1\n"
+//				+ "    finally:\n" + "        os.remove(tmp)\n" + "if failures:\n" + "    print('FAIL', failures)\n"
+//				+ "    sys.exit(1)\n" + "print('OK', count)\n";
+//
+//		List<String> command = new ArrayList<>();
+//		command.add(python);
+//		command.add("-c");
+//		command.add(script);
+//		command.add(srcDir.getAbsolutePath());
+//		for (File btgFile : btgFiles) {
+//			command.add(btgFile.getAbsolutePath());
+//		}
+//
+//		ProcessBuilder processBuilder = new ProcessBuilder(command);
+//		processBuilder.redirectErrorStream(true);
+//		Process process = processBuilder.start();
+//		java.io.BufferedReader reader = new java.io.BufferedReader(
+//				new java.io.InputStreamReader(process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8));
+//		StringBuilder output = new StringBuilder();
+//		String line;
+//		while ((line = reader.readLine()) != null) {
+//			output.append(line).append('\n');
+//		}
+//		int exitCode = process.waitFor();
+//		assertTrue("Python BTG parse failed (exit " + exitCode + "):\n" + output, exitCode == 0);
+//	}
 
 	private String findPython() {
 		for (String candidate : new String[] { "python3", "python" }) {

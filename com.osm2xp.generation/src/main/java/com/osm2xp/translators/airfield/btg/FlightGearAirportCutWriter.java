@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
 import org.locationtech.jts.algorithm.ConvexHull;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
@@ -27,7 +26,6 @@ import com.osm2xp.core.parsers.btg.Btg;
 import com.osm2xp.core.parsers.btg.BtgFace;
 import com.osm2xp.core.parsers.btg.BtgTile;
 import com.osm2xp.core.parsers.btg.BtgVector3;
-import com.osm2xp.generation.options.FlightGearOptionsProvider;
 import com.osm2xp.translators.airfield.AirfieldData;
 import com.osm2xp.translators.flightgear.FlightGearBucket;
 import com.osm2xp.translators.flightgear.FlightGearCoordinateUtils;
@@ -83,23 +81,21 @@ public class FlightGearAirportCutWriter {
 	private final GeometryFactory geometryFactory = new GeometryFactory();
 	private final PolygonTriangulator triangulator = new PolygonTriangulator();
 
-	public void write(AirfieldData airfield, File sceneryRoot) {
-		write(airfield, sceneryRoot, true);
-	}
-
 	/**
 	 * Bakes the airfield into the terrain.
 	 *
+	 * @param sourceTerrainDir the {@code Terrain} directory holding the original
+	 *            tiles (the {@code source_tiles} cache), used for elevation probing
+	 * @param outputSceneryRoot the generated scenery root; the patched tile is
+	 *            written to {@code <outputSceneryRoot>/Terrain/...}
 	 * @param cutTerrain when {@code true} the buffered footprint is cut out of the
 	 *                   terrain and filled with the flat plate + sloped skirt;
 	 *                   when {@code false} the terrain is left untouched and only
 	 *                   the plate + skirt are overlaid on top of it (a diagnostic
 	 *                   mode to isolate the effect of the cut)
 	 */
-	public void write(AirfieldData airfield, File sceneryRoot, boolean cutTerrain) {
-		String terrainRoot = FlightGearOptionsProvider.getOptions().getFlightGearSceneryPath();
-		FlightGearTerrainElevationProber prober = new FlightGearTerrainElevationProber(
-				StringUtils.isNotBlank(terrainRoot) ? new File(terrainRoot) : null);
+	public void write(AirfieldData airfield, File sourceTerrainDir, File outputSceneryRoot, boolean cutTerrain) {
+		FlightGearTerrainElevationProber prober = new FlightGearTerrainElevationProber(sourceTerrainDir);
 		if (!prober.isAvailable()) {
 			return;
 		}
@@ -173,7 +169,7 @@ public class FlightGearAirportCutWriter {
 						cut.removedFaces, skirtByTile, hull, buffer, prober, datumLon, datumLat);
 				// Keep the untouched faces; plate + skirt fill the removed hole.
 				BtgTile merged = converter.rebuild(cut.terrain, cut.keptFaces, new ArrayList<>(), overlay);
-				writeTile(merged, bucket, sceneryRoot, airfield, elevation);
+				writeTile(merged, bucket, outputSceneryRoot, airfield, elevation);
 			}
 		} else {
 			for (FlightGearBucket bucket : buckets) {
@@ -185,7 +181,7 @@ public class FlightGearAirportCutWriter {
 						null, skirtByTile, hull, buffer, prober, datumLon, datumLat);
 				// Keep every original terrain face and overlay the airfield on top.
 				BtgTile merged = converter.rebuild(terrain, terrain.getFaces(), new ArrayList<>(), overlay);
-				writeTile(merged, bucket, sceneryRoot, airfield, plateElevation);
+				writeTile(merged, bucket, outputSceneryRoot, airfield, plateElevation);
 			}
 		}
 	}
@@ -453,8 +449,10 @@ public class FlightGearAirportCutWriter {
 			double altitude = BtgCsgConverter.altitude(face, east, north);
 			z[i] = Double.isNaN(altitude) ? elevation : elevation + t * (altitude - elevation);
 		}
+		// Keep the removed terrain's own material for the transition, so unrelated
+		// terrain (forest, crop, ...) is not repainted as airfield grass.
 		return new BtgCsgConverter.Triangle(triangle[0], triangle[1], z[0], triangle[2], triangle[3], z[1],
-				triangle[4], triangle[5], z[2], FlightGearAirfieldMaterials.SKIRT);
+				triangle[4], triangle[5], z[2], face.material);
 	}
 
 	/** Smooth skirt (overlay mode): blends from the plate to the probed terrain. */
@@ -603,9 +601,9 @@ public class FlightGearAirportCutWriter {
 		return new BtgVector3(ecef[0], ecef[1], ecef[2]);
 	}
 
-	private void writeTile(BtgTile merged, FlightGearBucket bucket, File sceneryRoot, AirfieldData airfield,
+	private void writeTile(BtgTile merged, FlightGearBucket bucket, File outputSceneryRoot, AirfieldData airfield,
 			double elevation) {
-		File terrainFolder = new File(new File(sceneryRoot, "Terrain"), bucket.genBasePath());
+		File terrainFolder = new File(new File(outputSceneryRoot, "Terrain"), bucket.genBasePath());
 		terrainFolder.mkdirs();
 		File outFile = new File(terrainFolder, bucket.getIndex() + ".btg.gz");
 		try {

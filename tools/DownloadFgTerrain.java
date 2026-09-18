@@ -60,7 +60,16 @@ public class DownloadFgTerrain {
             Pattern.compile("^f:(\\d+)\\.btg\\.gz:[0-9a-f]+:(\\d+)$");
     private static final int MAX_ATTEMPTS = 5;
     private static final long[] BACKOFF_MS = {1000L, 3000L, 7000L, 15000L, 30000L};
-    private static final String DEFAULT_BASE_URL = "https://terrasync.b-cdn.net";
+    /**
+     * TerraSync mirrors serving the WS2.0 {@code Terrain/} tree, tried in order.
+     * The FlightGear CDN is not reachable from every network, so the official
+     * SourceForge master and the Gdansk mirror are fallbacks.
+     */
+    private static final String[] DEFAULT_BASE_URLS = {
+            "https://terrasync.b-cdn.net",
+            "https://flightgear.sourceforge.net/scenery",
+            "https://terrasync.eti.pg.gda.pl/ws2"};
+    private static final String DEFAULT_BASE_URL = DEFAULT_BASE_URLS[0];
     private static final int DEFAULT_CONCURRENCY = 8;
 
     private static final class Cell {
@@ -106,7 +115,7 @@ public class DownloadFgTerrain {
 
     public static void main(String[] args) throws Exception {
         String bbox = null;
-        String baseUrl = DEFAULT_BASE_URL;
+        String baseUrl = null;
         String rootStr = "fg_scenery";
         int concurrency = DEFAULT_CONCURRENCY;
         boolean force = false;
@@ -145,9 +154,35 @@ public class DownloadFgTerrain {
             System.exit(2);
         }
 
+        if (baseUrl == null) {
+            baseUrl = resolveBaseUrl();
+        }
+
         double[] b = parseBbox(bbox);
         DownloadFgTerrain tool = new DownloadFgTerrain(baseUrl, Paths.get(rootStr), concurrency, force);
         tool.run(b);
+    }
+
+    /** Picks the first reachable mirror from {@link #DEFAULT_BASE_URLS}. */
+    private static String resolveBaseUrl() {
+        HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15))
+                .followRedirects(HttpClient.Redirect.NORMAL).build();
+        for (String base : DEFAULT_BASE_URLS) {
+            try {
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(stripTrailingSlash(base) + "/.dirindex"))
+                        .timeout(Duration.ofSeconds(8)).GET().build();
+                HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+                if (response.statusCode() == 200) {
+                    System.out.println("Using terrain mirror " + base);
+                    return base;
+                }
+            } catch (Exception e) {
+                System.err.println("Mirror unreachable: " + base + " (" + e.getMessage() + ")");
+            }
+        }
+        System.err.println("No terrain mirror reachable, trying " + DEFAULT_BASE_URL);
+        return DEFAULT_BASE_URL;
     }
 
     private void run(double[] bbox) throws Exception {

@@ -219,7 +219,7 @@ public class XPAirfieldTranslationAdapter implements ISpecificTranslator {
 		File airfieldOutputFolder = perAirportAptDat ? workFolder : (writeAsMainAirfield ? workFolder : getMultiAirfieldsFolder());
 		XPAirfieldOutput airfieldOutput = createAirfieldOutput(airfieldOutputFolder, writeAsMainAirfield);
 		for (AirfieldData airfieldData : airfieldList) {
-			if (XPlaneOptionsProvider.getOptions().getAirfieldOptions().getIgnoredAirfields().contains(airfieldData.getICAO())) { //We can't check this at earlier stage since we need to ignore associated runways and other stuff as well
+			if (isAirfieldIgnored(airfieldData)) { //We can't check this at earlier stage since we need to ignore associated runways and other stuff as well
 				continue;
 			}
 			airfieldOutput.writeAirfield(airfieldData);
@@ -238,6 +238,17 @@ public class XPAirfieldTranslationAdapter implements ISpecificTranslator {
 		
 		StatsProvider.getCommonStats().setCount("Airfields", airfieldList.size());
 		StatsProvider.getCommonStats().setCount("Separate Runways", runwayList.size());
+	}
+
+	/**
+	 * Whether the given airfield should be skipped during output. The default
+	 * implementation honours the X-Plane excluded-airfields list; platform-specific
+	 * adapters may extend this (e.g. to auto-skip airfields already present in
+	 * downloaded terrain).
+	 */
+	protected boolean isAirfieldIgnored(AirfieldData airfieldData) {
+		return XPlaneOptionsProvider.getOptions().getAirfieldOptions().getIgnoredAirfields()
+				.contains(airfieldData.getICAO());
 	}
 
 	protected XPAirfieldOutput createAirfieldOutput(File airfieldOutputFolder, boolean writeAsMainAirfield) {

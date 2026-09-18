@@ -11,6 +11,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.osm2xp.core.logging.Osm2xpLogger;
+import com.osm2xp.translators.flightgear.terrain.BtgTileLocator;
+import com.osm2xp.translators.flightgear.terrain.TerrainTileLocator;
 
 /**
  * Probes terrain elevation from the local FlightGear scenery using the fgelev
@@ -40,6 +42,7 @@ public class FlightGearElevProber {
 	private final File fgelevBinary;
 	private final File sceneryRoot;
 	private final FlightGearElevationIndex elevationIndex;
+	private final TerrainTileLocator tileLocator;
 	private boolean disabled;
 	private boolean spawnErrorLogged;
 	private int record;
@@ -77,8 +80,19 @@ public class FlightGearElevProber {
 	 *            {@code null} to fall back to {@code fgelev}
 	 */
 	public FlightGearElevProber(File fgelevBinary, String sceneryPath, File terrainRoot) {
+		this(fgelevBinary, sceneryPath, terrainRoot, new BtgTileLocator());
+	}
+
+	/**
+	 * As {@link #FlightGearElevProber(File, String, File)} but with an explicit
+	 * terrain tile locator, so the same prober can serve other terrain formats
+	 * (e.g. VPB) once their locator exists.
+	 */
+	public FlightGearElevProber(File fgelevBinary, String sceneryPath, File terrainRoot,
+			TerrainTileLocator tileLocator) {
 		this.fgelevBinary = fgelevBinary;
 		this.sceneryRoot = sceneryPath == null ? null : new File(sceneryPath);
+		this.tileLocator = tileLocator == null ? new BtgTileLocator() : tileLocator;
 		this.elevationIndex = terrainRoot == null ? null : new FlightGearElevationIndex(terrainRoot);
 		this.disabled = elevationIndex != null
 				? elevationIndex.isDisabled()
@@ -156,14 +170,13 @@ public class FlightGearElevProber {
 
 	/**
 	 * Resolves the terrain tile (BTG) covering the given coordinate, using the
-	 * same sub-bucket math as SimGear's {@code SGBucket} and the TerraSync on-disk
-	 * layout {@code <root>/Terrain/<band>/<cell>/<bucketIndex>.btg.gz}.
+	 * injected {@link TerrainTileLocator} and the scenery root.
 	 */
 	private File tileFileFor(double lon, double lat) {
-		FlightGearBucket bucket = FlightGearBucket.bucketFor(lon, lat);
-		String cellPath = bucket.genBasePath().replace('/', File.separatorChar);
-		return new File(sceneryRoot,
-				new File(new File("Terrain", cellPath), bucket.getIndex() + ".btg.gz").getPath());
+		if (sceneryRoot == null) {
+			return null;
+		}
+		return tileLocator.tileFileFor(lon, lat, sceneryRoot);
 	}
 
 	private ProcessInfo ensureProcess(String tileKey, File tileFile) throws IOException {

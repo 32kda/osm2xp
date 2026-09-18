@@ -85,6 +85,8 @@ public class FlightGearBuildingAnalyzer {
 		int wallTexIdx = computeTextureIndex(center.x(), center.y(), 0);
 		int roofTexIdx = computeTextureIndex(center.x(), center.y(), 7);
 
+		// BUILDING_LIST origin is the center of the box, so anchor it at the footprint
+		// centroid (same convention as the 3D-object translators, which place by center).
 		return new FlightGearBuildingListEntry(
 				center.y(), center.x(), groundElev, streetAngle, listType,
 				width, depth, facadeHeight, roofHeight, roofShape,
@@ -106,33 +108,6 @@ public class FlightGearBuildingAnalyzer {
 			}
 		}
 		return minElev;
-	}
-
-	private boolean isConvex(LinearRing2D ring) {
-		int n = ring.vertexNumber();
-		if (n < 3)
-			return false;
-		boolean positive = false;
-		boolean negative = false;
-		Point2D[] verts = new Point2D[n];
-		int idx = 0;
-		for (Point2D p : ring.vertices()) {
-			verts[idx++] = p;
-		}
-		for (int i = 0; i < n; i++) {
-			Point2D p0 = verts[i];
-			Point2D p1 = verts[(i + 1) % n];
-			Point2D p2 = verts[(i + 2) % n];
-			double cross = (p1.x() - p0.x()) * (p2.y() - p1.y())
-					- (p1.y() - p0.y()) * (p2.x() - p1.x());
-			if (cross > 0)
-				positive = true;
-			if (cross < 0)
-				negative = true;
-			if (positive && negative)
-				return false;
-		}
-		return true;
 	}
 
 	private int analyzeLevels(OsmPolygon polygon) {
@@ -240,6 +215,9 @@ public class FlightGearBuildingAnalyzer {
 		if (n == 0) {
 			return new PcaRectangle(0, 0, 0, 0);
 		}
+		if (n == 4) {
+			return computeRectangle4Verts(pts);
+		}
 
 		double mx = 0, my = 0;
 		for (Point2D p : pts) {
@@ -294,6 +272,32 @@ public class FlightGearBuildingAnalyzer {
 			depth = tmp;
 			angle = (angle + 90) % 360;
 		}
+
+		return new PcaRectangle(width, depth, width * depth, angle);
+	}
+
+	private PcaRectangle computeRectangle4Verts(List<Point2D> pts) {
+		Point2D p0 = pts.get(0);
+		Point2D p1 = pts.get(1);
+		Point2D p2 = pts.get(2);
+		Point2D p3 = pts.get(3);
+
+		double d01 = p0.distance(p1);
+		double d12 = p1.distance(p2);
+		double d23 = p2.distance(p3);
+		double d30 = p3.distance(p0);
+
+		double width, depth, angle;
+		if (d01 + d23 >= d12 + d30) {
+			width = (d01 + d23) / 2.0;
+			depth = (d12 + d30) / 2.0;
+			angle = Math.toDegrees(Math.atan2(p1.x() - p0.x(), p1.y() - p0.y()));
+		} else {
+			width = (d12 + d30) / 2.0;
+			depth = (d01 + d23) / 2.0;
+			angle = Math.toDegrees(Math.atan2(p2.x() - p1.x(), p2.y() - p1.y()));
+		}
+		angle = (angle + 360) % 360;
 
 		return new PcaRectangle(width, depth, width * depth, angle);
 	}

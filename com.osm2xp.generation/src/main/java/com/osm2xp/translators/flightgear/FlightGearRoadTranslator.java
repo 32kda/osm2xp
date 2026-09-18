@@ -24,7 +24,7 @@ import math.geom2d.Point2D;
  *
  * @author osm2xp
  */
-public class FGRoadTranslator implements IPolyHandler {
+public class FlightGearRoadTranslator implements IPolyHandler {
 
     private static final String[] ALLOWED_HIGHWAY_TYPES = {
         "motorway", "trunk", "primary", "secondary", "tertiary",
@@ -36,18 +36,14 @@ public class FGRoadTranslator implements IPolyHandler {
     private static final String MATERIAL_FREEWAY = "ws30Freeway";
 
     private final List<OsmPolyline> roads = new ArrayList<>();
-    private BufferedWriter stgWriter;
-    private FlightGearStgWriterProvider stgWriterProvider;
     private FlightGearBucketOutputProvider bucketOutputProvider;
 
     @Override
     public void setStgWriter(BufferedWriter stgWriter) {
-        this.stgWriter = stgWriter;
     }
 
     @Override
     public void setStgWriterProvider(FlightGearStgWriterProvider stgWriterProvider) {
-        this.stgWriterProvider = stgWriterProvider;
     }
 
     @Override
@@ -58,7 +54,7 @@ public class FGRoadTranslator implements IPolyHandler {
     @Override
     public boolean handlePoly(OsmPolyline osmPolyline) {
         FlightGearOptions options = FlightGearOptionsProvider.getOptions();
-        if (!options.isGenerateTransportation()) {
+        if (!options.isGenerateTransportation() || !options.isGenerateRoads()) {
             return false;
         }
         String highway = osmPolyline.getTagValue("highway");
@@ -79,10 +75,10 @@ public class FGRoadTranslator implements IPolyHandler {
         if (roads.isEmpty()) {
             return;
         }
-        Osm2xpLogger.info("FGRoadTranslator: " + roads.size() + " roads collected");
+        Osm2xpLogger.info("FlightGearRoadTranslator: " + roads.size() + " roads collected");
         if (bucketOutputProvider == null) {
             Osm2xpLogger.warning(
-                    "FGRoadTranslator: no bucket output provider set, skipping LINE_FEATURE_LIST output");
+                    "FlightGearRoadTranslator: no bucket output provider set, skipping LINE_FEATURE_LIST output");
             return;
         }
         for (OsmPolyline road : roads) {

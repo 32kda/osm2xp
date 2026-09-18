@@ -61,7 +61,13 @@ public class FlightGearSiloTranslator extends FlightGearSpecObjectTranslator {
 
 	@Override
 	protected boolean canProcess(OsmPolygon osmPolygon) {
-		return generationEnabled() && (isSilo(osmPolygon) || isStorageTank(osmPolygon));
+		if (isSilo(osmPolygon)) {
+			return FlightGearOptionsProvider.getOptions().isGenerateSilos();
+		}
+		if (isStorageTank(osmPolygon)) {
+			return FlightGearOptionsProvider.getOptions().isGenerateStorageTanks();
+		}
+		return false;
 	}
 
 	@Override
@@ -116,7 +122,8 @@ public class FlightGearSiloTranslator extends FlightGearSpecObjectTranslator {
 
 	@Override
 	protected boolean generationEnabled() {
-		return FlightGearOptionsProvider.getOptions().isGenerateObjects();
+		return FlightGearOptionsProvider.getOptions().isGenerateSilos()
+				|| FlightGearOptionsProvider.getOptions().isGenerateStorageTanks();
 	}
 
 	@Override

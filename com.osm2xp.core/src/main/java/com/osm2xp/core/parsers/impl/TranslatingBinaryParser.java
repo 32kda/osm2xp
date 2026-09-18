@@ -91,6 +91,11 @@ public class TranslatingBinaryParser extends BinaryParser implements IParser, IV
 	
 	@Override
 	protected void parse(HeaderBlock header) {
+		// The header bounding box is optional; when absent getBbox() returns the
+		// all-zero default, which must not be reported as a real extent.
+		if (!header.hasBbox()) {
+			return;
+		}
 		HeaderBBox bbox = header.getBbox();
 		osmDataVisitor.visit(new Box2D(bbox.getLeft() / COORD_DIV_FACTOR, bbox.getRight() / COORD_DIV_FACTOR, bbox.getBottom() / COORD_DIV_FACTOR, bbox.getTop() / COORD_DIV_FACTOR));  
 	}

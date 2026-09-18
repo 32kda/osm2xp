@@ -25,7 +25,7 @@ public abstract class FlightGearObjectTranslator implements IPolyHandler {
 		if (stgWriterProvider == null) {
 			Osm2xpLogger.warning("FG object translator: no STG writer provider set");
 			return;
-		}
+		} 
 		BufferedWriter writer = stgWriterProvider.getStgWriter(lon, lat);
 		if (writer == null) {
 			return;

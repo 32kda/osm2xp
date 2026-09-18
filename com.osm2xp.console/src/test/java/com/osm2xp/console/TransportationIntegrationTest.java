@@ -46,6 +46,8 @@ public class TransportationIntegrationTest extends TestCase {
 		argList.add(TESTSCENERY_NAME);
 		FlightGearOptionsProvider.getOptions().setFgelevPath("D:\\Games\\FlightGear 2024.1\\bin\\fgelev.exe");
 		FlightGearOptionsProvider.getOptions().setFlightGearSceneryPath("D:\\Games\\FlightGear 2024.1\\TerraSync");
+		FlightGearOptionsProvider.getOptions().setGenerateRoads(true);
+		FlightGearOptionsProvider.getOptions().setGenerateRailways(true);
 //		FlightGearOptionsProvider.getOptions().setGenerateAirfieldsBtg(false);
 		com.osm2xp.console.App.main(argList.toArray(new String[0]));
 
@@ -216,6 +218,8 @@ public class TransportationIntegrationTest extends TestCase {
 		argList.add(basicFolder.getAbsolutePath());
 		argList.add("-s");
 		argList.add(targetDir.getName());
+		FlightGearOptionsProvider.getOptions().setGenerateRoads(true);
+		FlightGearOptionsProvider.getOptions().setGenerateRailways(true);
 		com.osm2xp.console.App.main(argList.toArray(new String[0]));
 
 		assertTrue("Target directory not created", targetDir.isDirectory());
