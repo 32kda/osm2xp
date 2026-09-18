@@ -29,6 +29,7 @@ import com.osm2xp.controllers.BuildController;
 import com.osm2xp.core.constants.CoreConstants;
 import com.osm2xp.core.exceptions.Osm2xpBusinessException;
 import com.osm2xp.core.logging.Osm2xpLogger;
+import com.osm2xp.generation.options.FlightGearOptionsProvider;
 import com.osm2xp.generation.options.GlobalOptionsProvider;
 import com.osm2xp.generation.options.XPlaneOptionsProvider;
 import com.osm2xp.gui.perspectives.IGenerationModeProvider;
@@ -160,7 +161,7 @@ public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 			XPlaneOptionsProvider.saveOptions();
 //			FsxOptionsProvider.saveOptions();
 //			FlyLegacyOptionsHelper.saveOptions();
-//			FlightGearOptionsProvider.saveOptions();
+			FlightGearOptionsProvider.saveOptions();
 		} catch (Osm2xpBusinessException e) {
 			Osm2xpLogger.error(e.getMessage());
 		}

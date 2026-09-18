@@ -7,6 +7,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
+import com.osm2xp.gui.views.panels.flightGear.FlightGearObjectsPanel;
 import com.osm2xp.gui.views.panels.flightGear.FlightGearObjectsRulesPanel;
 
 /**
@@ -24,6 +25,11 @@ public class FlightGear3DObjectsView extends AbstractOptionsView implements
 
 	@Override
 	protected void createFormControls() {
+		Section sectionGeneratedItems = createSection("Generated items", true);
+		FlightGearObjectsPanel generatedItemsPanel = new FlightGearObjectsPanel(sectionGeneratedItems, SWT.BORDER);
+		toolkit.adapt(generatedItemsPanel, true, true);
+		sectionGeneratedItems.setClient(generatedItemsPanel);
+
 		Section sectionObjectsRules = toolkit.createSection(form.getBody(),
 				Section.TWISTIE | Section.EXPANDED | Section.TITLE_BAR);
 		sectionObjectsRules.setLayoutData(new TableWrapData(

@@ -6,7 +6,11 @@ package com.osm2xp.gui.perspectives;
  * @author Benjamin Blanchet
  * 
  */
-public class FlightGearConfigurationPerspective extends GenerationPerspective {
-	
+public class FlightGearConfigurationPerspective extends GenerationPerspective implements IGenerationModeProvider {
+
+	@Override
+	public String getGenerationMode() {
+		return "FLIGHT_GEAR";
+	}
 
 }

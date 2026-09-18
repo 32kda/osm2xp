@@ -58,11 +58,11 @@
             id="com.osm2xp.consoleConfigurationPerspective"
             name="console configuration">
       </perspective>
-      <!--<perspective
-            class="com.osm2xp.gui.perspectives.GenerationPerspective"
+      <perspective
+            class="com.osm2xp.gui.perspectives.FlightGearConfigurationPerspective"
             id="com.osm2xp.flightGearConfigurationPerspective"
             name="Flight Gear configuration">
-      </perspective>-->
+      </perspective>
    </extension>
    <extension
          point="org.eclipse.ui.views">
@@ -190,6 +190,27 @@
             restorable="true"
             icon="images/viewIcons/objects-16.png">
       </view>      
+      <view
+            class="com.osm2xp.gui.views.FlightGearBuildingsView"
+            id="com.osm2xp.viewFlightGearBuildingsTab"
+            name="FlightGear Buildings"
+            restorable="true"
+            icon="images/viewIcons/home-16.png">
+      </view>
+      <view
+            class="com.osm2xp.gui.views.FlightGearPowerLinesView"
+            id="com.osm2xp.viewFlightGearPowerLinesTab"
+            name="FlightGear Power Lines"
+            restorable="true"
+            icon="images/viewIcons/light-16.png">
+      </view>
+      <view
+            class="com.osm2xp.gui.views.FlightGearAirfieldsView"
+            id="com.osm2xp.viewFlightGearAirfieldsTab"
+            name="FlightGear Airfields"
+            restorable="true"
+            icon="images/viewIcons/airfield-16.png">
+      </view>
       <view
             class="com.osm2xp.gui.views.BrowserView"
             id="com.osm2xp.application.BrowserView"
@@ -569,6 +590,30 @@
                relative="com.osm2xp.viewSceneryTab"
                standalone="false">
          </view>
+         <view
+               closeable="false"
+               id="com.osm2xp.viewFlightGearBuildingsTab"
+               minimized="false"
+               relationship="stack"
+               relative="com.osm2xp.viewSceneryTab"
+               standalone="false">
+         </view>
+         <view
+               closeable="false"
+               id="com.osm2xp.viewFlightGearPowerLinesTab"
+               minimized="false"
+               relationship="stack"
+               relative="com.osm2xp.viewSceneryTab"
+               standalone="false">
+         </view>
+         <view
+               closeable="false"
+               id="com.osm2xp.viewFlightGearAirfieldsTab"
+               minimized="false"
+               relationship="stack"
+               relative="com.osm2xp.viewSceneryTab"
+               standalone="false">
+         </view>
       </perspectiveExtension>
       <perspectiveExtension targetID="*">
       	 <view
@@ -729,13 +774,13 @@
                style="push"
                tooltip="Console mode">
          </command>
-         <!--<command
+         <command
                commandId="osm2xp.command.flightGearMode"
                icon="images/toolbarsIcons/flightGear.png"
                label=" "
                style="push"
                tooltip="FlightGear mode">
-         </command>-->
+         </command>
       </menuContribution>
    </extension>
    <extension
@@ -834,11 +879,11 @@
             id="osm2xp.command.consoleMode"
             name="Console mode">
       </command>
-     <!-- <command
+      <command
             defaultHandler="com.osm2xp.gui.handlers.modes.CommandFlightGearMode"
             id="osm2xp.command.flightGearMode"
             name="flightGearMode">
-      </command> -->
+      </command>
       <command
             defaultHandler="com.osm2xp.gui.handlers.CommandShowConsole"
             id="osm2xp.command.showConsole"

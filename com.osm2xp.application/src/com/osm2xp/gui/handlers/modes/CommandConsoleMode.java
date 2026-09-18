@@ -9,7 +9,7 @@ package com.osm2xp.gui.handlers.modes;
 public class CommandConsoleMode extends ModeCommand {
 	
 	public CommandConsoleMode() {
-		super("com.osm2xp.flightGearConfigurationPerspective", "console", "CONSOLE");
+		super("com.osm2xp.consoleConfigurationPerspective", "console", "CONSOLE");
 	}
 	
 }

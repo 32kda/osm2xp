@@ -75,7 +75,7 @@ public class UiUtil {
 	}
 
 	public static void showCurrentModeInfo(boolean force) {
-		String mode = BuildController.getGenerationMode().toLowerCase();
+		String mode = BuildController.getGenerationMode();
 		IWorkbench workbench = PlatformUI.getWorkbench();
 		if (workbench != null) {
 			IWorkbenchWindow win = workbench.getActiveWorkbenchWindow();
@@ -93,10 +93,24 @@ public class UiUtil {
 						browserView = page.findView(BrowserView.ID);
 					}
 					if (browserView instanceof BrowserView) {
-						((BrowserView) browserView).setUrl(HTML_FILE_PREFFIX + mode + HTML_FILE);
+						((BrowserView) browserView).setUrl(HTML_FILE_PREFFIX + docFolderForMode(mode) + HTML_FILE);
 					}
 				}
 			}
 		}		
+	}
+
+	/**
+	 * Maps a generation mode id (e.g. {@code FLIGHT_GEAR}) to its documentation
+	 * folder under {@code doc/modes}.
+	 */
+	private static String docFolderForMode(String mode) {
+		if (mode == null) {
+			return "";
+		}
+		if ("FLIGHT_GEAR".equalsIgnoreCase(mode)) {
+			return "flightGear";
+		}
+		return mode.toLowerCase();
 	}
 }
