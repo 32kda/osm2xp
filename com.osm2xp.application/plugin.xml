@@ -184,6 +184,13 @@
             restorable="true">
       </view>
       <view
+            class="com.osm2xp.gui.views.FlightGearSimView"
+            id="com.osm2xp.viewFlightGearSimTab"
+            name="FlightGear Sim"
+            restorable="true"
+            icon="images/viewIcons/settings-16.png">
+      </view>
+      <view
             class="com.osm2xp.gui.views.FlightGear3DObjectsView"
             id="com.osm2xp.viewFlightGearObjectsTab"
             name="FlightGear 3D Objects"
@@ -581,6 +588,14 @@
                ratio="0.15f"
                relationship="left"
                relative="com.osm2xp.viewSceneryTab">
+         </view>
+         <view
+               closeable="false"
+               id="com.osm2xp.viewFlightGearSimTab"
+               minimized="false"
+               relationship="stack"
+               relative="com.osm2xp.viewSceneryTab"
+               standalone="false">
          </view>
          <view
                closeable="false"

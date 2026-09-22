@@ -1,17 +1,12 @@
 package com.osm2xp.gui.views.panels.flightGear;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
-import org.eclipse.swt.widgets.Text;
 
 import com.osm2xp.generation.options.FlightGearOptions;
 import com.osm2xp.generation.options.FlightGearOptionsProvider;
@@ -39,8 +34,6 @@ public class FlightGearBuildingsPanel extends Osm2xpPanel {
 	private Spinner spinnerFlatRatio;
 	private Spinner spinnerGabledRatio;
 	private Spinner spinnerHippedRatio;
-	private Text fgelevPathText;
-	private Text sceneryPathText;
 
 	public FlightGearBuildingsPanel(Composite parent, int style) {
 		super(parent, style);
@@ -54,20 +47,13 @@ public class FlightGearBuildingsPanel extends Osm2xpPanel {
 				"Write buildings as a BUILDING_LIST rendered by the FlightGear OSMBuildings shader");
 
 		btnProbeElevation = new Button(this, SWT.CHECK);
-		btnProbeElevation.setText("Probe ground elevation with fgelev");
+		btnProbeElevation.setText("Place buildings at terrain elevation");
 		btnProbeElevation.setToolTipText(
-				"Place each building at the real terrain elevation using fgelev (requires fgelevPath and "
-						+ "flightGearSceneryPath to be configured)");
+				"Probe the downloaded terrain tiles and place each building at the real ground elevation");
 
 		btnAllowNeighbours = new Button(this, SWT.CHECK);
 		btnAllowNeighbours.setText("Allow buildings to share walls with neighbours");
 		btnAllowNeighbours.setToolTipText("Group adjacent buildings so that touching walls are not rendered twice");
-
-		Composite pathsComposite = new Composite(this, SWT.NONE);
-		pathsComposite.setLayout(new GridLayout(3, false));
-		pathsComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		fgelevPathText = createPathRow(pathsComposite, "fgelev executable:", false);
-		sceneryPathText = createPathRow(pathsComposite, "FlightGear scenery path:", true);
 
 		addLabel("Small building min side, m");
 		spinnerSmallMinSide = addSpinner(1, 1000);
@@ -107,30 +93,6 @@ public class FlightGearBuildingsPanel extends Osm2xpPanel {
 		return spinner;
 	}
 
-	private Text createPathRow(Composite parent, String labelText, boolean directory) {
-		Label label = new Label(parent, SWT.NONE);
-		label.setText(labelText);
-		Text text = new Text(parent, SWT.BORDER);
-		text.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		Button browse = new Button(parent, SWT.PUSH);
-		browse.setText("Browse...");
-		browse.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				String value;
-				if (directory) {
-					value = new DirectoryDialog(getShell()).open();
-				} else {
-					value = new FileDialog(getShell(), SWT.OPEN).open();
-				}
-				if (value != null) {
-					text.setText(value);
-				}
-			}
-		});
-		return text;
-	}
-
 	@Override
 	protected void initLayout() {
 		GridLayout layout = new GridLayout(2, false);
@@ -148,8 +110,6 @@ public class FlightGearBuildingsPanel extends Osm2xpPanel {
 		bindComponent(btnGenerateBuildings, options, "generateBuildings");
 		bindComponent(btnProbeElevation, options, "generateBuildingsElevation");
 		bindComponent(btnAllowNeighbours, options, "buildingListAllowNeighbours");
-		bindComponent(fgelevPathText, options, "fgelevPath");
-		bindComponent(sceneryPathText, options, "flightGearSceneryPath");
 		bindSpinnerToDouble(spinnerSmallMinSide, options, "buildingListSmallMinSide", 1);
 		bindSpinnerToDouble(spinnerMediumMinSide, options, "buildingListMediumMinSide", 1);
 		bindSpinnerToDouble(spinnerLargeMinSide, options, "buildingListLargeMinSide", 1);
