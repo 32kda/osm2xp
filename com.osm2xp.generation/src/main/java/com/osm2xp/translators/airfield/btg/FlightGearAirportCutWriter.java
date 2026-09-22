@@ -115,7 +115,7 @@ public class FlightGearAirportCutWriter {
 		}
 
 		double buffer = Math.max(BUFFER_MIN_M, BUFFER_DIAMETER_RATIO * diameterOf(hull));
-		Polygon cutPolygon = (Polygon) hull.buffer(buffer);
+		Polygon cutPolygon = (Polygon) hull.buffer(5); //FIXME debug
 
 		double[] minMax = probeElevation(prober, cutPolygon, datumLon, datumLat);
 		if (Double.isNaN(minMax[0]) || Double.isNaN(minMax[1])) {
@@ -449,10 +449,8 @@ public class FlightGearAirportCutWriter {
 			double altitude = BtgCsgConverter.altitude(face, east, north);
 			z[i] = Double.isNaN(altitude) ? elevation : elevation + t * (altitude - elevation);
 		}
-		// Keep the removed terrain's own material for the transition, so unrelated
-		// terrain (forest, crop, ...) is not repainted as airfield grass.
 		return new BtgCsgConverter.Triangle(triangle[0], triangle[1], z[0], triangle[2], triangle[3], z[1],
-				triangle[4], triangle[5], z[2], face.material);
+				triangle[4], triangle[5], z[2], FlightGearAirfieldMaterials.SKIRT);
 	}
 
 	/** Smooth skirt (overlay mode): blends from the plate to the probed terrain. */

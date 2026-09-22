@@ -70,9 +70,19 @@
     <generateBuildings3D>true</generateBuildings3D>
     <useBuildingList>true</useBuildingList>
     <generateTransportation>true</generateTransportation>
+    <generateRoads>false</generateRoads>
+    <generateRailways>false</generateRailways>
+    <generatePowerLines>true</generatePowerLines>
     <generateAirfields>true</generateAirfields>
     <generateAirfieldsBtg>false</generateAirfieldsBtg>
     <generateAirfieldsBtgCut>false</generateAirfieldsBtgCut>
+    <ignoreExistingAirfields>false</ignoreExistingAirfields>
     <generateChimneys>true</generateChimneys>
     <generateCoolingTowers>true</generateCoolingTowers>
+    <generateSilos>true</generateSilos>
+    <generateStorageTanks>true</generateStorageTanks>
+    <terrainFormat>BTG</terrainFormat>
+    <terrainMirrors>https://terrasync.b-cdn.net</terrainMirrors>
+    <terrainMirrors>https://flightgear.sourceforge.net/scenery</terrainMirrors>
+    <terrainMirrors>https://terrasync.eti.pg.gda.pl/ws2</terrainMirrors>
 </FlightGearOptions>
