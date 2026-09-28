@@ -37,7 +37,8 @@ import com.osm2xp.generation.options.rules.ObjectsRulesList;
 		"buildingListLargeMaxLevels", "buildingListAllowNeighbours",
 		"buildingListAreaDeviation", "buildingListDistDeviation",
 		"buildingTextureGroupRadius", "roofShapeFlatRatio",
-		"roofShapeGabledRatio", "roofShapeHippedRatio" })
+		"roofShapeGabledRatio", "roofShapeHippedRatio",
+		"generateForests", "forestSpacingM" })
 @XmlRootElement(name = "FlightGearOptions")
 public class FlightGearOptions {
 
@@ -90,6 +91,9 @@ public class FlightGearOptions {
 	protected double roofShapeFlatRatio = 0.1;
 	protected double roofShapeGabledRatio = 0.8;
 	protected double roofShapeHippedRatio = 0.1;
+	protected boolean generateForests = false;
+	/** Mean distance between scattered trees, in metres. */
+	protected double forestSpacingM = 10.0;
 
 	/**
 	 * Default no-arg constructor
@@ -419,6 +423,22 @@ public class FlightGearOptions {
 
 	public void setRoofShapeHippedRatio(double roofShapeHippedRatio) {
 		this.roofShapeHippedRatio = roofShapeHippedRatio;
+	}
+
+	public boolean isGenerateForests() {
+		return generateForests;
+	}
+
+	public void setGenerateForests(boolean generateForests) {
+		this.generateForests = generateForests;
+	}
+
+	public double getForestSpacingM() {
+		return forestSpacingM;
+	}
+
+	public void setForestSpacingM(double forestSpacingM) {
+		this.forestSpacingM = forestSpacingM;
 	}
 
 }

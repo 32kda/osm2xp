@@ -12,6 +12,7 @@ import org.json.simple.JSONObject;
 import com.osm2xp.generation.options.FlightGearOptions;
 import com.osm2xp.generation.options.FlightGearOptionsProvider;
 import com.osm2xp.translators.flightgear.FlightGearElevProber;
+import com.osm2xp.translators.flightgear.spatial.TerrainSpatialIndexService;
 
 import math.geom2d.Point2D;
 
@@ -45,6 +46,7 @@ public class ElevationProvidingService extends GeoMetaProvidingService<Double> {
 	 */
 	public static synchronized void setTerrainRoot(File root) {
 		terrainRoot = root;
+		TerrainSpatialIndexService.setShared(root);
 		if (instance != null && instance.prober != null) {
 			instance.prober.close();
 			instance.prober = null;
@@ -85,6 +87,11 @@ public class ElevationProvidingService extends GeoMetaProvidingService<Double> {
 		FlightGearOptions options = FlightGearOptionsProvider.getOptions();
 		String fgelevPath = options.getFgelevPath();
 		File fgelevBinary = StringUtils.isNotBlank(fgelevPath) ? new File(fgelevPath) : null;
+		TerrainSpatialIndexService shared = TerrainSpatialIndexService.shared();
+		if (shared != null && !shared.isDisabled()) {
+			// Shared per-tile spatial index; no fgelev and no per-run re-indexing.
+			return new FlightGearElevProber(fgelevBinary, null, shared);
+		}
 		if (terrainRoot != null) {
 			// Cached source tiles; read BTG in-process (no fgelev required).
 			return new FlightGearElevProber(fgelevBinary, terrainRoot.getPath(), terrainRoot);

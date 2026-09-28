@@ -37,12 +37,15 @@ import com.osm2xp.translators.flightgear.FlightGearBucketOutputRegistry;
 import com.osm2xp.translators.flightgear.FlightGearChimneyTranslator;
 import com.osm2xp.translators.flightgear.FlightGearCoolingTowerTranslator;
 import com.osm2xp.translators.flightgear.FlightGearElevProber;
+import com.osm2xp.translators.flightgear.FlightGearForestTranslator;
+import com.osm2xp.translators.flightgear.FlightGearModelsProvider;
 import com.osm2xp.translators.flightgear.FlightGearModelsProvider;
 import com.osm2xp.translators.flightgear.FlightGearSiloTranslator;
 import com.osm2xp.translators.flightgear.TransportationData;
 import com.osm2xp.translators.flightgear.TransportationParsingService;
 import com.osm2xp.translators.flightgear.TransportationValidator;
 import com.osm2xp.translators.flightgear.TransportationValidator.ValidationReport;
+import com.osm2xp.translators.flightgear.spatial.TerrainSpatialIndexService;
 import com.osm2xp.translators.flightgear.terrain.TerrainCache;
 import com.osm2xp.translators.flightgear.terrain.TerrainFormat;
 import com.osm2xp.translators.flightgear.terrain.TerrainServices;
@@ -61,6 +64,7 @@ public class FlightGearTranslatorImpl implements ITranslator {
 
     private final List<IPolyHandler> polyHandlers = new ArrayList<>();
     private final List<IPolyHandler> objectHandlers = new ArrayList<>();
+    private final FlightGearForestTranslator forestTranslator;
     private final TransportationParsingService transportationService = new TransportationParsingService();
     private final TransportationValidator transportationValidator = new TransportationValidator();
     private ValidationReport transportReport;
@@ -88,6 +92,7 @@ public class FlightGearTranslatorImpl implements ITranslator {
         this.folderPath = folderPath;
         this.bucketOutputRegistry = bucketOutputRegistry;
         this.terrainCacheDir = terrainCacheDir;
+        this.forestTranslator = new FlightGearForestTranslator();
 
         // Register poly handlers (order matters — most specific first)
         polyHandlers.add(new FlightGearRoadTranslator());
@@ -131,6 +136,13 @@ public class FlightGearTranslatorImpl implements ITranslator {
             return;
         }
         FlightGearOptions options = FlightGearOptionsProvider.getOptions();
+
+        // 0. Forests: scattered into the terrain BTG as vegetation points.
+        if (forestTranslator != null && forestTranslator.handlePoly(osmPolyline)) {
+            StatsProvider.getTileStats(currentTile, true).incCount(forestTranslator.getId());
+            StatsProvider.getCommonStats().incCount(forestTranslator.getId());
+            return;
+        }
 
         // 1. Try poly handlers (roads, railways, powerlines)
         if (options.isGenerateTransportation() || options.isGeneratePowerLines()) {
@@ -222,6 +234,10 @@ public class FlightGearTranslatorImpl implements ITranslator {
             objectHandler.translationComplete();
         }
 
+        // Forest trees are written as STG TREE_LIST entries once all forest
+        // polygons of this tile have been collected.
+        forestTranslator.translationComplete();
+
         if (elevProber != null) {
             elevProber.close();
             elevProber = null;
@@ -271,6 +287,7 @@ public class FlightGearTranslatorImpl implements ITranslator {
 			objectHandler.setStgWriterProvider(stgWriterProvider);
 			objectHandler.setBucketOutputProvider(this::bucketOutputFor);
 		}
+		forestTranslator.setBucketOutputProvider(this::bucketOutputFor);
 		FlightGearModelsProvider.ensureModelsCopied(parentDir);
 
         if (options.isGenerateTransportation()) {
@@ -287,6 +304,13 @@ public class FlightGearTranslatorImpl implements ITranslator {
     private FlightGearElevProber createElevProber(FlightGearOptions options) {
         if (!options.isGenerateBuildings() || !options.isGenerateBuildingsElevation()) {
             return null;
+        }
+        // Reuse the run-scoped shared spatial index (built once per tile) when it has
+        // been installed by the provider; it serves buildings, airfields and
+        // vegetation alike.
+        TerrainSpatialIndexService shared = TerrainSpatialIndexService.shared();
+        if (shared != null && !shared.isDisabled()) {
+            return new FlightGearElevProber(null, null, shared);
         }
         String fgelevPath = options.getFgelevPath();
         File fgelevBinary = StringUtils.isNotBlank(fgelevPath) ? new File(fgelevPath) : null;

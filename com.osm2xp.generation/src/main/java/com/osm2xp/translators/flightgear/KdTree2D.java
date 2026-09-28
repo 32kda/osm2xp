@@ -136,6 +136,20 @@ final class KdTree2D {
 		return state.bestIndex < 0 ? Double.NaN : values[state.bestIndex];
 	}
 
+	/**
+	 * Squared distance to the nearest point, or
+	 * {@link Double#POSITIVE_INFINITY} when empty. Cheaper than comparing metric
+	 * distances when the caller only needs a radius test.
+	 */
+	double nearestSquaredDistance(double x, double y) {
+		if (root < 0) {
+			return Double.POSITIVE_INFINITY;
+		}
+		Search state = new Search();
+		search(root, x, y, state);
+		return state.bestDist;
+	}
+
 	private void search(int node, double x, double y, Search state) {
 		if (node < 0) {
 			return;

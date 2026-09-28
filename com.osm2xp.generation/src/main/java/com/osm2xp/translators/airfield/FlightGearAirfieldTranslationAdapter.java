@@ -8,7 +8,7 @@ import java.util.Set;
 import com.osm2xp.core.logging.Osm2xpLogger;
 import com.osm2xp.generation.options.FlightGearOptions;
 import com.osm2xp.generation.options.FlightGearOptionsProvider;
-import com.osm2xp.translators.airfield.btg.FlightGearAirportCutWriter;
+import com.osm2xp.translators.airfield.btg.AirfieldBtgPatcher;
 import com.osm2xp.translators.flightgear.FlightGearExistingAirfields;
 
 /**
@@ -20,9 +20,13 @@ import com.osm2xp.translators.flightgear.FlightGearExistingAirfields;
  * In addition it bakes the visual airport geometry (runways, taxiways, aprons,
  * helipads and the grass clearing) into the matching terrain BTG tile, reusing
  * the same {@link AirfieldData} that the apt.dat writer consumes. Two modes are
- * supported by {@link FlightGearAirportCutWriter}: cut-and-fill (a hole in the
- * terrain) when {@code generateAirfieldsBtgCut} is on, otherwise the plate +
- * skirt are overlaid on the untouched terrain.
+ * supported by {@link com.osm2xp.translators.airfield.btg.FlightGearAirportCutWriter}:
+ * cut-and-fill (a hole in the terrain) when {@code generateAirfieldsBtgCut} is on,
+ * otherwise the plate + skirt are overlaid on the untouched terrain.
+ * <p>
+ * The patched tiles are contributed to the run-scoped
+ * {@link AirfieldBtgPatcher} and written by the BTG patch pipeline, so that later
+ * phases (vegetation) compose on top of them.
  * <p>
  * The terrain is prepared up-front by
  * {@code FlightGearTerrainPreprocessor} (via
@@ -33,14 +37,15 @@ import com.osm2xp.translators.flightgear.FlightGearExistingAirfields;
  */
 public class FlightGearAirfieldTranslationAdapter extends XPAirfieldTranslationAdapter {
 
-	private final FlightGearAirportCutWriter cutWriter = new FlightGearAirportCutWriter();
-
 	private final File terrainCacheDir;
+	private final AirfieldBtgPatcher btgPatcher;
 	private Set<String> existingAirfields;
 
-	public FlightGearAirfieldTranslationAdapter(String outputFolder, File terrainCacheDir) {
+	public FlightGearAirfieldTranslationAdapter(String outputFolder, File terrainCacheDir,
+			AirfieldBtgPatcher btgPatcher) {
 		super(outputFolder, true);
 		this.terrainCacheDir = terrainCacheDir;
+		this.btgPatcher = btgPatcher;
 	}
 
 	@Override
@@ -88,7 +93,7 @@ public class FlightGearAirfieldTranslationAdapter extends XPAirfieldTranslationA
 				continue;
 			}
 			try {
-				cutWriter.write(airfield, terrainCacheDir, getWorkFolder(), cut);
+				btgPatcher.contribute(airfield, terrainCacheDir, cut);
 			} catch (Throwable t) {
 				Osm2xpLogger.error("Error generating FlightGear airfield BTG for " + airfield.getId(), t);
 			}

@@ -34,6 +34,9 @@ public class FlightGearBucketOutput {
 	private final Map<String, BufferedWriter> lineFeatureListWriters = new HashMap<>();
 	private final Map<String, String> lineFeatureListFileNames = new HashMap<>();
 	private final Set<String> lineFeatureListHeadersWritten = new HashSet<>();
+	private final Map<String, BufferedWriter> treeListWriters = new HashMap<>();
+	private final Map<String, String> treeListFileNames = new HashMap<>();
+	private final Set<String> treeListHeadersWritten = new HashSet<>();
 	private BufferedWriter stgWriter;
 	private BufferedWriter buildingListWriter;
 	private boolean buildingListHeaderWritten;
@@ -135,6 +138,45 @@ public class FlightGearBucketOutput {
 		lineFeatureListHeadersWritten.add(material);
 	}
 
+	/**
+	 * Deterministic file name (relative to the bucket folder) of the
+	 * <code>TREE_LIST</code> tree-coordinate file for the given FlightGear
+	 * material, e.g. <code>TreeList_MixedForest_4268928.txt.gz</code>.
+	 */
+	public String getTreeListFileName(String material) {
+		return treeListFileNames.computeIfAbsent(material,
+				m -> "TreeList_" + sanitize(m) + "_" + bucket.getIndex() + ".txt.gz");
+	}
+
+	/**
+	 * Lazily opens (and caches) the gzipped tree-coordinate file for the given
+	 * material. The returned writer is closed by {@link #close()}.
+	 */
+	public BufferedWriter getTreeListWriter(String material) {
+		return treeListWriters.computeIfAbsent(material, m -> {
+			try {
+				GZIPOutputStream gzipOut = new GZIPOutputStream(
+						new FileOutputStream(new File(folder, getTreeListFileName(m))));
+				return new BufferedWriter(new OutputStreamWriter(gzipOut, StandardCharsets.UTF_8));
+			} catch (IOException e) {
+				Osm2xpLogger.error("Error opening tree list file in " + folder, e);
+				return null;
+			}
+		});
+	}
+
+	public boolean isTreeListHeaderWritten(String material) {
+		return treeListHeadersWritten.contains(material);
+	}
+
+	public void setTreeListHeaderWritten(String material) {
+		treeListHeadersWritten.add(material);
+	}
+
+	private static String sanitize(String material) {
+		return material == null ? "" : material.replaceAll("[^A-Za-z0-9_.-]", "_");
+	}
+
 	public void close() {
 		if (closed) {
 			return;
@@ -162,5 +204,13 @@ public class FlightGearBucketOutput {
 			}
 		}
 		lineFeatureListWriters.clear();
+		for (BufferedWriter treeListWriter : treeListWriters.values()) {
+			try {
+				treeListWriter.close();
+			} catch (IOException e) {
+				Osm2xpLogger.error("Error closing tree list file", e);
+			}
+		}
+		treeListWriters.clear();
 	}
 }

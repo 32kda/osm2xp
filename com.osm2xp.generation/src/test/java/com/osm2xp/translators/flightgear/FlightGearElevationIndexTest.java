@@ -34,6 +34,15 @@ public class FlightGearElevationIndexTest {
 	}
 
 	@Test
+	public void nearestSquaredDistanceFindsClosest() {
+		KdTree2D tree = new KdTree2D(new double[] { 0, 10 }, new double[] { 0, 0 }, new double[] { 1, 2 });
+		assertEquals(0.01, tree.nearestSquaredDistance(0.1, 0.0), 1e-9);
+		assertEquals(1.0, tree.nearestSquaredDistance(9.0, 0.0), 1e-9);
+		assertTrue(Double.isInfinite(
+				new KdTree2D(new double[0], new double[0], new double[0]).nearestSquaredDistance(0, 0)));
+	}
+
+	@Test
 	public void probesKnownAirport() {
 		File terrain = new File(TERRAIN_DIR);
 		assumeTrue("TerraSync terrain not found, skipping", terrain.isDirectory());

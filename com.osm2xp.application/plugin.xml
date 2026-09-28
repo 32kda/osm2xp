@@ -219,6 +219,13 @@
             icon="images/viewIcons/airfield-16.png">
       </view>
       <view
+            class="com.osm2xp.gui.views.FlightGearForestsView"
+            id="com.osm2xp.viewFlightGearForestsTab"
+            name="FlightGear Forests"
+            restorable="true"
+            icon="images/viewIcons/tree-16.png">
+      </view>
+      <view
             class="com.osm2xp.gui.views.BrowserView"
             id="com.osm2xp.application.BrowserView"
             name="Browser"
@@ -621,15 +628,23 @@
                relative="com.osm2xp.viewSceneryTab"
                standalone="false">
          </view>
-         <view
-               closeable="false"
-               id="com.osm2xp.viewFlightGearAirfieldsTab"
-               minimized="false"
-               relationship="stack"
-               relative="com.osm2xp.viewSceneryTab"
-               standalone="false">
-         </view>
-      </perspectiveExtension>
+          <view
+                closeable="false"
+                id="com.osm2xp.viewFlightGearAirfieldsTab"
+                minimized="false"
+                relationship="stack"
+                relative="com.osm2xp.viewSceneryTab"
+                standalone="false">
+          </view>
+          <view
+                closeable="false"
+                id="com.osm2xp.viewFlightGearForestsTab"
+                minimized="false"
+                relationship="stack"
+                relative="com.osm2xp.viewSceneryTab"
+                standalone="false">
+          </view>
+       </perspectiveExtension>
       <perspectiveExtension targetID="*">
       	 <view
                closeable="true"

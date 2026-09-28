@@ -53,6 +53,7 @@ public class AirfieldBtgCutIntegrationTest extends TestCase {
 
 		FlightGearOptionsProvider.getOptions().setGenerateAirfieldsBtg(true);
 		FlightGearOptionsProvider.getOptions().setGenerateAirfieldsBtgCut(true);
+		FlightGearOptionsProvider.getOptions().setGenerateForests(true);
 		FlightGearOptionsProvider.getOptions().setFlightGearSceneryPath(terrasync.getAbsolutePath());
 		FlightGearOptionsProvider.getOptions().setFgelevPath("D:\\Games\\FlightGear 2024.1\\bin\\fgelev.exe");
 //		FlightGearOptionsProvider.getOptions().setFlightGearSceneryPath("D:\\Games\\FlightGear 2024.1\\TerraSync");

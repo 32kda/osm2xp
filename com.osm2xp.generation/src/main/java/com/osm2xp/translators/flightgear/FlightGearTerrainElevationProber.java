@@ -9,6 +9,7 @@ import com.osm2xp.core.logging.Osm2xpLogger;
 import com.osm2xp.core.parsers.btg.Btg;
 import com.osm2xp.core.parsers.btg.BtgFace;
 import com.osm2xp.core.parsers.btg.BtgTile;
+import com.osm2xp.translators.flightgear.spatial.TerrainSpatialIndexService;
 
 /**
  * Probes terrain elevation from FlightGear terrain BTG files (the same format
@@ -18,22 +19,37 @@ import com.osm2xp.core.parsers.btg.BtgTile;
  * {@code <terrainDir>/<band>/<cell>/<index>.btg.gz} and cached for the duration
  * of the generation run. {@code terrainDir} is the {@code source_tiles} cache or
  * a generated {@code Terrain/} directory.
+ * <p>
+ * When a {@link TerrainSpatialIndexService} is supplied, tiles and elevation
+ * come from that shared service instead, so airfields reuse the very same index
+ * as buildings and vegetation.
  */
 public class FlightGearTerrainElevationProber {
 
 	private final File terrainDir;
+	private final TerrainSpatialIndexService service;
 	private final Map<Long, BtgTile> tileCache = new HashMap<>();
 
 	public FlightGearTerrainElevationProber(File terrainDir) {
 		this.terrainDir = terrainDir;
+		this.service = null;
+	}
+
+	public FlightGearTerrainElevationProber(TerrainSpatialIndexService service) {
+		this.terrainDir = null;
+		this.service = service;
 	}
 
 	public boolean isAvailable() {
-		return terrainDir != null && terrainDir.isDirectory();
+		return service != null ? !service.isDisabled()
+				: terrainDir != null && terrainDir.isDirectory();
 	}
 
 	/** Loads (and caches) the terrain tile for the given bucket, or {@code null}. */
 	public BtgTile getTile(FlightGearBucket bucket) {
+		if (service != null) {
+			return service.tileFor(bucket);
+		}
 		BtgTile cached = tileCache.get(bucket.getIndex());
 		if (cached != null) {
 			return cached;
@@ -50,6 +66,14 @@ public class FlightGearTerrainElevationProber {
 		}
 		tileCache.put(bucket.getIndex(), tile);
 		return tile;
+	}
+
+	/** Terrain height at a global lon/lat, or {@code NaN} when unavailable. */
+	public double probeElevation(double lon, double lat) {
+		if (service != null) {
+			return service.probeElevation(lon, lat);
+		}
+		return probe(getTile(FlightGearBucket.bucketFor(lon, lat)), lon, lat);
 	}
 
 	/**

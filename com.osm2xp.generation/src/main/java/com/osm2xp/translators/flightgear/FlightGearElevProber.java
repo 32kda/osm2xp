@@ -11,6 +11,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.osm2xp.core.logging.Osm2xpLogger;
+import com.osm2xp.translators.flightgear.spatial.TerrainSpatialIndexService;
 import com.osm2xp.translators.flightgear.terrain.BtgTileLocator;
 import com.osm2xp.translators.flightgear.terrain.TerrainTileLocator;
 
@@ -41,7 +42,7 @@ public class FlightGearElevProber {
 
 	private final File fgelevBinary;
 	private final File sceneryRoot;
-	private final FlightGearElevationIndex elevationIndex;
+	private final TerrainSpatialIndexService spatialService;
 	private final TerrainTileLocator tileLocator;
 	private boolean disabled;
 	private boolean spawnErrorLogged;
@@ -64,14 +65,14 @@ public class FlightGearElevProber {
 	private final Map<String, ProcessInfo> processes = new HashMap<>();
 
 	public FlightGearElevProber(File fgelevBinary, String sceneryPath) {
-		this(fgelevBinary, sceneryPath, null);
+		this(fgelevBinary, sceneryPath, (TerrainSpatialIndexService) null);
 	}
 
 	/**
-	 * Constructs a prober that optionally uses an in-process
-	 * {@link FlightGearElevationIndex} over the given {@code Terrain} directory
-	 * instead of spawning {@code fgelev}. When {@code terrainRoot} is provided the
-	 * index is preferred and {@code fgelevBinary} is ignored.
+	 * Constructs a prober that uses an in-process spatial index over the given
+	 * {@code Terrain} directory instead of spawning {@code fgelev}. When a
+	 * non-{@code null} terrain root is provided the index is preferred and
+	 * {@code fgelevBinary} is ignored.
 	 *
 	 * @param fgelevBinary path to the {@code fgelev} executable (may be {@code null}
 	 *            when an index is used)
@@ -90,14 +91,29 @@ public class FlightGearElevProber {
 	 */
 	public FlightGearElevProber(File fgelevBinary, String sceneryPath, File terrainRoot,
 			TerrainTileLocator tileLocator) {
+		this(fgelevBinary, sceneryPath,
+				terrainRoot == null ? null : new TerrainSpatialIndexService(terrainRoot), tileLocator);
+	}
+
+	/**
+	 * Constructs a prober backed by a (typically shared) {@link
+	 * TerrainSpatialIndexService}. When the service is non-{@code null} and not
+	 * disabled it is used and {@code fgelev} is ignored.
+	 */
+	public FlightGearElevProber(File fgelevBinary, String sceneryPath, TerrainSpatialIndexService spatialService) {
+		this(fgelevBinary, sceneryPath, spatialService, new BtgTileLocator());
+	}
+
+	public FlightGearElevProber(File fgelevBinary, String sceneryPath, TerrainSpatialIndexService spatialService,
+			TerrainTileLocator tileLocator) {
 		this.fgelevBinary = fgelevBinary;
 		this.sceneryRoot = sceneryPath == null ? null : new File(sceneryPath);
 		this.tileLocator = tileLocator == null ? new BtgTileLocator() : tileLocator;
-		this.elevationIndex = terrainRoot == null ? null : new FlightGearElevationIndex(terrainRoot);
-		this.disabled = elevationIndex != null
-				? elevationIndex.isDisabled()
+		this.spatialService = spatialService;
+		this.disabled = spatialService != null
+				? spatialService.isDisabled()
 				: fgelevBinary == null || !fgelevBinary.isFile()
-						|| sceneryRoot == null || !sceneryRoot.isDirectory();
+						|| this.sceneryRoot == null || !this.sceneryRoot.isDirectory();
 	}
 
 	public boolean isDisabled() {
@@ -113,8 +129,8 @@ public class FlightGearElevProber {
 		if (disabled) {
 			return 0.0;
 		}
-		if (elevationIndex != null) {
-			double elevation = elevationIndex.probe(lon, lat);
+		if (spatialService != null) {
+			double elevation = spatialService.probeElevation(lon, lat);
 			return Double.isNaN(elevation) ? NO_ELEV : elevation;
 		}
 		File tileFile = tileFileFor(lon, lat);

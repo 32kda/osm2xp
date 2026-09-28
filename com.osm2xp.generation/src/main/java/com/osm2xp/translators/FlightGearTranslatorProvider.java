@@ -11,7 +11,9 @@ import com.osm2xp.generation.options.FlightGearOptions;
 import com.osm2xp.generation.options.FlightGearOptionsProvider;
 import com.osm2xp.translators.airfield.ElevationProvidingService;
 import com.osm2xp.translators.airfield.FlightGearAirfieldTranslationAdapter;
+import com.osm2xp.translators.airfield.btg.AirfieldBtgPatcher;
 import com.osm2xp.translators.flightgear.FlightGearBucketOutputRegistry;
+import com.osm2xp.translators.flightgear.btg.BtgPatchPipeline;
 import com.osm2xp.translators.flightgear.terrain.AbstractTerrainDownloader;
 import com.osm2xp.translators.flightgear.terrain.FlightGearTerrainPreprocessor;
 import com.osm2xp.translators.flightgear.terrain.TerrainCache;
@@ -41,6 +43,9 @@ public class FlightGearTranslatorProvider extends DefaultTranslatorProvider impl
 
 	private final FlightGearBucketOutputRegistry bucketOutputRegistry;
 	private final TerrainPaths terrainPaths;
+	private final BtgPatchPipeline btgPatchPipeline;
+	private final AirfieldBtgPatcher airfieldBtgPatcher;
+	private boolean closed;
 
 	public FlightGearTranslatorProvider(File binaryFile, String folderPath, String outputFomat) {
 		super(binaryFile, folderPath, outputFomat);
@@ -53,6 +58,11 @@ public class FlightGearTranslatorProvider extends DefaultTranslatorProvider impl
 		File cacheDir = TerrainCache.resolveCacheDir(workingFolder, sourceFileFolder);
 		this.terrainPaths = new TerrainPaths(cacheDir, toFileOrNull(options.getFlightGearSceneryPath()),
 				new File(workingFolder, "Terrain"));
+
+		// Ordered BTG patching (terrain-shape stages; trees are written as STG TREE_LIST).
+		this.btgPatchPipeline = new BtgPatchPipeline(terrainPaths.getOutputTerrainDir());
+		this.airfieldBtgPatcher = new AirfieldBtgPatcher();
+		this.btgPatchPipeline.addPatcher(airfieldBtgPatcher);
 
 		// Elevation probing (buildings and airfields) reads the cached source tiles.
 		ElevationProvidingService.setTerrainRoot(cacheDir);
@@ -67,7 +77,8 @@ public class FlightGearTranslatorProvider extends DefaultTranslatorProvider impl
 	public Collection<ISpecificTranslator> createAdditinalAdapters() {
 		Collection<ISpecificTranslator> adapters = super.createAdditinalAdapters();
 		if (FlightGearOptionsProvider.getOptions().isGenerateAirfields()) {
-			adapters.add(new FlightGearAirfieldTranslationAdapter(folderPath, terrainPaths.getCacheDir()));
+			adapters.add(new FlightGearAirfieldTranslationAdapter(folderPath, terrainPaths.getCacheDir(),
+					airfieldBtgPatcher));
 		}
 		return adapters;
 	}
@@ -101,7 +112,8 @@ public class FlightGearTranslatorProvider extends DefaultTranslatorProvider impl
 	 */
 	private static boolean needsTerrain(FlightGearOptions options) {
 		return (options.isGenerateBuildings() && options.isGenerateBuildingsElevation())
-				|| (options.isGenerateAirfields() && options.isGenerateAirfieldsBtg());
+				|| (options.isGenerateAirfields() && options.isGenerateAirfieldsBtg())
+				|| options.isGenerateForests();
 	}
 
 	private static File toFileOrNull(String path) {
@@ -110,6 +122,15 @@ public class FlightGearTranslatorProvider extends DefaultTranslatorProvider impl
 
 	@Override
 	public void close() {
+		if (closed) {
+			return;
+		}
+		closed = true;
+		try {
+			btgPatchPipeline.run();
+		} catch (Throwable t) {
+			Osm2xpLogger.error("Error running FlightGear BTG patch pipeline", t);
+		}
 		bucketOutputRegistry.closeAll();
 	}
 
