@@ -1,5 +1,7 @@
 package com.osm2xp.translators.flightgear;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
@@ -68,6 +70,94 @@ public class FlightGearForestTranslatorTreeListTest {
 		} finally {
 			TerrainSpatialIndexService.setShared(null);
 		}
+	}
+
+	@Test
+	public void fixed2FormattingMatchesStringFormat() {
+		double[] values = { 0.0, 1.23, -1.23, 12345.67, -9876.54, 0.006, 0.004, 9.999, -0.5, 100.0, -100.99 };
+		for (double value : values) {
+			StringBuilder sb = new StringBuilder();
+			FlightGearForestTranslator.appendFixed2(sb, value);
+			assertEquals("value=" + value, String.format(java.util.Locale.US, "%.2f", value), sb.toString());
+		}
+	}
+
+	@Test
+	public void excludesHoleFromTreePlacement() throws Exception {
+		File terrain = Files.createTempDirectory("osm2xp-terrain-hole").toFile();
+		File output = Files.createTempDirectory("osm2xp-output-hole").toFile();
+		FlightGearBucket bucket = FlightGearBucket.bucketFor(80.0, 50.0);
+		writeTile(terrain, bucket);
+
+		TerrainSpatialIndexService.setShared(terrain);
+		try {
+			FlightGearForestTranslator translator = new FlightGearForestTranslator();
+			FlightGearBucketOutput out = new FlightGearBucketOutput(output, bucket, false);
+			translator.setBucketOutputProvider((lon, lat) -> out);
+
+			double centerLon = bucket.getCenterLon();
+			double centerLat = bucket.getCenterLat();
+			LinearRing2D outer = square(centerLon, centerLat, 0.008);
+			LinearRing2D hole = square(centerLon, centerLat, 0.006);
+			translator.contribute(outer, java.util.Collections.singletonList(hole),
+					FlightGearForestMaterials.MIXED);
+			translator.translationComplete();
+			out.close();
+
+			File list = new File(new File(new File(output, "Objects"), bucket.genBasePath()),
+					"TreeList_" + FlightGearForestMaterials.MIXED + "_" + bucket.getIndex() + ".txt.gz");
+			assertTrue("tree list should exist: " + list, list.isFile());
+			List<String> lines = readLines(list);
+			assertTrue("expected trees in the ring, got " + lines.size(), lines.size() > 0);
+
+			double[] holeBounds = localBounds(centerLon, centerLat, 0.006);
+			double margin = 10.0;
+			for (String line : lines) {
+				String[] parts = line.trim().split("\\s+");
+				double east = Double.parseDouble(parts[1]);
+				double north = -Double.parseDouble(parts[0]);
+				boolean insideHole = east > holeBounds[0] + margin && east < holeBounds[2] - margin
+						&& north > holeBounds[1] + margin && north < holeBounds[3] - margin;
+				assertFalse("tree placed inside the hole: " + line, insideHole);
+			}
+		} finally {
+			TerrainSpatialIndexService.setShared(null);
+		}
+	}
+
+	private static LinearRing2D square(double lon, double lat, double half) {
+		return new LinearRing2D(new Point2D(lon - half, lat - half), new Point2D(lon + half, lat - half),
+				new Point2D(lon + half, lat + half), new Point2D(lon - half, lat + half));
+	}
+
+	private static double[] localBounds(double lon, double lat, double half) {
+		double[][] corners = { { lon - half, lat - half }, { lon + half, lat - half }, { lon + half, lat + half },
+				{ lon - half, lat + half } };
+		double minE = Double.POSITIVE_INFINITY;
+		double minN = Double.POSITIVE_INFINITY;
+		double maxE = Double.NEGATIVE_INFINITY;
+		double maxN = Double.NEGATIVE_INFINITY;
+		for (double[] corner : corners) {
+			double[] local = FlightGearCoordinateUtils.toLocal(corner[0], corner[1], lon, lat);
+			minE = Math.min(minE, local[0]);
+			minN = Math.min(minN, local[1]);
+			maxE = Math.max(maxE, local[0]);
+			maxN = Math.max(maxN, local[1]);
+		}
+		return new double[] { minE, minN, maxE, maxN };
+	}
+
+	private static List<String> readLines(File gzip) throws Exception {
+		List<String> lines = new ArrayList<>();
+		try (BufferedReader reader = new BufferedReader(
+				new InputStreamReader(new GZIPInputStream(Files.newInputStream(gzip.toPath())),
+						StandardCharsets.UTF_8))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				lines.add(line);
+			}
+		}
+		return lines;
 	}
 
 	private static int countLines(File gzip) throws Exception {

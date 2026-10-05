@@ -11,8 +11,8 @@ import java.util.Map;
 import java.util.Random;
 
 import com.osm2xp.core.logging.Osm2xpLogger;
-import com.osm2xp.generation.options.FlightGearOptions;
 import com.osm2xp.generation.options.FlightGearOptionsProvider;
+import com.osm2xp.model.osm.polygon.OsmMultiPolygon;
 import com.osm2xp.model.osm.polygon.OsmPolygon;
 import com.osm2xp.model.osm.polygon.OsmPolyline;
 import com.osm2xp.spatial.TileSpatialIndex;
@@ -57,16 +57,26 @@ public class FlightGearForestTranslator implements IPolyHandler {
 		if (polygon.getPolygon() == null || !isForest(polygon.getTags())) {
 			return false;
 		}
-		contribute(polygon.getPolygon(), ForestType.fromTags(polygon.getTags()).getMaterial());
+		// Multipolygon forest relations carry holes; keep them so trees are not
+		// placed inside e.g. lakes/clearings (same as the X-Plane forest output).
+		List<LinearRing2D> holes = polygon instanceof OsmMultiPolygon
+				? ((OsmMultiPolygon) polygon).getInnerPolys()
+				: null;
+		contribute(polygon.getPolygon(), holes, ForestType.fromTags(polygon.getTags()).getMaterial());
 		return true;
 	}
 
 	/** Registers a forest polygon (already clipped to the tile) for tree output. */
 	public void contribute(LinearRing2D ring, String material) {
+		contribute(ring, null, material);
+	}
+
+	/** Registers a forest polygon with optional hole rings for tree output. */
+	public void contribute(LinearRing2D ring, List<LinearRing2D> holes, String material) {
 		if (ring == null || ring.vertices().size() < 3) {
 			return;
 		}
-		ForestArea area = new ForestArea(ring, material);
+		ForestArea area = new ForestArea(ring, holes, material);
 		for (FlightGearBucket bucket : bucketsFor(area)) {
 			byBucket.computeIfAbsent(bucket, k -> new ArrayList<>()).add(area);
 		}
@@ -111,64 +121,127 @@ public class FlightGearForestTranslator implements IPolyHandler {
 		double anchorLon = bucket.getCenterLon();
 		double anchorLat = bucket.getCenterLat();
 
+		// Local bounds of THIS bucket: a polygon is only clipped to the 1-degree
+		// tile, so without this every overlapping bucket would write the whole
+		// polygon (duplicates + out-of-tile points) and the per-bucket tree budget
+		// would be consumed by the first areas only.
+		double[] bounds = bucketLocalBounds(bucket, anchorLon, anchorLat);
+		double bucketMinE = bounds[0];
+		double bucketMinN = bounds[1];
+		double bucketMaxE = bounds[2];
+		double bucketMaxN = bounds[3];
+
 		List<AreaLocal> locals = new ArrayList<>(areas.size());
-		double roiMinE = Double.POSITIVE_INFINITY;
-		double roiMinN = Double.POSITIVE_INFINITY;
-		double roiMaxE = Double.NEGATIVE_INFINITY;
-		double roiMaxN = Double.NEGATIVE_INFINITY;
+		double unionMinE = Double.POSITIVE_INFINITY;
+		double unionMinN = Double.POSITIVE_INFINITY;
+		double unionMaxE = Double.NEGATIVE_INFINITY;
+		double unionMaxN = Double.NEGATIVE_INFINITY;
 		for (ForestArea area : areas) {
 			AreaLocal local = AreaLocal.of(area, anchorLon, anchorLat);
 			locals.add(local);
-			roiMinE = Math.min(roiMinE, local.minE);
-			roiMinN = Math.min(roiMinN, local.minN);
-			roiMaxE = Math.max(roiMaxE, local.maxE);
-			roiMaxN = Math.max(roiMaxN, local.maxN);
+			unionMinE = Math.min(unionMinE, local.minE);
+			unionMinN = Math.min(unionMinN, local.minN);
+			unionMaxE = Math.max(unionMaxE, local.maxE);
+			unionMaxN = Math.max(unionMaxN, local.maxN);
 		}
+		double roiMinE = Math.max(unionMinE, bucketMinE);
+		double roiMaxE = Math.min(unionMaxE, bucketMaxE);
+		double roiMinN = Math.max(unionMinN, bucketMinN);
+		double roiMaxN = Math.min(unionMaxN, bucketMaxN);
 		if (roiMinE > roiMaxE || roiMinN > roiMaxN) {
 			return;
 		}
 		Grid grid = Grid.create(roiMinE, roiMinN, roiMaxE, roiMaxN, spacing);
 
-		Map<String, BufferedWriter> writers = new LinkedHashMap<>();
-		int placed = 0;
-		IntList candidates = new IntList();
+		// Collect candidate cells per material (deduplicated by cell would also
+		// merge overlapping polygons; not needed here).
+		Map<String, IntList> candidatesByMaterial = new LinkedHashMap<>();
+		IntList scratch = new IntList();
+		long total = 0;
 		for (AreaLocal local : locals) {
-			if (placed >= MAX_TREES_PER_BUCKET) {
-				break;
-			}
-			candidates.clear();
-			scanlineFill(grid, local, candidates);
-			if (candidates.size == 0) {
+			scratch.clear();
+			scanlineFill(grid, local, scratch);
+			if (scratch.size == 0) {
 				continue;
 			}
-			shuffle(candidates);
-			String material = local.area.getMaterial();
-			BufferedWriter writer = writers.get(material);
-			if (writer == null) {
-				writer = ensureWriter(output, material, anchorLon, anchorLat);
-				if (writer == null) {
+			IntList list = candidatesByMaterial.computeIfAbsent(local.area.getMaterial(), k -> new IntList());
+			for (int i = 0; i < scratch.size; i++) {
+				list.add(scratch.data[i]);
+			}
+			total += scratch.size;
+		}
+		if (total == 0) {
+			return;
+		}
+
+		for (Map.Entry<String, IntList> entry : candidatesByMaterial.entrySet()) {
+			String material = entry.getKey();
+			IntList list = entry.getValue();
+			shuffle(list);
+			// Distribute the per-bucket budget proportionally so every zone gets
+			// trees instead of the first one consuming the whole cap.
+			int keep = (int) Math.min(list.size,
+					total <= MAX_TREES_PER_BUCKET ? list.size
+							: (long) MAX_TREES_PER_BUCKET * list.size / total);
+			if (keep <= 0) {
+				if (list.size > 0) {
+					keep = 1; // never drop a whole zone just because it is small
+				} else {
 					continue;
 				}
-				writers.put(material, writer);
 			}
-			for (int k = 0; k < candidates.size && placed < MAX_TREES_PER_BUCKET; k++) {
-				int cellIndex = candidates.data[k];
+			BufferedWriter writer = ensureWriter(output, material, anchorLon, anchorLat);
+			if (writer == null) {
+				continue;
+			}
+			// Build the whole material's list, then write it in one call: the writer
+			// chain (BufferedWriter -> OutputStreamWriter -> GZIP) then encodes a
+			// single large string instead of many small ones.
+			StringBuilder buffer = new StringBuilder(1 << 16);
+			for (int k = 0; k < keep; k++) {
+				int cellIndex = list.data[k];
 				int col = cellIndex % grid.cols;
 				int row = cellIndex / grid.cols;
 				double east = grid.eastOf(col) + (random.nextDouble() - 0.5) * grid.cell;
 				double north = grid.northOf(row) + (random.nextDouble() - 0.5) * grid.cell;
+				if (east < bucketMinE || east > bucketMaxE || north < bucketMinN || north > bucketMaxN) {
+					continue;
+				}
 				double elevation = index.elevationLocal(east, north);
-				if (!Double.isFinite(east) || !Double.isFinite(north) || !Double.isFinite(elevation)) {
+				if (!Double.isFinite(elevation)) {
 					continue;
 				}
 				double z = elevation - FlightGearCoordinateUtils.calcHorizonElevLocal(east, north);
 				if (!Double.isFinite(z) || Math.abs(z) > 20000.0) {
 					continue;
 				}
-				writer.write(String.format(Locale.US, "%.2f %.2f %.2f\n", -north, east, z));
-				placed++;
+				appendFixed2(buffer, -north).append(' ');
+				appendFixed2(buffer, east).append(' ');
+				appendFixed2(buffer, z).append('\n');
+			}
+			if (buffer.length() > 0) {
+				writer.write(buffer.toString());
 			}
 		}
+	}
+
+	/** Local east/north bounds of the bucket (anchor is the bucket centre). */
+	private static double[] bucketLocalBounds(FlightGearBucket bucket, double anchorLon, double anchorLat) {
+		double[][] corners = {
+				{ bucket.getMinLon(), bucket.getMinLat() }, { bucket.getMaxLon(), bucket.getMinLat() },
+				{ bucket.getMaxLon(), bucket.getMaxLat() }, { bucket.getMinLon(), bucket.getMaxLat() } };
+		double minE = Double.POSITIVE_INFINITY;
+		double minN = Double.POSITIVE_INFINITY;
+		double maxE = Double.NEGATIVE_INFINITY;
+		double maxN = Double.NEGATIVE_INFINITY;
+		for (double[] corner : corners) {
+			double[] local = FlightGearCoordinateUtils.toLocal(corner[0], corner[1], anchorLon, anchorLat);
+			minE = Math.min(minE, local[0]);
+			minN = Math.min(minN, local[1]);
+			maxE = Math.max(maxE, local[0]);
+			maxN = Math.max(maxN, local[1]);
+		}
+		return new double[] { minE, minN, maxE, maxN };
 	}
 
 	/** Opens the material's tree list and writes its STG header once. */
@@ -259,22 +332,24 @@ public class FlightGearForestTranslator implements IPolyHandler {
 	}
 
 	private static void scanlineFill(Grid grid, AreaLocal local, IntList out) {
-		double[] px = local.x;
-		double[] py = local.y;
-		int n = px.length;
-		double[] intersections = new double[n];
+		double[] intersections = new double[local.totalVertices];
 		int minRow = Math.max(0, grid.rowOf(local.minN));
 		int maxRow = Math.min(grid.rows - 1, grid.rowOf(local.maxN));
 		for (int row = minRow; row <= maxRow; row++) {
 			double y = grid.northOf(row);
 			int count = 0;
-			for (int i = 0, j = n - 1; i < n; j = i++) {
-				double yi = py[i];
-				double yj = py[j];
-				if ((yi > y) != (yj > y)) {
-					double xi = px[i];
-					double xj = px[j];
-					intersections[count++] = xi + (y - yi) / (yj - yi) * (xj - xi);
+			// Even-odd across the outer ring AND all hole rings, so points inside a
+			// hole cancel out and are not filled.
+			for (int r = 0; r < local.ringX.size(); r++) {
+				double[] px = local.ringX.get(r);
+				double[] py = local.ringY.get(r);
+				int n = px.length;
+				for (int i = 0, j = n - 1; i < n; j = i++) {
+					double yi = py[i];
+					double yj = py[j];
+					if ((yi > y) != (yj > y)) {
+						intersections[count++] = px[i] + (y - yi) / (yj - yi) * (px[j] - px[i]);
+					}
 				}
 			}
 			if (count < 2) {
@@ -307,19 +382,43 @@ public class FlightGearForestTranslator implements IPolyHandler {
 		}
 	}
 
+	/**
+	 * Appends {@code value} with two decimals, avoiding the (very expensive)
+	 * {@link String#format}: no locale parsing, no argument boxing, no regex.
+	 * Equivalent to {@code String.format(Locale.US, "%.2f", value)} for the
+	 * coordinate ranges used here.
+	 */
+	static StringBuilder appendFixed2(StringBuilder sb, double value) {
+		long scaled = Math.round(value * 100.0);
+		if (scaled < 0) {
+			sb.append('-');
+			scaled = -scaled;
+		}
+		long whole = scaled / 100;
+		int frac = (int) (scaled % 100);
+		sb.append(whole).append('.');
+		if (frac < 10) {
+			sb.append('0');
+		}
+		return sb.append(frac);
+	}
+
 	private static final class AreaLocal {
 		final ForestArea area;
-		final double[] x;
-		final double[] y;
+		final List<double[]> ringX;
+		final List<double[]> ringY;
+		final int totalVertices;
 		final double minE;
 		final double minN;
 		final double maxE;
 		final double maxN;
 
-		private AreaLocal(ForestArea area, double[] x, double[] y, double minE, double minN, double maxE, double maxN) {
+		private AreaLocal(ForestArea area, List<double[]> ringX, List<double[]> ringY, int totalVertices, double minE,
+				double minN, double maxE, double maxN) {
 			this.area = area;
-			this.x = x;
-			this.y = y;
+			this.ringX = ringX;
+			this.ringY = ringY;
+			this.totalVertices = totalVertices;
 			this.minE = minE;
 			this.minN = minN;
 			this.maxE = maxE;
@@ -327,23 +426,52 @@ public class FlightGearForestTranslator implements IPolyHandler {
 		}
 
 		static AreaLocal of(ForestArea area, double anchorLon, double anchorLat) {
-			int n = area.vertexCount();
-			double[] x = new double[n];
-			double[] y = new double[n];
+			List<double[]> ringX = new ArrayList<>();
+			List<double[]> ringY = new ArrayList<>();
 			double minE = Double.POSITIVE_INFINITY;
 			double minN = Double.POSITIVE_INFINITY;
 			double maxE = Double.NEGATIVE_INFINITY;
 			double maxN = Double.NEGATIVE_INFINITY;
+			int total = 0;
+
+			// Outer ring.
+			int n = area.vertexCount();
+			double[] ox = new double[n];
+			double[] oy = new double[n];
 			for (int i = 0; i < n; i++) {
 				double[] local = FlightGearCoordinateUtils.toLocal(area.x(i), area.y(i), anchorLon, anchorLat);
-				x[i] = local[0];
-				y[i] = local[1];
-				minE = Math.min(minE, x[i]);
-				minN = Math.min(minN, y[i]);
-				maxE = Math.max(maxE, x[i]);
-				maxN = Math.max(maxN, y[i]);
+				ox[i] = local[0];
+				oy[i] = local[1];
+				minE = Math.min(minE, ox[i]);
+				minN = Math.min(minN, oy[i]);
+				maxE = Math.max(maxE, ox[i]);
+				maxN = Math.max(maxN, oy[i]);
 			}
-			return new AreaLocal(area, x, y, minE, minN, maxE, maxN);
+			ringX.add(ox);
+			ringY.add(oy);
+			total += n;
+
+			// Holes.
+			for (int h = 0; h < area.holeCount(); h++) {
+				double[] gx = area.holeX(h);
+				double[] gy = area.holeY(h);
+				int hn = gx.length;
+				double[] hx = new double[hn];
+				double[] hy = new double[hn];
+				for (int i = 0; i < hn; i++) {
+					double[] local = FlightGearCoordinateUtils.toLocal(gx[i], gy[i], anchorLon, anchorLat);
+					hx[i] = local[0];
+					hy[i] = local[1];
+					minE = Math.min(minE, hx[i]);
+					minN = Math.min(minN, hy[i]);
+					maxE = Math.max(maxE, hx[i]);
+					maxN = Math.max(maxN, hy[i]);
+				}
+				ringX.add(hx);
+				ringY.add(hy);
+				total += hn;
+			}
+			return new AreaLocal(area, ringX, ringY, total, minE, minN, maxE, maxN);
 		}
 	}
 

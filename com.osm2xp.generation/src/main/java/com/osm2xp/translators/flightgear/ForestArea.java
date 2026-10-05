@@ -1,27 +1,30 @@
 package com.osm2xp.translators.flightgear;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import math.geom2d.Point2D;
 import math.geom2d.polygon.LinearRing2D;
 
 /**
- * One OSM forest polygon prepared for vegetation scattering: its ring, the
- * FlightGear material to use, its bounding box and its area in square metres.
+ * One OSM forest polygon prepared for vegetation scattering: its outer ring, any
+ * hole (inner) rings, the FlightGear material to use, its bounding box and its
+ * area in square metres.
  * <p>
- * The ring vertices are copied into flat {@code double[]} arrays and containment
- * uses a plain even-odd ray cast, which is far cheaper than
- * {@link LinearRing2D#isInside(double, double)} (that one goes through
- * per-edge distance computations with {@link Math#hypot}).
+ * Ring vertices are copied into flat {@code double[]} arrays and containment
+ * uses a plain even-odd ray cast over the outer ring plus all holes (so holes
+ * are correctly excluded), which is far cheaper than
+ * {@link LinearRing2D#isInside(double, double)}.
  *
  * @author osm2xp
  */
 public final class ForestArea {
 
-	private final LinearRing2D ring;
 	private final String material;
 	private final double[] xs;
 	private final double[] ys;
+	private final List<double[]> holeXs;
+	private final List<double[]> holeYs;
 	private final double minLon;
 	private final double minLat;
 	private final double maxLon;
@@ -29,10 +32,13 @@ public final class ForestArea {
 	private final double areaM2;
 
 	public ForestArea(LinearRing2D ring, String material) {
-		this.ring = ring;
+		this(ring, null, material);
+	}
+
+	public ForestArea(LinearRing2D ring, List<LinearRing2D> holes, String material) {
 		this.material = material;
 
-		List<Point2D> vertices = new java.util.ArrayList<>(ring.vertices());
+		List<Point2D> vertices = new ArrayList<>(ring.vertices());
 		int count = vertices.size();
 		this.xs = new double[count];
 		this.ys = new double[count];
@@ -60,26 +66,59 @@ public final class ForestArea {
 		this.maxLon = maxLon;
 		this.maxLat = maxLat;
 
+		this.holeXs = new ArrayList<>();
+		this.holeYs = new ArrayList<>();
+		if (holes != null) {
+			for (LinearRing2D hole : holes) {
+				if (hole == null) {
+					continue;
+				}
+				List<Point2D> holeVertices = new ArrayList<>(hole.vertices());
+				if (holeVertices.size() < 3) {
+					continue;
+				}
+				double[] hx = new double[holeVertices.size()];
+				double[] hy = new double[holeVertices.size()];
+				for (int i = 0; i < holeVertices.size(); i++) {
+					hx[i] = holeVertices.get(i).x();
+					hy[i] = holeVertices.get(i).y();
+				}
+				holeXs.add(hx);
+				holeYs.add(hy);
+			}
+		}
+
 		double anchorLon = count > 0 ? sumLon / count : minLon;
 		double anchorLat = count > 0 ? sumLat / count : minLat;
-		this.areaM2 = computeAreaM2(xs, ys, anchorLon, anchorLat);
+		this.areaM2 = computeAreaM2(xs, ys, holeXs, holeYs, anchorLon, anchorLat);
 	}
 
-	public LinearRing2D getRing() {
-		return ring;
+	/** Number of hole (inner) rings. */
+	public int holeCount() {
+		return holeXs.size();
 	}
 
-	/** Number of ring vertices. */
+	/** Longitudes of hole ring {@code h}. */
+	public double[] holeX(int h) {
+		return holeXs.get(h);
+	}
+
+	/** Latitudes of hole ring {@code h}. */
+	public double[] holeY(int h) {
+		return holeYs.get(h);
+	}
+
+	/** Number of outer ring vertices. */
 	public int vertexCount() {
 		return xs.length;
 	}
 
-	/** Longitude of vertex {@code i}. */
+	/** Longitude of outer vertex {@code i}. */
 	public double x(int i) {
 		return xs[i];
 	}
 
-	/** Latitude of vertex {@code i}. */
+	/** Latitude of outer vertex {@code i}. */
 	public double y(int i) {
 		return ys[i];
 	}
@@ -104,22 +143,28 @@ public final class ForestArea {
 		return maxLat;
 	}
 
-	/** Area in square metres (flat-earth approximation around the centroid). */
+	/** Area in square metres (outer minus holes, flat-earth around the centroid). */
 	public double getAreaM2() {
 		return areaM2;
 	}
 
-	/** Even-odd point-in-polygon test (cheap: no per-edge distance math). */
+	/** Even-odd point-in-polygon test (outer minus holes; no per-edge distance math). */
 	public boolean contains(double lon, double lat) {
 		boolean inside = false;
-		int n = xs.length;
-		for (int i = 0, j = n - 1; i < n; j = i++) {
-			double xi = xs[i];
+		inside ^= crosses(xs, ys, lon, lat);
+		for (int h = 0; h < holeXs.size(); h++) {
+			inside ^= crosses(holeXs.get(h), holeYs.get(h), lon, lat);
+		}
+		return inside;
+	}
+
+	private static boolean crosses(double[] xs, double[] ys, double lon, double lat) {
+		boolean inside = false;
+		for (int i = 0, j = xs.length - 1; i < xs.length; j = i++) {
 			double yi = ys[i];
-			double xj = xs[j];
 			double yj = ys[j];
 			if ((yi > lat) != (yj > lat)) {
-				double xCross = xi + (lat - yi) / (yj - yi) * (xj - xi);
+				double xCross = xs[i] + (lat - yi) / (yj - yi) * (xs[j] - xs[i]);
 				if (lon < xCross) {
 					inside = !inside;
 				}
@@ -128,7 +173,16 @@ public final class ForestArea {
 		return inside;
 	}
 
-	private static double computeAreaM2(double[] xs, double[] ys, double anchorLon, double anchorLat) {
+	private static double computeAreaM2(double[] xs, double[] ys, List<double[]> holeXs, List<double[]> holeYs,
+			double anchorLon, double anchorLat) {
+		double area = ringAreaM2(xs, ys, anchorLon, anchorLat);
+		for (int h = 0; h < holeXs.size(); h++) {
+			area -= ringAreaM2(holeXs.get(h), holeYs.get(h), anchorLon, anchorLat);
+		}
+		return Math.max(area, 0.0);
+	}
+
+	private static double ringAreaM2(double[] xs, double[] ys, double anchorLon, double anchorLat) {
 		int n = xs.length;
 		if (n < 3) {
 			return 0.0;
