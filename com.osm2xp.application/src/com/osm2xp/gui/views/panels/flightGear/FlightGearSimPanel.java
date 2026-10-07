@@ -47,11 +47,16 @@ public class FlightGearSimPanel extends Osm2xpPanel {
 				"Path to the fgelev utility shipped with FlightGear. Only needed for terrain formats that "
 						+ "cannot be read in-process (the future WS3.0 VPB/OSGB terrain).");
 
-		Label hint = new Label(this, SWT.WRAP);
-		hint.setText("Terrain tiles are cached under the source_tiles folder in the working folder "
-				+ "(or next to the input file / in the OS temp folder if it is not writable). "
-				+ "Missing tiles are downloaded from the configured TerraSync mirrors.");
-		hint.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		addHint("Terrain tiles are cached under the source_tiles folder in the working folder.");
+		addHint("If that folder is not writable, the cache falls back to the folder containing the "
+				+ "input file, then to the OS temp folder.");
+		addHint("Missing tiles are downloaded from the configured TerraSync mirrors.");
+	}
+
+	private void addHint(String text) {
+		Label label = new Label(this, SWT.WRAP);
+		label.setText(text);
+		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 	}
 
 	private Text createPathRow(Composite parent, String labelText, boolean directory) {

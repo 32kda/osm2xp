@@ -1,9 +1,10 @@
 package com.osm2xp.gui.handlers.modes;
 
 /**
- * CommandOsmMode.
+ * Flight Gear Mode.
  * 
  * @author Benjamin Blanchet
+ * @author 32kda
  * 
  */
 public class CommandFlightGearMode extends ModeCommand {

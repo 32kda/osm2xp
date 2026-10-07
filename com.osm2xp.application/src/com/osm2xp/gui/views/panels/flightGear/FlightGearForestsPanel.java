@@ -37,6 +37,16 @@ public class FlightGearForestsPanel extends Osm2xpPanel {
 		spinnerSpacing = addSpinner(1, 5000);
 		spinnerSpacing.setToolTipText(
 				"Average distance between scattered trees; smaller values add more trees (and larger tiles)");
+
+		addHint("FlightGear forest generation is highly experimental, can be long and produce large "
+				+ "scenario folders.");
+		addHint("It randomly scatters trees one by one in forest zones. Use with care.");
+	}
+
+	private void addHint(String text) {
+		Label label = new Label(this, SWT.WRAP);
+		label.setText(text);
+		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 	}
 
 	private void addLabel(String text) {

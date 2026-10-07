@@ -32,7 +32,7 @@ public class FlightGearPowerLinesPanel extends Osm2xpPanel {
 
 		Label hint = new Label(this, SWT.WRAP);
 		hint.setText("Pylon model is chosen from the line tags (material, design, cables, height) "
-				+ "and the maximum distance between nodes, mirroring OSM2City.");
+				+ "and the maximum distance between nodes.");
 	}
 
 	@Override

@@ -1,45 +1,74 @@
-name: Build & Test
+name: OSM2XP Tycho Build
 
 on:
   push:
-    branches: [ master, develop ]
+    branches: [ master, develop, java11_flightgear ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, develop, java11_flightgear ]
+  workflow_dispatch:
 
 jobs:
   build:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-
-    runs-on: ${{ matrix.os }}
+    name: Build (core + console + RCP app)
+    runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Set up JDK 11
-      uses: actions/setup-java@v4
-      with:
-        java-version: '11'
-        distribution: 'temurin'
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
 
-    - name: Cache Maven dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-m2-
+      - name: Cache Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-m2-
 
-    - name: Build with Maven (core)
-      working-directory: releng-core
-      run: mvn clean compile install -DskipTests
+      # Tycho reactor: com.osm2xp.core, com.osm2xp.classification.core, com.osm2xp.generation
+      - name: Build Tycho core modules
+        run: mvn -B -ntp install -f releng-core/pom.xml -DskipTests
 
-    - name: Build with Maven (console)
-      working-directory: releng-console
-      run: mvn clean compile install -DskipTests
+      # Plain Maven module; bundles the core jars into a runnable osm2xpc distribution
+      - name: Build console distribution
+        run: mvn -B -ntp install -f releng-console/pom.xml -DskipTests
 
-    - name: Run tests
-      working-directory: releng-core
-      run: mvn verify
+      # Eclipse RCP product (needs the core bundles installed above in the local p2 index)
+      - name: Build RCP application
+        run: mvn -B -ntp install -f releng-app/pom.xml -DskipTests
+
+      - name: Upload Tycho bundles
+        uses: actions/upload-artifact@v4
+        with:
+          name: osm2xp-tycho-bundles
+          path: |
+            com.osm2xp.core/target/com.osm2xp.core-*.jar
+            com.osm2xp.generation/target/com.osm2xp.generation-*.jar
+            com.osm2xp.classification.core/target/com.osm2xp.classification.core-*.jar
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload console distribution
+        uses: actions/upload-artifact@v4
+        with:
+          name: osm2xpc-console
+          path: |
+            builds/bin/osm2xpc-*.zip
+            builds/bin/osm2xpc-*.tgz
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload application distribution
+        uses: actions/upload-artifact@v4
+        with:
+          name: osm2xp-application
+          path: |
+            builds/bin/osm2xp-*.zip
+            builds/bin/osm2xp-*.tar.gz
+          if-no-files-found: error
+          retention-days: 30

@@ -1,5 +1,7 @@
 package com.osm2xp.utils.ui;
 
+import java.util.Locale;
+
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -98,6 +100,39 @@ public class UiUtil {
 				}
 			}
 		}		
+	}
+
+	/**
+	 * Updates the application window title to show the name of the current
+	 * generation mode (e.g. "OSM2XP - X-Plane 10/11 mode"). Call on startup and
+	 * whenever the mode changes.
+	 */
+	public static void showCurrentMode() {
+		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		if (window != null && window.getShell() != null && !window.getShell().isDisposed()) {
+			window.getShell().setText("OSM2XP - " + modeDisplayName(BuildController.getGenerationMode()));
+		}
+	}
+
+	/** Human-readable display name for a generation mode id. */
+	public static String modeDisplayName(String mode) {
+		if (mode == null) {
+			return "";
+		}
+		switch (mode.toUpperCase(Locale.ROOT)) {
+		case "XPLANE10":
+			return "X-Plane 10/11 mode";
+		case "XPLANE9":
+			return "X-Plane 9 mode";
+		case "FLIGHT_GEAR":
+			return "FlightGear mode";
+		case "OSM":
+			return "OSM mode";
+		case "CONSOLE":
+			return "Console mode";
+		default:
+			return mode;
+		}
 	}
 
 	/**

@@ -27,14 +27,14 @@
 	<repositories>
 		<repository>
 		   <id>eclipse-r4v10</id>
-		   <url>https://download.eclipse.org/releases/2018-12/</url>
+		   <url>https://download.eclipse.org/releases/2019-06/</url>
 		   <layout>p2</layout>
 		</repository>
 	</repositories>
 
 	<properties>
-		<tycho-version>1.2.0</tycho-version>
-		<tycho-extras-version>1.2.0</tycho-extras-version>
+		<tycho-version>1.5.0</tycho-version>
+		<tycho-extras-version>1.5.0</tycho-extras-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
     	<maven.compiler.target>1.8</maven.compiler.target>

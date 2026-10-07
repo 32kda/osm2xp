@@ -15,10 +15,13 @@ import org.eclipse.ui.progress.UIJob;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.osm2xp.constants.Perspectives;
+import com.osm2xp.controllers.BuildController;
 import com.osm2xp.gui.Activator;
+import com.osm2xp.gui.handlers.modes.CommandXplane10Mode;
 import com.osm2xp.gui.views.MainSceneryFileView;
 import com.osm2xp.gui.views.XPlaneAirfieldsView;
 import com.osm2xp.gui.views.XplanePolyView;
+import com.osm2xp.utils.ui.UiUtil;
 
 public class OSM2XPStartup implements IStartup {
 
@@ -32,6 +35,8 @@ public class OSM2XPStartup implements IStartup {
             public IStatus runInUIThread(IProgressMonitor monitor) {
                 try {
                     workbench.showPerspective(Perspectives.PERSPECTIVE_XPLANE10, workbench.getActiveWorkbenchWindow());
+                    BuildController.setGenerationMode(CommandXplane10Mode.MODE);
+                    UiUtil.showCurrentMode();
                     IEclipsePreferences node = ConfigurationScope.INSTANCE.getNode(Activator.PLUGIN_ID);
 					boolean shownAirfields = node.getBoolean(SHOWN_NEW_VIEWS, false);
                     IWorkbenchPage activePage = workbench.getActiveWorkbenchWindow().getActivePage();

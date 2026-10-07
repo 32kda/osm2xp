@@ -64,6 +64,13 @@ public class FlightGearAirfieldsPanel extends Osm2xpPanel {
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(aptConfigSection);
 		con.setLayout(new GridLayout(2, false));
 
+		Label btgHint = toolkit.createLabel(con,
+				"Patching the BTG and baking the airfield into it is experimental.", SWT.WRAP);
+		GridDataFactory.fillDefaults().span(2, 1).applyTo(btgHint);
+		Label btgHint2 = toolkit.createLabel(con,
+				"The scenery terrain can have 'sawtooth' and other quirks after it.", SWT.WRAP);
+		GridDataFactory.fillDefaults().span(2, 1).applyTo(btgHint2);
+
 		Composite leftComposite = toolkit.createComposite(con);
 		GridDataFactory.fillDefaults().grab(false, true).applyTo(leftComposite);
 		leftComposite.setLayout(new GridLayout(1, false));
