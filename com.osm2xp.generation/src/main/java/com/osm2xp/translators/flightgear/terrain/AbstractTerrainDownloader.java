@@ -1,6 +1,9 @@
 package com.osm2xp.translators.flightgear.terrain;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -155,19 +158,45 @@ public abstract class AbstractTerrainDownloader {
 	}
 
 	/**
+	 * Reports the number of bytes received so far while a resource is being
+	 * downloaded. Called on the downloading thread.
+	 */
+	@FunctionalInterface
+	public interface ProgressListener {
+		void onProgress(long bytesRead, long total);
+	}
+
+	/**
 	 * Downloads the resource at {@code relativePath} (relative to the active
 	 * mirror) to {@code tmp}, retrying with exponential back-off. A negative
 	 * {@code expectedSize} disables the size check.
 	 */
 	protected boolean downloadToFile(String relativePath, Path tmp, long expectedSize) throws InterruptedException {
+		return downloadToFile(relativePath, tmp, expectedSize, null);
+	}
+
+	/**
+	 * As {@link #downloadToFile(String, Path, long)}, but reports the received
+	 * byte count to {@code listener} while the body is streamed to disk.
+	 */
+	protected boolean downloadToFile(String relativePath, Path tmp, long expectedSize, ProgressListener listener)
+			throws InterruptedException {
 		String url = activeBaseUrl() + relativePath;
 		for (int attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
 			try {
 				HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).timeout(Duration.ofMinutes(2))
 						.GET().build();
-				HttpResponse<Path> response = client.send(request, HttpResponse.BodyHandlers.ofFile(tmp));
-				if (response.statusCode() == 200 && (expectedSize < 0 || Files.size(tmp) == expectedSize)) {
-					return true;
+				HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+				if (response.statusCode() == 200) {
+					long read;
+					try (InputStream body = response.body()) {
+						read = copyToFile(body, tmp, expectedSize, listener);
+					}
+					if (expectedSize < 0 || read == expectedSize) {
+						return true;
+					}
+				} else {
+					response.body().close();
 				}
 			} catch (IOException e) {
 				// transient failure, retry below
@@ -181,6 +210,22 @@ public abstract class AbstractTerrainDownloader {
 			Thread.sleep(BACKOFF_MS[attempt]);
 		}
 		return false;
+	}
+
+	private static long copyToFile(InputStream in, Path tmp, long total, ProgressListener listener) throws IOException {
+		long read = 0;
+		byte[] buffer = new byte[64 * 1024];
+		try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(tmp))) {
+			int n;
+			while ((n = in.read(buffer)) != -1) {
+				out.write(buffer, 0, n);
+				read += n;
+				if (listener != null) {
+					listener.onProgress(read, total);
+				}
+			}
+		}
+		return read;
 	}
 
 	protected static String stripTrailingSlash(String url) {

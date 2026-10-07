@@ -259,15 +259,42 @@ public class BtgTerrainDownloader extends AbstractTerrainDownloader {
 		}
 		Path tmp = cacheTile.resolveSibling(cacheTile.getFileName() + ".tmp");
 		String relativePath = "/Terrain/" + tile.band + "/" + tile.cell + "/" + tile.index + BTG_SUFFIX;
-		if (downloadToFile(relativePath, tmp, tile.size)) {
+		String label = tile.index + " tile";
+		Osm2xpLogger.info(label + " download started");
+		if (downloadToFile(relativePath, tmp, tile.size, new TileProgress(label))) {
 			try {
 				Files.move(tmp, cacheTile, StandardCopyOption.REPLACE_EXISTING);
-				return true;
 			} catch (IOException e) {
 				return false;
 			}
+			Osm2xpLogger.info(label + " download done");
+			return true;
 		}
 		return false;
+	}
+
+	/** Logs the download progress of one tile at 25% steps. */
+	private static final class TileProgress implements ProgressListener {
+		private static final int STEP = 25;
+
+		private final String label;
+		private int lastReported;
+
+		TileProgress(String label) {
+			this.label = label;
+		}
+
+		@Override
+		public void onProgress(long bytesRead, long total) {
+			if (total <= 0) {
+				return;
+			}
+			int milestone = (int) (bytesRead * 100 / total) / STEP * STEP;
+			if (milestone >= STEP && milestone < 100 && milestone > lastReported) {
+				lastReported = milestone;
+				Osm2xpLogger.info(label + " - " + milestone + "% downloaded");
+			}
+		}
 	}
 
 	/** SimGear {@code SGBucket::gen_base_path} band folder, e.g. e080n50. */

@@ -20,18 +20,18 @@ import com.osm2xp.translators.flightgear.FlightGearExistingAirfields;
  * In addition it bakes the visual airport geometry (runways, taxiways, aprons,
  * helipads and the grass clearing) into the matching terrain BTG tile, reusing
  * the same {@link AirfieldData} that the apt.dat writer consumes. Two modes are
- * supported by {@link com.osm2xp.translators.airfield.btg.FlightGearAirportCutWriter}:
- * cut-and-fill (a hole in the terrain) when {@code generateAirfieldsBtgCut} is on,
- * otherwise the plate + skirt are overlaid on the untouched terrain.
+ * supported by
+ * {@link com.osm2xp.translators.airfield.btg.FlightGearAirportCutWriter}:
+ * cut-and-fill (a hole in the terrain) when {@code generateAirfieldsBtgCut} is
+ * on, otherwise the plate + skirt are overlaid on the untouched terrain.
  * <p>
  * The patched tiles are contributed to the run-scoped
- * {@link AirfieldBtgPatcher} and written by the BTG patch pipeline, so that later
- * phases (vegetation) compose on top of them.
+ * {@link AirfieldBtgPatcher} and written by the BTG patch pipeline, so that
+ * later phases (vegetation) compose on top of them.
  * <p>
- * The terrain is prepared up-front by
- * {@code FlightGearTerrainPreprocessor} (via
- * {@code FlightGearTranslatorProvider.createPreprocessors}); this adapter no
- * longer downloads it.
+ * The terrain is prepared up-front by {@code FlightGearTerrainPreprocessor}
+ * (via {@code FlightGearTranslatorProvider.createPreprocessors}); this adapter
+ * no longer downloads it.
  *
  * @author osm2xp
  */
