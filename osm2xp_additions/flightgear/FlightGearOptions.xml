@@ -118,7 +118,7 @@
     <generateAirfields>true</generateAirfields>
     <generateAirfieldsBtg>true</generateAirfieldsBtg>
     <generateAirfieldsBtgCut>false</generateAirfieldsBtgCut>
-    <ignoreExistingAirfields>false</ignoreExistingAirfields>
+    <ignoreExistingAirfields>true</ignoreExistingAirfields>
     <generateChimneys>true</generateChimneys>
     <generateCoolingTowers>true</generateCoolingTowers>
     <generateSilos>true</generateSilos>

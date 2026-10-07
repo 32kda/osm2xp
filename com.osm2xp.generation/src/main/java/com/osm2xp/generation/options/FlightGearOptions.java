@@ -18,7 +18,7 @@ import com.osm2xp.generation.options.rules.ObjectsRulesList;
  * FlightGearOptions.
  * 
  * @author Benjamin Blanchet
- * 
+ * @author 32kda
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = { "objectsRules", "generateBuildings",
@@ -67,7 +67,7 @@ public class FlightGearOptions {
 	protected boolean generateAirfields = true;
 	protected boolean generateAirfieldsBtg = true;
 	protected boolean generateAirfieldsBtgCut = false;
-	protected boolean ignoreExistingAirfields = false;
+	protected boolean ignoreExistingAirfields = true;
 	protected List<String> ignoredAirfields;
 	protected boolean generateChimneys = true;
 	protected boolean generateCoolingTowers = true;
