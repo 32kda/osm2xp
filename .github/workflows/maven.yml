@@ -30,6 +30,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-m2-
 
+      # Poms installed by the reactor builds below declare com.osm2xp.build as parent;
+      # install it so the later, separate reactor builds can read those descriptors.
+      - name: Install build parent POM
+        run: mvn -B -ntp -N install -f releng/pom.xml
+
       # Tycho reactor: com.osm2xp.core, com.osm2xp.classification.core, com.osm2xp.generation
       - name: Build Tycho core modules
         run: mvn -B -ntp install -f releng-core/pom.xml -DskipTests
