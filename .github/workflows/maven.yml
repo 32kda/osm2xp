@@ -3,9 +3,13 @@ name: OSM2XP Tycho Build
 on:
   push:
     branches: [ master, develop, java11_flightgear ]
+    tags: [ '*' ]
   pull_request:
     branches: [ master, develop, java11_flightgear ]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -85,3 +89,23 @@ jobs:
             builds/bin/osm2xp-*.tar.gz
           if-no-files-found: error
           retention-days: 30
+
+      # Tag push: publish the 4 build outputs as a GitHub Release. GitHub adds the
+      # two source archives automatically, giving the same 6 files as SourceForge.
+      - name: Publish GitHub release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes \
+            builds/bin/osm2xp-*.zip \
+            builds/bin/osm2xp-*.tar.gz \
+            builds/bin/osm2xpc-*.zip \
+            builds/bin/osm2xpc-*.tgz \
+          || gh release upload "$GITHUB_REF_NAME" --clobber \
+            builds/bin/osm2xp-*.zip \
+            builds/bin/osm2xp-*.tar.gz \
+            builds/bin/osm2xpc-*.zip \
+            builds/bin/osm2xpc-*.tgz
