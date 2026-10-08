@@ -22,6 +22,14 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
+      # Tycho 1.5.0 emits an invalid collect request for Bundle-ClassPath system
+      # dependencies on Maven 3.10+; pin the last known-good Maven 3.9.x.
+      - name: Set up Maven 3.9.12
+        run: |
+          curl -fsSL https://archive.apache.org/dist/maven/maven-3/3.9.12/binaries/apache-maven-3.9.12-bin.tar.gz -o "$RUNNER_TEMP/maven.tar.gz"
+          tar -xzf "$RUNNER_TEMP/maven.tar.gz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/apache-maven-3.9.12/bin" >> "$GITHUB_PATH"
+
       - name: Cache Maven repository
         uses: actions/cache@v4
         with:
