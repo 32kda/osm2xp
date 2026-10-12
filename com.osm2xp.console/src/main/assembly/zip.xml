@@ -19,6 +19,17 @@
 		      <exclude>*/**</exclude>
 		    </excludes>
 		</fileSet>
+        <fileSet>
+            <directory>${project.basedir}/../osm2xp_additions/flightgear</directory>
+            <outputDirectory>flightgear</outputDirectory>
+        </fileSet>
+        <fileSet> <!-- A trick to create empty dir -->
+		    <directory>.</directory>
+		    <outputDirectory>flightgear/resources</outputDirectory>
+		    <excludes>
+		      <exclude>*/**</exclude>
+		    </excludes>
+		</fileSet>
     </fileSets>
     <files>
     	<file>
@@ -32,10 +43,6 @@
         <file>
             <source> ${project.basedir}/target/jar/osm2xpc.jar</source>
             <outputDirectory>./</outputDirectory>
-        </file>
-        <file>
-        	<source>${project.basedir}/../osm2xp_additions/utils/DSFTool.exe</source>
-        	<outputDirectory>xplane/utils</outputDirectory>
         </file>
     </files>
 </assembly>

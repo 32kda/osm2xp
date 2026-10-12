@@ -3,7 +3,7 @@
     <name>russian facades and fence set</name>
     <author>32kda, Alex Krug</author>
     <description>russian facades set for osm2xp V2.0.2</description>
-	<facades>
+    <facades>
         <file>apartment1.fac</file>
         <roofColor></roofColor>
         <wallColor></wallColor>
@@ -17,7 +17,7 @@
         <minHeight>12</minHeight>
         <maxHeight>100</maxHeight>
     </facades>
-	<facades>
+    <facades>
         <file>apartment2.fac</file>
         <roofColor></roofColor>
         <wallColor></wallColor>
@@ -31,7 +31,7 @@
         <minHeight>12</minHeight>
         <maxHeight>100</maxHeight>
     </facades>
-	<facades>
+    <facades>
         <file>apartment3.fac</file>
         <roofColor></roofColor>
         <wallColor></wallColor>
@@ -44,8 +44,8 @@
         <simpleBuildingOnly>false</simpleBuildingOnly>
         <minHeight>12</minHeight>
         <maxHeight>100</maxHeight>
-    </facades>	
-	<facades>
+    </facades>
+    <facades>
         <file>houseText1.fac</file>
         <roofColor></roofColor>
         <wallColor></wallColor>
@@ -59,7 +59,7 @@
         <minHeight>20</minHeight>
         <maxHeight>100</maxHeight>
     </facades>
-	<facades>
+    <facades>
         <file>houseText2.fac</file>
         <roofColor></roofColor>
         <wallColor></wallColor>
@@ -73,7 +73,7 @@
         <minHeight>20</minHeight>
         <maxHeight>100</maxHeight>
     </facades>
-	<facades>
+    <facades>
         <file>houseText3.fac</file>
         <roofColor></roofColor>
         <wallColor></wallColor>
@@ -87,7 +87,7 @@
         <minHeight>20</minHeight>
         <maxHeight>100</maxHeight>
     </facades>
-	<facades>
+    <facades>
         <file>houseText4.fac</file>
         <roofColor></roofColor>
         <wallColor></wallColor>
@@ -101,7 +101,7 @@
         <minHeight>20</minHeight>
         <maxHeight>60</maxHeight>
     </facades>
-	<facades>
+    <facades>
         <file>houseText5.fac</file>
         <roofColor></roofColor>
         <wallColor></wallColor>
@@ -423,7 +423,7 @@
         <minHeight>0</minHeight>
         <maxHeight>100</maxHeight>
     </facades>
-	<facades>
+    <facades>
         <file>industrial2.fac</file>
         <roofColor></roofColor>
         <wallColor></wallColor>
@@ -619,7 +619,7 @@
         <minHeight>0</minHeight>
         <maxHeight>100</maxHeight>
     </facades>
-	<facades>
+    <facades>
         <file>industrial_W2XP_tony1.fac</file>
         <roofColor></roofColor>
         <wallColor></wallColor>
@@ -633,7 +633,7 @@
         <minHeight>0</minHeight>
         <maxHeight>100</maxHeight>
     </facades>
-	<facades>
+    <facades>
         <file>industrial_W2XP_tony2.fac</file>
         <roofColor></roofColor>
         <wallColor></wallColor>
@@ -647,7 +647,7 @@
         <minHeight>0</minHeight>
         <maxHeight>100</maxHeight>
     </facades>
-	<facades>
+    <facades>
         <file>industrial_W2XP_tony3.fac</file>
         <roofColor></roofColor>
         <wallColor></wallColor>
@@ -775,7 +775,7 @@
         <minHeight>6</minHeight>
         <maxHeight>24</maxHeight>
     </facades>
-	<facades>
+    <facades>
         <file>simplehouse3.fac</file>
         <industrial>false</industrial>
         <commercial>false</commercial>

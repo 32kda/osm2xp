@@ -7,9 +7,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.text.DecimalFormat;
 
-import com.osm2xp.generation.paths.PathsService;
-import com.osm2xp.utils.MiscUtils;
-
 import math.geom2d.Point2D;
 
 /**
@@ -21,24 +18,6 @@ import math.geom2d.Point2D;
 public class DsfUtils {
 
 	private static final String DEFAULT_FACADE_LOD = "LOD 0.000000 25000.000000";
-
-	/**
-	 * get the right path to the dsfTool executable
-	 * 
-	 * @return String the path to the dsfTool executable
-	 */
-	public static File getDsfTool() {
-		File dsfTool;
-		String parentDir = PathsService.getPathsProvider().getXPlaneToolsFolder().getAbsolutePath();
-		if (MiscUtils.isWindows()) {
-			dsfTool = new File(parentDir, "DSFTool.exe");
-		} else if (MiscUtils.isMac()) {
-			dsfTool = new File(parentDir, "DSFToolMac");
-		} else {
-			dsfTool = new File(parentDir, "DSFToolLinux");
-		}
-		return dsfTool;
-	}
 
 	/**
 	 * @param to

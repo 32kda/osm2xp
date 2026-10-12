@@ -73,44 +73,6 @@
 							</resources>
 						</configuration>
 					</execution>
-					<execution>
-						<id>copy-tools-win</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>./target/products/${project.artifactId}/win32/win32/x86_64/xplane/utils</outputDirectory>
-							<resources>
-								<resource>
-									<directory>../osm2xp_additions/utils</directory>
-									<filtering>false</filtering>
-									<includes>
-						                <include>**/*.exe</include>
-						            </includes>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-					<execution>
-						<id>copy-tools-lin</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>./target/products/${project.artifactId}/linux/gtk/x86_64/xplane/utils</outputDirectory>
-							<resources>
-								<resource>
-									<directory>../osm2xp_additions/utils</directory>
-									<filtering>false</filtering>
-									<excludes>
-										<exclude>**/*.exe</exclude>
-									</excludes>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
 				</executions>
 			</plugin>
 
@@ -123,7 +85,9 @@
                     	<configuration>
                        		 <tasks>
                            		<mkdir dir="./target/products/${project.artifactId}/win32/win32/x86_64/xplane/resources"/>
+                           		<mkdir dir="./target/products/${project.artifactId}/win32/win32/x86_64/flightgear/resources"/>
                            		<mkdir dir="./target/products/${project.artifactId}/linux/gtk/x86_64/xplane/resources"/>
+                           		<mkdir dir="./target/products/${project.artifactId}/linux/gtk/x86_64/flightgear/resources"/>
                        		 </tasks>
                    		 </configuration>
                    		 <goals>

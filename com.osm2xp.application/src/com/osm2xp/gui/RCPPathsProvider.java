@@ -12,7 +12,7 @@ public class RCPPathsProvider extends DefaultPathsProvider {
 	@Override
 	public File getBasicFolder() {
 		if (basicFolder == null) {
-			basicFolder = FileUtils.toFile(Platform.getInstallLocation().getURL());
+			basicFolder = locateBasicFolder(FileUtils.toFile(Platform.getInstallLocation().getURL()));
 		}
 		return basicFolder;
 	}

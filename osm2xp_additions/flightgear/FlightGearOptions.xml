@@ -143,4 +143,6 @@
     <roofShapeFlatRatio>0.1</roofShapeFlatRatio>
     <roofShapeGabledRatio>0.8</roofShapeGabledRatio>
     <roofShapeHippedRatio>0.1</roofShapeHippedRatio>
+    <generateForests>false</generateForests>
+    <forestSpacingM>10.0</forestSpacingM>
 </FlightGearOptions>

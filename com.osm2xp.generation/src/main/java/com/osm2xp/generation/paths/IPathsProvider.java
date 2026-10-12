@@ -23,9 +23,9 @@ public interface IPathsProvider {
 
 	File getFlightGearSpecObjectsFolder();
 
+	File getFlightGearResourcesFolder();
+
 	public File getForestsFolder();
-	
-	public File getXPlaneToolsFolder();
 	
 	public File getUserResourcesFolder();
 }

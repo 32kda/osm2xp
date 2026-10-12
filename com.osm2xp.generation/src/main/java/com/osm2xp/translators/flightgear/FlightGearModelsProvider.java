@@ -2,6 +2,8 @@ package com.osm2xp.translators.flightgear;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.osm2xp.core.logging.Osm2xpLogger;
 import com.osm2xp.generation.paths.PathsService;
@@ -30,7 +32,28 @@ public final class FlightGearModelsProvider {
 
 	private static final Object COPY_LOCK = new Object();
 
+	private static final Set<String> COPIED_RESOURCE_ROOTS = ConcurrentHashMap.newKeySet();
+
 	private FlightGearModelsProvider() {
+	}
+
+	private static void copyIfMissing(File source, File target) {
+		if (!source.isDirectory()) {
+			Osm2xpLogger.error("FlightGear objects folder not present in resources dir: "
+					+ source + " - objects will not be copied");
+			return;
+		}
+		if (target.isDirectory()) {
+			return;
+		}
+		try {
+			target.getParentFile().mkdirs();
+			target.mkdirs();
+			FilesUtils.copyDirectory(source, target, false);
+			Osm2xpLogger.info("Copied FlightGear objects to " + target);
+		} catch (IOException e) {
+			Osm2xpLogger.error("Error copying FlightGear objects into " + target, e);
+		}
 	}
 
 	/**
@@ -53,22 +76,32 @@ public final class FlightGearModelsProvider {
 		}
 	}
 
-	private static void copyIfMissing(File source, File target) {
+	/**
+	 * Copies the user-provided FlightGear resources from the bundle
+	 * <code>flightgear/resources</code> folder verbatim into the FlightGear scenery output root,
+	 * mirroring the X-Plane <code>xplane/resources</code> handling. Copying is done at most once
+	 * per scenery root, so calling it for every translated tile is cheap.
+	 *
+	 * @param sceneryRoot the FlightGear scenery output root
+	 */
+	public static void ensureUserResourcesCopied(File sceneryRoot) {
+		if (sceneryRoot == null) {
+			return;
+		}
+		File source = PathsService.getPathsProvider().getFlightGearResourcesFolder();
 		if (!source.isDirectory()) {
-			Osm2xpLogger.error("FlightGear objects folder not present in resources dir: "
-					+ source + " - objects will not be copied");
 			return;
 		}
-		if (target.isDirectory()) {
+		if (!COPIED_RESOURCE_ROOTS.add(sceneryRoot.getAbsolutePath())) {
 			return;
 		}
-		try {
-			target.getParentFile().mkdirs();
-			target.mkdirs();
-			FilesUtils.copyDirectory(source, target, false);
-			Osm2xpLogger.info("Copied FlightGear objects to " + target);
-		} catch (IOException e) {
-			Osm2xpLogger.error("Error copying FlightGear objects into " + target, e);
+		synchronized (COPY_LOCK) {
+			try {
+				FilesUtils.copyDirectory(source, sceneryRoot, true);
+				Osm2xpLogger.info("Copied FlightGear user resources from " + source + " to " + sceneryRoot);
+			} catch (IOException e) {
+				Osm2xpLogger.error("Error copying FlightGear user resources into " + sceneryRoot, e);
+			}
 		}
 	}
 }

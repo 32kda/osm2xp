@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <XplaneOptions>
+    <autoExclude>true</autoExclude>
     <excludeObj>true</excludeObj>
     <excludeFac>false</excludeFac>
     <excludeFor>true</excludeFor>
@@ -19,7 +20,11 @@
     <minHouseSegment>2</minHouseSegment>
     <maxHouseSegment>200</maxHouseSegment>
     <minHouseArea>20</minHouseArea>
+    <objectRenderLevel>1</objectRenderLevel>
+    <facadeRenderLevel>3</facadeRenderLevel>
+    <buildLibrary>false</buildLibrary>
     <generateObj>true</generateObj>
+    <generateObjBuildings>true</generateObjBuildings>
     <generateFor>true</generateFor>
     <generateBuildings>true</generateBuildings>
     <generatePowerlines>true</generatePowerlines>
@@ -34,17 +39,32 @@
     <generatePolys>true</generatePolys>
     <generateStreetLights>true</generateStreetLights>
     <lightsDensity>0</lightsDensity>
+    <city3LaneHighwayRoadType>14</city3LaneHighwayRoadType>
+    <country3LaneHighwayRoadType>14</country3LaneHighwayRoadType>
+    <city2LaneHighwayRoadType>40</city2LaneHighwayRoadType>
+    <country2LaneHighwayRoadType>40</country2LaneHighwayRoadType>
+    <cityRoadType>40</cityRoadType>
+    <countryRoadType>40</countryRoadType>
+    <oneLaneRoadType>50</oneLaneRoadType>
+    <railwayType>151</railwayType>
+    <powerlineType>220</powerlineType>
     <packageFacades>true</packageFacades>
     <hardBuildings>false</hardBuildings>
+    <lightObjectString>objects/column_sng.str</lightObjectString>
     <restrictFacadeLod>false</restrictFacadeLod>
     <facadeLod>25000</facadeLod>
     <generateXmlStats>false</generateXmlStats>
     <generatePdfStats>true</generatePdfStats>
     <generateDebugImg>false</generateDebugImg>
     <generateComments>false</generateComments>
+    <generateHighwayLights>true</generateHighwayLights>
     <roadBridgeRampLen>100</roadBridgeRampLen>
     <railBridgeRampLen>200</railBridgeRampLen>
-    <lightObjectString>objects/column_sng.str</lightObjectString>
+    <streetLightsInterval>50</streetLightsInterval>
+    <maxPerimeterToSimplify>50</maxPerimeterToSimplify>
+    <objSizeTolerance>0.1</objSizeTolerance>
+    <objHeightTolerance>0.3</objHeightTolerance>
+    <objHeightAllowedDifference>6</objHeightAllowedDifference>
     <BuildingsExclusions>
         <exclusions value="hangar" key="aeroway"/>
         <exclusions value="terminal" key="aeroway"/>
@@ -114,7 +134,7 @@
             </objectsFiles>
             <angle>0</angle>
             <randomAngle>true</randomAngle>
-            <polygonAngle>false</polygonAngle>
+            <usePolygonAngle>false</usePolygonAngle>
             <sizeCheck>false</sizeCheck>
             <xVectorMinLength>0</xVectorMinLength>
             <xVectorMaxLength>0</xVectorMaxLength>
@@ -124,9 +144,10 @@
             <minArea>0</minArea>
             <maxArea>0</maxArea>
             <simplePolygonOnly>false</simplePolygonOnly>
-            <usePolygonAngle>false</usePolygonAngle>
             <rotationPointX>50</rotationPointX>
             <rotationPointY>50</rotationPointY>
+            <minHeight>0.0</minHeight>
+            <maxHeight>0.0</maxHeight>
         </rules>
         <rules>
             <tag value="lighthouse" key="man_made"/>
@@ -135,7 +156,7 @@
             </objectsFiles>
             <angle>0</angle>
             <randomAngle>true</randomAngle>
-            <polygonAngle>false</polygonAngle>
+            <usePolygonAngle>false</usePolygonAngle>
             <sizeCheck>false</sizeCheck>
             <xVectorMinLength>0</xVectorMinLength>
             <xVectorMaxLength>0</xVectorMaxLength>
@@ -145,9 +166,10 @@
             <minArea>0</minArea>
             <maxArea>0</maxArea>
             <simplePolygonOnly>false</simplePolygonOnly>
-            <usePolygonAngle>false</usePolygonAngle>
             <rotationPointX>50</rotationPointX>
             <rotationPointY>50</rotationPointY>
+            <minHeight>0.0</minHeight>
+            <maxHeight>0.0</maxHeight>
         </rules>
         <rules>
             <tag value="water_tower" key="man_made"/>
@@ -156,7 +178,7 @@
             </objectsFiles>
             <angle>0</angle>
             <randomAngle>true</randomAngle>
-            <polygonAngle>false</polygonAngle>
+            <usePolygonAngle>false</usePolygonAngle>
             <sizeCheck>false</sizeCheck>
             <xVectorMinLength>0</xVectorMinLength>
             <xVectorMaxLength>0</xVectorMaxLength>
@@ -166,18 +188,19 @@
             <minArea>0</minArea>
             <maxArea>0</maxArea>
             <simplePolygonOnly>false</simplePolygonOnly>
-            <usePolygonAngle>false</usePolygonAngle>
             <rotationPointX>50</rotationPointX>
             <rotationPointY>50</rotationPointY>
+            <minHeight>0.0</minHeight>
+            <maxHeight>0.0</maxHeight>
         </rules>
         <rules>
             <tag value="tower" key="man_made"/>
             <objectsFiles>
                 <path>objects/watertower-3.obj</path>
-            </objectsFiles>            
+            </objectsFiles>
             <angle>0</angle>
             <randomAngle>true</randomAngle>
-            <polygonAngle>false</polygonAngle>
+            <usePolygonAngle>false</usePolygonAngle>
             <sizeCheck>false</sizeCheck>
             <xVectorMinLength>0</xVectorMinLength>
             <xVectorMaxLength>0</xVectorMaxLength>
@@ -187,9 +210,10 @@
             <minArea>0</minArea>
             <maxArea>0</maxArea>
             <simplePolygonOnly>false</simplePolygonOnly>
-            <usePolygonAngle>false</usePolygonAngle>
             <rotationPointX>50</rotationPointX>
             <rotationPointY>50</rotationPointY>
+            <minHeight>0.0</minHeight>
+            <maxHeight>0.0</maxHeight>
         </rules>
         <rules>
             <tag value="crane" key="man_made"/>
@@ -198,7 +222,7 @@
             </objectsFiles>
             <angle>0</angle>
             <randomAngle>true</randomAngle>
-            <polygonAngle>false</polygonAngle>
+            <usePolygonAngle>false</usePolygonAngle>
             <sizeCheck>false</sizeCheck>
             <xVectorMinLength>0</xVectorMinLength>
             <xVectorMaxLength>0</xVectorMaxLength>
@@ -208,21 +232,22 @@
             <minArea>0</minArea>
             <maxArea>0</maxArea>
             <simplePolygonOnly>false</simplePolygonOnly>
-            <usePolygonAngle>false</usePolygonAngle>
             <rotationPointX>50</rotationPointX>
             <rotationPointY>50</rotationPointY>
+            <minHeight>0.0</minHeight>
+            <maxHeight>0.0</maxHeight>
         </rules>
-		<rules>
+        <rules>
             <tag value="communication" key="tower:type"/>
             <objectsFiles>
                 <path>objects/GSM-tow-50m.obj</path>
             </objectsFiles>
-			<objectsFiles>
+            <objectsFiles>
                 <path>objects/GSM-tow-20m.obj</path>
             </objectsFiles>
             <angle>0</angle>
             <randomAngle>true</randomAngle>
-            <polygonAngle>false</polygonAngle>
+            <usePolygonAngle>false</usePolygonAngle>
             <sizeCheck>false</sizeCheck>
             <xVectorMinLength>0</xVectorMinLength>
             <xVectorMaxLength>0</xVectorMaxLength>
@@ -232,24 +257,25 @@
             <minArea>0</minArea>
             <maxArea>0</maxArea>
             <simplePolygonOnly>false</simplePolygonOnly>
-            <usePolygonAngle>false</usePolygonAngle>
             <rotationPointX>5</rotationPointX>
             <rotationPointY>5</rotationPointY>
-        </rules>		
-		<rules>
+            <minHeight>0.0</minHeight>
+            <maxHeight>0.0</maxHeight>
+        </rules>
+        <rules>
             <tag value="communications_tower" key="man_made"/>
             <objectsFiles>
                 <path>objects/R_Tower_SAT_107m.obj</path>
             </objectsFiles>
-			<objectsFiles>
+            <objectsFiles>
                 <path>objects/R_Tower_GRN_65m.obj</path>
             </objectsFiles>
-			<objectsFiles>
+            <objectsFiles>
                 <path>objects/R_Tower_50m.obj</path>
             </objectsFiles>
             <angle>0</angle>
             <randomAngle>true</randomAngle>
-            <polygonAngle>false</polygonAngle>
+            <usePolygonAngle>false</usePolygonAngle>
             <sizeCheck>false</sizeCheck>
             <xVectorMinLength>0</xVectorMinLength>
             <xVectorMaxLength>0</xVectorMaxLength>
@@ -259,21 +285,22 @@
             <minArea>0</minArea>
             <maxArea>0</maxArea>
             <simplePolygonOnly>false</simplePolygonOnly>
-            <usePolygonAngle>false</usePolygonAngle>
             <rotationPointX>5</rotationPointX>
             <rotationPointY>5</rotationPointY>
+            <minHeight>0.0</minHeight>
+            <maxHeight>0.0</maxHeight>
         </rules>
-		<rules>
+        <rules>
             <tag value="mast" key="man_made"/>
             <objectsFiles>
                 <path>objects/mast1.obj</path>
             </objectsFiles>
-			<objectsFiles>
+            <objectsFiles>
                 <path>objects/mast2.obj</path>
             </objectsFiles>
             <angle>0</angle>
             <randomAngle>true</randomAngle>
-            <polygonAngle>false</polygonAngle>
+            <usePolygonAngle>false</usePolygonAngle>
             <sizeCheck>false</sizeCheck>
             <xVectorMinLength>0</xVectorMinLength>
             <xVectorMaxLength>0</xVectorMaxLength>
@@ -283,15 +310,16 @@
             <minArea>0</minArea>
             <maxArea>0</maxArea>
             <simplePolygonOnly>false</simplePolygonOnly>
-            <usePolygonAngle>false</usePolygonAngle>
             <rotationPointX>5</rotationPointX>
             <rotationPointY>5</rotationPointY>
+            <minHeight>0.0</minHeight>
+            <maxHeight>0.0</maxHeight>
         </rules>
     </ObjectsRules>
     <LightsRules/>
     <FacadesRules/>
-    <Polygons minPerimeter="200">
-        <rules>
+    <Polygons>
+        <rules minPerimeter="200">
             <tag value="parking" key="amenity"/>
             <polygon path="lib/airport/pavement/asphalt_1L.pol"/>
             <polygon path="lib/airport/pavement/asphalt_1D.pol"/>
@@ -327,5 +355,12 @@
         <defaultHardTaxiwayWidth>20</defaultHardTaxiwayWidth>
         <defaultGrassTaxiwayWidth>10</defaultGrassTaxiwayWidth>
         <defaultHelipadSize>10</defaultHelipadSize>
+        <ignoredAirfields>UNNT</ignoredAirfields>
+        <ignoredAirfields>UNBB</ignoredAirfields>
+        <ignoredAirfields>UNCX</ignoredAirfields>
+        <ignoredAirfields>UNWW</ignoredAirfields>
+        <ignoredAirfields>UNBG</ignoredAirfields>
+        <ignoredAirfields>ULAM</ignoredAirfields>
     </AirfieldOptions>
+    <deleteSrc>true</deleteSrc>
 </XplaneOptions>

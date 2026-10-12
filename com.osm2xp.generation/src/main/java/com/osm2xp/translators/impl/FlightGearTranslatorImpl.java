@@ -289,6 +289,7 @@ public class FlightGearTranslatorImpl implements ITranslator {
 		}
 		forestTranslator.setBucketOutputProvider(this::bucketOutputFor);
 		FlightGearModelsProvider.ensureModelsCopied(parentDir);
+		FlightGearModelsProvider.ensureUserResourcesCopied(parentDir);
 
         if (options.isGenerateTransportation()) {
             transportationService.reset();
