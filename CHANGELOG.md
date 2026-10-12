@@ -6,6 +6,37 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [4.7.0]
+
+### Added
+- FlightGear output mode - generate scenery for the FlightGear flight simulator:
+  - Buildings rendered as rectangular/near-rectangular OSM footprint geometry through FlightGear's `BUILDING_LIST` mechanism and shaders, with optional substitution by 3D prefab objects (`generateBuildings3D`) selected via PCA-based building shape analysis
+  - Special objects translated to rule-based models - chimneys, cooling towers, water towers, lighthouses, silos, gasometers
+  - Power lines - pylon placement (pylons only for now; wires are exported as metadata)
+  - Airfields - `apt.dat` generation in the per-airport `NavData/apt/<ICAO>/` layout, plus experimental terrain patching (BTG cutting) for airport areas
+  - Forests (experimental) - tree list generation
+  - Roads and railways exported via `LINE_FEATURE_LIST`
+  - Terrain tile downloading/caching and `fgelev`-based building elevation probing
+  - Dedicated GUI mode and options for FlightGear
+- O(1) tag-value lookup cache on OSM polylines (replaces linear tag scans on every lookup)
+- New `BuildingClassifier` and `RoadClassifier` classes, extracted from the X-Plane translator
+
+### Fixed
+- Cyrillic `с` typo in the `commercial` building check, which prevented `building=commercial` objects from being classified as industrial
+- Invalid airfield cut-area computation in FlightGear BTG terrain patching
+- FlightGear building orientation issue
+- Log tile X/Y coordinate confusion
+- Various legacy X-Plane bugs in the road, railway and power line translators
+
+### Changed
+- Switched from Java 8 to Java 11
+- Migrated the Eclipse RCP GUI to a newer Eclipse platform (updated SWT/JFace databinding bundles)
+- Faster ECEF->geodetic conversion via fixed-point iteration, and streaming terrain downloads with progress reporting
+- UI updates and FlightGear default tweaks
+
+### Removed
+- Travis CI configuration (replaced by GitHub Actions, which also publishes build artifacts as a GitHub release on tag)
+
 ## [4.6.2]
 
 ### Fixed

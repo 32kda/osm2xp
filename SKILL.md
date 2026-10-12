@@ -26,7 +26,7 @@ OSM2XP converts OpenStreetMap data into flight simulator scenery. Originally bui
 - Two separate Maven hierarchies:
   - `releng-core/` — Tycho reactor: builds `com.osm2xp.core`, `com.osm2xp.generation`, `com.osm2xp.classification.core`
   - `releng-console/` — plain Maven: builds `com.osm2xp.console`
-- Console module depends on eclipse-plugin modules as Maven JARs (`1.0.0-SNAPSHOT` for core/generation, `4.6.2-SNAPSHOT` for classification.core).
+- Console module depends on eclipse-plugin modules as Maven JARs (`1.0.0-SNAPSHOT` for core/generation, `4.7.0-SNAPSHOT` for classification.core).
 - After changing code in an eclipse-plugin module, must run `mvn install -f releng-core/pom.xml -DskipTests` first so the console module picks up the new JAR.
 
 ### Build Commands
