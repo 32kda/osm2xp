@@ -7,6 +7,11 @@ on:
   pull_request:
     branches: [ master, develop, java11_flightgear ]
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Existing release tag to (re)mirror to SourceForge, e.g. 4.7.0 (empty = normal build)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -90,6 +95,19 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      # Resolves which release tag the publish/mirror steps should act on: the
+      # pushed tag, or the manually supplied input (for re-mirroring an already
+      # released version without pushing anything).
+      - name: Resolve release tag
+        id: rel
+        if: startsWith(github.ref, 'refs/tags/') || inputs.release_tag != ''
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ inputs.release_tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
+          fi
+
       # Tag push: publish the 4 build outputs as a GitHub Release. GitHub adds the
       # two source archives automatically, giving the same 6 files as SourceForge.
       - name: Publish GitHub release
@@ -109,3 +127,40 @@ jobs:
             builds/bin/osm2xp-*.tar.gz \
             builds/bin/osm2xpc-*.zip \
             builds/bin/osm2xpc-*.tgz
+
+      # Mirror the 4 release files to the SourceForge File Release System so they
+      # are served by SF's download mirror network. On a tag push the freshly
+      # built files are used; on a manual run (workflow_dispatch with
+      # release_tag) the assets of that existing GitHub release are downloaded
+      # and mirrored instead, so the pipeline can be verified without tagging.
+      # Requires the SOURCEFORGE_USER and SOURCEFORGE_SSH_KEY repo secrets (see
+      # docs/releasing.md); the step is skipped when they are not configured.
+      - name: Mirror release assets to SourceForge
+        if: steps.rel.outputs.tag != ''
+        env:
+          SF_USER: ${{ secrets.SOURCEFORGE_USER }}
+          SF_KEY: ${{ secrets.SOURCEFORGE_SSH_KEY }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ steps.rel.outputs.tag }}"
+          if [ -z "$SF_KEY" ] || [ -z "$SF_USER" ]; then
+            echo "SOURCEFORGE_SSH_KEY / SOURCEFORGE_USER not set, skipping SourceForge mirror"
+            exit 0
+          fi
+          mkdir -p dist
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Fetching assets of existing release $TAG"
+            gh release download "$TAG" --dir dist --clobber \
+              --pattern 'osm2xp-*' --pattern 'osm2xpc-*'
+          else
+            cp builds/bin/osm2xp-*.zip builds/bin/osm2xp-*.tar.gz \
+               builds/bin/osm2xpc-*.zip builds/bin/osm2xpc-*.tgz dist/
+          fi
+          install -m700 -d ~/.ssh
+          printf '%s\n' "$SF_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan frs.sourceforge.net >> ~/.ssh/known_hosts 2>/dev/null
+          DEST="/home/frs/project/osm2xp/$TAG"
+          ssh "$SF_USER@frs.sourceforge.net" "mkdir -p $DEST"
+          rsync -e ssh --archive --verbose dist/* \
+            "$SF_USER@frs.sourceforge.net:$DEST/"
