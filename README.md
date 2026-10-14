@@ -39,6 +39,8 @@ Download program archive from [SourceForge](https://sourceforge.net/projects/osm
 Initially program was available for Windows only, starting from 3.5/4.x Linux version is also provided (see .tgz archives on website). 
 Alpha releases with latest fixes can be downloaded from [here](https://github.com/32kda/osm2xp/releases)
 
+For maintainers: see [docs/releasing.md](docs/releasing.md) for how releases are cut and mirrored to SourceForge.
+
 ## Usage
 
 Please refer [Quick Start Guide](https://github.com/32kda/osm2xp/wiki/Quick-Start "Guide") 
