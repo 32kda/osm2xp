@@ -172,6 +172,8 @@ jobs:
           EOF
           chmod 600 ~/.ssh/config
           ssh-keygen -l -f ~/.ssh/id_rsa || true
-          DEST="/home/frs/project/osm2xp/$TAG"
-          ssh frs.sourceforge.net "mkdir -p $DEST"
-          rsync -e ssh --archive --verbose dist/* "frs.sourceforge.net:$DEST/"
+          # SourceForge gives a restricted shell that can't run remote commands
+          # (e.g. mkdir); rsync with a trailing-slash destination creates the
+          # target directory itself.
+          DEST="/home/frs/project/osm2xp/$TAG/"
+          rsync -e ssh --archive --verbose dist/* "frs.sourceforge.net:$DEST"
