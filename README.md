@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.com/32kda/osm2xp.svg?branch=master)](https://travis-ci.com/32kda/osm2xp)
 
-# OSM2XP - Generate X-Plane 11, X-Plane 10 and X-Plane 9 scenery using OSM Data
+# OSM2XP - Generate X-Plane 11, X-Plane 10, X-Plane 9, FlightGear (from v. 4.7.0) scenery using OSM Data
 This project is based on original OSM2XP by Benjamin Blanchet, code was originally taken from code.google.com/p/osm2xp
 # Original osm2xp 
 Supports generating *buildings* using facade set from OSM data loaded from pbf file, as well as generating
@@ -13,7 +13,7 @@ Since initial task is generating X-Plane 10 scenery, most fixes I've done and al
 ## Already done
 
 ### Generation of
-* Buildings using facades or matching 3D objects
+* Buildings using facades or 3D objects matching by size (via configurable rules)
 * Roads, trying to select best matching road type, if lane count data is present in OSM. Road types are configurable from the UI
 * Railways
 * Power lines
@@ -32,8 +32,20 @@ Since initial task is generating X-Plane 10 scenery, most fixes I've done and al
 * Migration to Java 8, using some newer libraries and some UI fixes
 * OSM multipolygon support - polygons with multiple rings and holes, cutting building polygons when necessary and clipping polygon to particular tile
 
+## FlightGear support
+FlightGear scenery generation brought back (was present in OSM2XP 2.0) and extended alot in version 4.7.0, but is pretty basic relative to X-Plane support
+###  Currently supported
+* Buildings using 3D model matching by type and size
+* Buildings using FlightGear building shader (only for rectangular/almost rectangular buildings, since FlightGear building shader supports only rectangular form)
+* Special buildings - chimneys, cooling towers, tanks/silos/gasometers, lighthouses etc. - using matching 3D model.
+* Power lines (pylons only)
+* Airfields - generating `apt.dat` same way with X-Plane flow, but can also patch a BTG terrain and generate polygons for airfield. This flow does not produce ideal topology, it's main purpose is "quickly get some result using single app", without doing a lot of work setting up several tools, downloading .hgt files etc. - you need just OSM PBF file, OSM2XP and FlightGear itself to go.
+* Forests - highly experimental, jst random scattering trees inside forest zones. Can make resulting scenery size-heavy.
+
+Not generating any models on fly, possibly will do this in future
+
 ## Installation
-You need at least Java 8 JRE or JDK to be installed
+You need at least Java 11 JRE or JDK to be installed
 
 Download program archive from [SourceForge](https://sourceforge.net/projects/osm2xp/ "SourceForge") and unpack to any folder. It's better to use path without spaces. Launch program using osm2xp/osm2xp.exe executable.
 Initially program was available for Windows only, starting from 3.5/4.x Linux version is also provided (see .tgz archives on website). 
@@ -79,6 +91,4 @@ OSM2XP uses facades taken from different open libraries, e.g. from facade set by
 ## Participate
 You can help with coding, if you know Java/Eclipse, with creating better default facade set (current one has a lot of problems), default models (cranes, chimneys, communication towers...) or just filing issues and posting improvement suggestions. Any help is welcome. 
 
-## Nearest plans
 
-* Select 3D model for building by length, width and height (if specified)
