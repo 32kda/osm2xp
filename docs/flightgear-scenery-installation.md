@@ -30,6 +30,8 @@ Example (tile lat=52, lon=80, source `volchikha.osm.pbf`):
 │           ├── 4268928.stg           ← STG scenery script
 │           ├── BuildingList_4268928.txt.gz
 │           └── LineFeatureList_ws30Road_4268928.txt.gz   ← roads/railways (see §4)
+├── Terrain/
+│   └── e080n50/e080n52/4268928.btg.gz   ← terrain tiles for the area (downloaded/copied, optionally patched)
 └── transportation_report_52.0_80.0.txt   ← roads/rails/powerlines report (informational)
 ```
 
@@ -40,6 +42,7 @@ Example (tile lat=52, lon=80, source `volchikha.osm.pbf`):
 | `Objects/<band>/<bucket>/<index>.stg` | Scenery tile script for one FlightGear sub-bucket (see §4). File name is the bucket index, e.g. `4268928.stg`. |
 | `Objects/<band>/<bucket>/BuildingList_<index>.txt.gz` | OSM building list referenced by the STG file, placed next to it. |
 | `Objects/<band>/<bucket>/LineFeatureList_<material>_<index>.txt.gz` | Road/railway list files referenced by `LINE_FEATURE_LIST` STG tokens (one file per material per bucket, see §4). |
+| `Terrain/<band>/<cell>/<index>.btg.gz` | Terrain tiles covering the generated area. They are copied from the configured scenery root or downloaded from TerraSync, and patched when airfield BTG patching is enabled. Present only when terrain was prepared for the run (building elevation, airfield patching or forests). |
 | `transportation_report_<lat>_<lon>.txt` | Validation report for roads/railways/powerlines (informational, kept at the scenery root). |
 
 Example `NavData/apt/xx00/apt.dat` (Volchikha test area):
@@ -136,7 +139,7 @@ The generated `NavData/apt/<ICAO>/apt.dat` files are directly consumable by Flig
 
 ## 4. Installing the OSM scenery layer (buildings/objects)
 
-Since OSM2XP now writes each sub-bucket's STG directly into the correct `Objects/<bucket_path>/` folder (with its building list next to it), the **manual bucket-merging step is no longer needed**: just copy the generated `Objects/` and `Models/` folders into the scenery root.
+Since OSM2XP now writes each sub-bucket's STG directly into the correct `Objects/<bucket_path>/` folder (with its building list next to it), the **manual bucket-merging step is no longer needed**: just copy the generated `Objects/`, `Models/` and (when present) `Terrain/` folders into the scenery root.
 
 The `.stg` files contain:
 
@@ -145,15 +148,15 @@ The `.stg` files contain:
 - `LINE_FEATURE_LIST <file> <material>` tokens referencing the road/railway list files (see below),
 - powerlines written as `# ...` comment metadata (they are **not** rendered as meshes yet).
 
-The generated STG files contain **no `OBJECT_BASE`** (OSM2XP does not generate terrain). FlightGear therefore still needs the terrain for the bucket from another scenery root — normally TerraSync or `$FG_ROOT/Scenery`. Because custom roots are searched **before** TerraSync, the overlay is found first and the terrain is picked up from a later root, so the tile renders with our buildings on top of the real terrain.
+The generated STG files contain **no `OBJECT_BASE`** — OSM2XP does not generate terrain. Instead, when terrain is needed (building elevation, airfield BTG patching or forests) OSM2XP prepares it before the main pass: tiles are reused from the `source_tiles` cache, else copied from the configured `flightGearSceneryPath`, else downloaded from the TerraSync mirrors, and every tile for the area is copied into the generated `Terrain/` folder (patched if airfield patching is enabled). Buckets outside the generated area still come from another terrain source — normally TerraSync or `$FG_ROOT/Scenery` — so keep such a root **after** your overlay root in the search order.
 
 **Step-by-step**
 
-1. **Copy the generated `Objects/` and `Models/` folders into a scenery root** (or point the scenery root directly at the OSM2XP target folder). Result: `<scenery_root>/Objects/e080n50/e080n52/4268928.stg`, `<scenery_root>/Models/specobjects/cooling_tower-100.ac`, etc.
+1. **Copy the generated `Objects/`, `Models/` and (if present) `Terrain/` folders into a scenery root** (or point the scenery root directly at the OSM2XP target folder). Result: `<scenery_root>/Objects/e080n50/e080n52/4268928.stg`, `<scenery_root>/Models/specobjects/cooling_tower-100.ac`, `<scenery_root>/Terrain/e080n50/e080n52/4268928.btg.gz`, etc.
    - `Models/objects/` holds the building-size 3D models (used only when `generateBuildings3D` is enabled); `Models/specobjects/` holds the rule-based models (chimneys, cooling towers, …). Textures/`.png`/`.dds` and `_LIT` night files sit alongside the `.ac` files and must be copied with them.
    - OSM2XP copies these folders automatically into its output root at generation time, so a full copy of the output root is all you need.
 
-2. **Make sure a terrain source is available for the same bucket** (TerraSync enabled, or the bucket exists in `$FG_ROOT/Scenery`), ordered **after** your overlay root in the scenery-path list.
+2. **Make sure a terrain source is available for buckets outside the generated area** (TerraSync enabled, or the bucket exists in `$FG_ROOT/Scenery`), ordered **after** your overlay root in the scenery-path list. Buckets inside the generated area already have their terrain in the generated `Terrain/` folder.
 
 3. Restart FlightGear (or reload scenery). Buildings appear from the `BUILDING_LIST` data using the `OSMBuildings` material from FlightGear's material database; the `OBJECT_SHARED_AGL` models are loaded from `<scenery_root>/Models/`.
 
@@ -161,23 +164,28 @@ The generated STG files contain **no `OBJECT_BASE`** (OSM2XP does not generate t
 >
 > If a referenced model is missing under `<scenery_root>/Models/`, FlightGear logs a "failed to load model" warning and skips that object. Keep the whole `Models/` folder together with the `Objects/` folder in the same scenery root.
 
-### Building ground elevation (optional, recommended)
+### Building ground elevation
 
-Building positions are written as **local Cartesian metres** relative to the STG `BUILDING_LIST` anchor (X south, Y east, Z up) with the round-Earth sagitta correction, exactly as FlightGear's `SGBuildingBin` expects. Their **vertical placement** depends on the terrain elevation at each building, which is probed from your local FlightGear scenery with the **`fgelev`** utility (ships with FlightGear in `utils/fgelev`). This is the same approach OSM2City uses — fully offline, no web service.
+Building positions are written as **local Cartesian metres** relative to the STG `BUILDING_LIST` anchor (X south, Y east, Z up) with the round-Earth sagitta correction, exactly as FlightGear's `SGBuildingBin` expects. Their **vertical placement** depends on the terrain elevation at each building.
 
-1. Build/obtain the `fgelev` binary (with the same FlightGear build as the version you run, so the BTG format matches). FlightGear **2024.1+** `fgelev` is VPB-only: it no longer accepts `--tile-lon/--tile-lat` and must be given the exact tile via `--use-vpb --tile-file <tile.btg.gz>`. OSM2XP derives that tile per building from `FlightGearBucket` and spawns one `fgelev` per sub-bucket.
-2. Get the terrain for your region into a scenery root. You can fetch just the needed BTG tiles over HTTP without running the sim (cross-platform Java, JDK 11+):
-   ```
-   java tools/DownloadFgTerrain.java --bbox "77.4,51.2,88.5,56.1" --root D:/Work/fg_scenery
-   ```
-   (the tool mirrors the TerraSync layout `Terrain/<band>/<cell>/<index>.btg.gz` from the `terrasync.b-cdn.net` CDN advertised by the `terrasync.flightgear.org` NAPTR record. A Windows-only PowerShell equivalent is `tools/download_fg_terrain.ps1`.)
-3. In the OSM2XP options (`flightgear/FlightGearOptions.xml`), set:
-   - `generateBuildingsElevation` = `true` (default),
-   - `fgelevPath` = absolute path to the `fgelev` executable,
-   - `flightGearSceneryPath` = absolute path to the scenery root containing the downloaded `Terrain/` folder.
-4. Generate. OSM2XP spawns one `fgelev` process per sub-bucket tile (capped by an LRU pool of 32) and probes each building's outline; buildings over water/void (`-9999`/`-1000`) or on terrain without a tile are skipped.
+By default OSM2XP probes elevation **in-process** from the prepared BTG tiles: the `source_tiles` cache (filled by the terrain pre-pass from the configured scenery root or from TerraSync) is indexed with a per-tile spatial hash and queried with barycentric interpolation, so no external tool is needed and buildings are terraced to the real terrain. This is the same data FlightGear renders, and it works offline once the tiles are available.
 
-If `fgelevPath`/`flightGearSceneryPath` are not configured (or the binary is missing), OSM2XP falls back to placing all buildings at the anchor elevation — generation still works, but buildings are not terraced to the real terrain.
+`fgelev` is only a **last resort**: it is used when no in-process terrain index can be built (for example for a terrain format whose reader is not implemented yet). In that case OSM2XP spawns `fgelev --use-vpb --tile-file <tile.btg.gz>` (one process per sub-bucket, capped by an LRU pool of 32) and queries it over stdin/stdout.
+
+Configuration in `flightgear/FlightGearOptions.xml`:
+
+- `generateBuildingsElevation` = `true` (default) — enable ground elevation probing;
+- `flightGearSceneryPath` — an existing FlightGear scenery root used as a local terrain source before downloading (optional, but recommended);
+- `fgelevPath` — path to the `fgelev` executable; only needed for the fallback path;
+- `terrainMirrors` — TerraSync mirrors used to download missing tiles (defaults are built in).
+
+Terrain tiles are cached in `source_tiles` under the working folder (falling back to the folder of the input file, then the OS temp folder), so subsequent runs do not download them again. Buildings over water/void (`-9999`/`-1000`) or on terrain without a tile are skipped. If no terrain can be obtained at all, generation still works, but buildings sit at the anchor elevation.
+
+To pre-fetch tiles for a region without running the generation (e.g. to seed the scenery path), you can still use the standalone tool (JDK 11+, single-file source launch):
+
+```
+java tools/DownloadFgTerrain.java --bbox "77.4,51.2,88.5,56.1" --root D:/Work/fg_scenery
+```
 
 ### Roads and railways (LINE_FEATURE_LIST)
 
@@ -201,8 +209,8 @@ Materials map as follows (all are shipped by FlightGear in `Materials/base/mater
 
 - Power lines are exported as comment metadata only (`# powerline …`); there is no dedicated FlightGear cable material, so they are not rendered yet (a 3D/glTF approach like modern OSM2City is a possible follow-up).
 - Roads/railways render only on VPB terrain (FlightGear ≥ 2020.3); on legacy WS2.0 tiles the `LINE_FEATURE_LIST` tokens are ignored.
-- The generated STG has no `OBJECT_BASE`, so a bucket that has no terrain in any later scenery root renders as ocean.
-- Building ground elevation is only accurate when `fgelev` probing is configured; without it buildings sit at the anchor elevation.
+- The generated STG has no `OBJECT_BASE`; buckets outside the generated area still need terrain from a later scenery root, otherwise they render as ocean.
+- Building ground elevation is accurate when the terrain tiles are available (they are prepared automatically); without terrain, buildings sit at the anchor elevation.
 
 ---
 
@@ -216,9 +224,9 @@ Materials map as follows (all are shipped by FlightGear in `Materials/base/mater
 | "Building specifies unknown material: OSMBuildings" | The `OSMBuildings` material is missing/renamed in the loaded material database. Keep the default FG data or use a material name that exists in `Materials/ground/materials.xml`. |
 | 3D objects (chimneys, cooling towers, houses) missing / "failed to load model" warning | The `OBJECT_SHARED_AGL` model path is scenery-root-relative, so the referenced `.ac` must exist under `<scenery_root>/Models/`. Re-copy the generated `Models/` folder into the same root as `Objects/`, or re-enable the `generateObjects`/`generateBuildings3D` option and regenerate. |
 | Roads/railways not visible | `LINE_FEATURE_LIST` requires the VPB terrain pipeline (FlightGear ≥ 2020.3 / WS30 terrain). On legacy WS2.0 tiles the tokens are silently ignored. Check the FG console for a "specifies unknown material" warning if `ws30Road`/`ws30Freeway`/`ws30Railway` are missing from the material database. |
-| Tile renders as ocean / no terrain | The overlay STG has no `OBJECT_BASE` and no later scenery root provides the terrain for that bucket. Keep the real tile (TerraSync / `$FG_ROOT/Scenery`) in the search path after your overlay root. |
-| Buildings at wrong height / all at sea level | `fgelev` elevation probing is not configured. Set `fgelevPath` and `flightGearSceneryPath` in `FlightGearOptions.xml` (see §4). |
-| Building elevation probing disabled warning | OSM2XP logs this when the fgelev binary/scenery path is missing; generation continues with buildings at the anchor elevation. |
+| Tile renders as ocean / no terrain | The STG has no `OBJECT_BASE` and this bucket is outside the generated area, so no `Terrain/` tile was produced and no later scenery root provides it. Keep the real tile (TerraSync / `$FG_ROOT/Scenery`) in the search path after your overlay root. |
+| Buildings at wrong height / all at sea level | No terrain was available for the area, so elevation probing was skipped. Make sure the terrain pre-pass can copy tiles from `flightGearSceneryPath` or download them from `terrainMirrors`. `fgelev` is only a fallback and is not required for BTG. |
+| Building elevation probing disabled warning | OSM2XP logs this when no terrain index could be built for the area (no cached or scenery tiles). Generation continues with buildings at the anchor elevation; `fgelev` is only a last resort. |
 
 ## 6. Reference
 
