@@ -44,6 +44,8 @@ FlightGear scenery generation brought back (was present in OSM2XP 2.0) and exten
 
 Not generating any models on fly, possibly will do this in future
 
+See the [Quick Start Guide - FlightGear](https://github.com/32kda/osm2xp/wiki/Quick-Start-Guide---FlightGear) for a step-by-step generation and installation walkthrough.
+
 ## Installation
 You need at least Java 11 JRE or JDK to be installed
 
